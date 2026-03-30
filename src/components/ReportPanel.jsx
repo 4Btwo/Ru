@@ -2,18 +2,20 @@
 import React, { useState } from 'react'
 
 const BUTTONS = [
+  // Vida noturna
   { type:'cheio',    emoji:'🍻', label:'Tá cheio',  group:'noturno',  accent:'#ff2d55', bg:'rgba(255,45,85,.12)'   },
   { type:'evento',   emoji:'🎉', label:'Evento',     group:'noturno',  accent:'#bf5fff', bg:'rgba(191,95,255,.12)'  },
   { type:'morto',    emoji:'😴', label:'Tá vazio',  group:'noturno',  accent:'#6666aa', bg:'rgba(102,102,170,.12)' },
+  // Trânsito
   { type:'pesado',   emoji:'🚗', label:'Trânsito',  group:'transito', accent:'#ff6b35', bg:'rgba(255,107,53,.12)'  },
   { type:'bloqueio', emoji:'🚧', label:'Bloqueio',  group:'transito', accent:'#ffcc00', bg:'rgba(255,204,0,.12)'   },
   { type:'acidente', emoji:'💥', label:'Acidente',  group:'transito', accent:'#ff2d55', bg:'rgba(255,45,85,.12)'   },
+  { type:'blitz',    emoji:'🚔', label:'Blitz',     group:'transito', accent:'#4d9fff', bg:'rgba(77,159,255,.12)'  },
 ]
 
 export default function ReportPanel({ open, location, onClose, onConfirm }) {
   const [selected, setSelected] = useState(null)
 
-  // Fecha limpo
   const handleClose = () => { setSelected(null); onClose() }
 
   const confirm = () => {
@@ -22,12 +24,9 @@ export default function ReportPanel({ open, location, onClose, onConfirm }) {
     setSelected(null)
   }
 
-  // Filtra botões pelo tipo do local
   const nightBtns   = BUTTONS.filter(b => b.group === 'noturno')
   const transitBtns = BUTTONS.filter(b => b.group === 'transito')
 
-  // Se local é trânsito mostra só trânsito; noturno mostra noturno
-  // Se não tem cat definida mostra tudo
   const showNight   = !location?.cat || location.cat === 'noturno'
   const showTransit = !location?.cat || location.cat === 'transito'
 
@@ -49,7 +48,7 @@ export default function ReportPanel({ open, location, onClose, onConfirm }) {
       }}>
         <div style={{ width:40, height:4, background:'#2a2a3d', borderRadius:2, margin:'12px auto 20px' }}/>
 
-        {/* Local selecionado — contexto claro para o usuário */}
+        {/* Local selecionado */}
         {location && (
           <div style={{
             display:'flex', alignItems:'center', gap:10,
@@ -88,12 +87,19 @@ export default function ReportPanel({ open, location, onClose, onConfirm }) {
         {showTransit && (
           <>
             <p style={{ fontSize:10, textTransform:'uppercase', letterSpacing:'.12em', color:'#6666aa', marginBottom:10 }}>🚦 Trânsito</p>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8, marginBottom:24 }}>
-              {transitBtns.map(b => (
+            {/* Grid de 4 itens: 2 na primeira linha + 2 na segunda, blitz ocupa destaque */}
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:8, marginBottom:8 }}>
+              {transitBtns.filter(b => b.type !== 'blitz').map(b => (
                 <Btn key={b.type} {...b} active={selected === b.type}
                   onPress={() => setSelected(s => s === b.type ? null : b.type)} />
               ))}
             </div>
+            {/* Blitz em destaque — largura total */}
+            {transitBtns.filter(b => b.type === 'blitz').map(b => (
+              <BlitzBtn key={b.type} {...b} active={selected === b.type}
+                onPress={() => setSelected(s => s === b.type ? null : b.type)} />
+            ))}
+            <div style={{ marginBottom:24 }}/>
           </>
         )}
 
@@ -130,6 +136,42 @@ function Btn({ emoji, label, active, onPress, accent, bg }) {
     >
       <span style={{ fontSize:24 }}>{emoji}</span>
       {label}
+    </button>
+  )
+}
+
+// Botão de blitz em destaque — linha inteira com layout horizontal
+function BlitzBtn({ emoji, label, active, onPress, accent, bg }) {
+  return (
+    <button onClick={onPress} style={{
+      width:'100%',
+      background:  active ? bg : '#1a1a26',
+      border:     `1px solid ${active ? accent : '#2a2a3d'}`,
+      borderRadius:12, padding:'12px 16px', cursor:'pointer',
+      color:       active ? accent : '#f0f0ff',
+      fontFamily:  "'Syne',sans-serif", fontSize:13, fontWeight:700,
+      display:'flex', alignItems:'center', justifyContent:'center', gap:10,
+      transition:'all .15s',
+    }}
+      onMouseDown={e  => e.currentTarget.style.transform='scale(.98)'}
+      onMouseUp={e    => e.currentTarget.style.transform='scale(1)'}
+      onTouchStart={e => e.currentTarget.style.transform='scale(.98)'}
+      onTouchEnd={e   => e.currentTarget.style.transform='scale(1)'}
+    >
+      <span style={{ fontSize:22 }}>{emoji}</span>
+      <div style={{ textAlign:'left' }}>
+        <div>{label}</div>
+        <div style={{ fontSize:10, fontWeight:400, opacity:.6, marginTop:1 }}>
+          Fiscalização policial na via
+        </div>
+      </div>
+      {active && (
+        <div style={{
+          marginLeft:'auto', background: accent,
+          color:'#fff', fontSize:10, fontWeight:800,
+          padding:'3px 8px', borderRadius:20,
+        }}>✓</div>
+      )}
     </button>
   )
 }

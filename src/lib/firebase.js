@@ -1,3 +1,4 @@
+cat > src/lib/firebase.js << 'EOF'
 import { initializeApp } from 'firebase/app'
 import { getAuth, GoogleAuthProvider } from 'firebase/auth'
 import { getDatabase } from 'firebase/database'
@@ -21,3 +22,4 @@ export const googleProvider = new GoogleAuthProvider()
 export let messaging = null
 isSupported().then(ok => { if (ok) messaging = getMessaging(app) }).catch(() => {})
 export default app
+EOF

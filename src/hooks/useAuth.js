@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { onAuthStateChanged, signInWithRedirect, getRedirectResult, signOut } from 'firebase/auth'
+import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
 import { ref, set, get, onValue } from 'firebase/database'
 import { auth, googleProvider, db } from '../lib/firebase'
 
@@ -10,9 +10,6 @@ export function useAuth() {
   useEffect(() => {
     let unsubProfile = null
 
-    // Captura o resultado do redirect ao voltar ao app após login Google
-    getRedirectResult(auth).catch(() => {})
-
     const unsubAuth = onAuthStateChanged(auth, async (fireUser) => {
       if (unsubProfile) { unsubProfile(); unsubProfile = null }
 
@@ -21,23 +18,15 @@ export function useAuth() {
         const snap = await get(profileRef)
         if (!snap.exists()) {
           await set(profileRef, {
-            name:      fireUser.displayName,
-            photo:     fireUser.photoURL,
-            score:     0,
-            reports:   0,
-            createdAt: Date.now(),
+            name: fireUser.displayName, photo: fireUser.photoURL,
+            score: 0, reports: 0, createdAt: Date.now(),
           })
         }
         // Escuta perfil em tempo real → score atualiza ao vivo
         unsubProfile = onValue(profileRef, (s) => {
           const d = s.val() || {}
-          setUser({
-            uid:     fireUser.uid,
-            name:    fireUser.displayName,
-            photo:   fireUser.photoURL,
-            score:   d.score   || 0,
-            reports: d.reports || 0,
-          })
+          setUser({ uid: fireUser.uid, name: fireUser.displayName,
+            photo: fireUser.photoURL, score: d.score || 0, reports: d.reports || 0 })
         })
         setLoading(false)
       } else {
@@ -50,10 +39,8 @@ export function useAuth() {
   }, [])
 
   return {
-    user,
-    loading,
-    // signInWithRedirect não abre popup — evita bloqueio COOP do Vercel
-    login:  () => signInWithRedirect(auth, googleProvider),
+    user, loading,
+    login:  () => signInWithPopup(auth, googleProvider),
     logout: () => signOut(auth),
   }
 }
