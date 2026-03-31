@@ -1,21 +1,49 @@
-// ── MARCADORES DO MAPA — ícone por categoria + tipo dominante ─────────────────
+// ── MARCADORES DO MAPA — ícone próprio por categoria + tipo dominante ──────────
 import L from 'leaflet'
 import { calcScore, getHeatLevel, getLocationStatus } from './hotspot'
-import { getFomoLabel, CAT_ICON } from './constants'
+import { getFomoLabel } from './constants'
 
 function markerSize(score) {
   return Math.min(60, 28 + score * 3.5)
 }
 
+// Ícone base por categoria do local (quando inativo)
+function getCatIcon(cat) {
+  switch (cat) {
+    case 'noturno':  return '🍺'
+    case 'transito': return '🚦'
+    case 'parque':   return '🌳'
+    case 'comercio': return '🛒'
+    case 'show':     return '🎵'
+    default:         return '📍'
+  }
+}
+
+// Cor base por categoria (quando inativo)
+function getCatColor(cat) {
+  switch (cat) {
+    case 'noturno':  return '#7c3aed'
+    case 'transito': return '#0369a1'
+    case 'parque':   return '#16a34a'
+    case 'comercio': return '#b45309'
+    case 'show':     return '#be185d'
+    default:         return '#3a3a5a'
+  }
+}
+
 export function buildMarkerIcon(loc, events, usersMap = {}) {
   const status = getLocationStatus(loc.id, events, usersMap)
   const { heat, domType, color, emoji, score } = status
-  const size   = heat === 'inactive' ? 26 : markerSize(score)
+  const size   = heat === 'inactive' ? 32 : markerSize(score)
   const count  = events.filter(e => e.locationId === loc.id).length
 
-  const glowHex = heat === 'inactive' ? 'transparent' : `${color}88`
+  // Quando inativo: usa ícone e cor da categoria
+  const isInactive = heat === 'inactive'
+  const displayEmoji = isInactive ? getCatIcon(loc.cat) : emoji
+  const bgColor      = isInactive ? getCatColor(loc.cat) : color
+  const glowHex      = isInactive ? 'transparent' : `${color}88`
 
-  // Anel pulsante só para locais ativos com tipo positivo
+  // Anel pulsante só para locais quentes com tipo positivo
   const shouldPulse = (heat === 'hot' || heat === 'mid') && domType !== 'morto'
 
   const ring = shouldPulse ? `
@@ -26,7 +54,7 @@ export function buildMarkerIcon(loc, events, usersMap = {}) {
       border:1px solid ${color};opacity:.2;
       animation:markerPulse 1.6s ease infinite .4s;"></div>` : ''
 
-  // FOMO label só para tipos positivos
+  // Label FOMO
   const showFomo = (heat === 'hot' || heat === 'mid') && domType !== 'morto'
   const fomoLabel = showFomo
     ? `<div style="position:absolute;bottom:calc(100% + 6px);left:50%;
@@ -46,21 +74,33 @@ export function buildMarkerIcon(loc, events, usersMap = {}) {
         border-radius:20px;padding:1px 6px;min-width:17px;text-align:center;
         box-shadow:0 1px 4px rgba(0,0,0,.4);">${count}</div>` : ''
 
-  // ── Ícone exibido no marcador ─────────────────────────────────────────────
-  // Inativo → ícone da categoria do local (ex: 🍺 para noturno, 🚦 para trânsito)
-  // Ativo   → emoji do tipo dominante (ex: 🍻 lotado, 💥 acidente)
-  const displayEmoji = heat === 'inactive'
-    ? (CAT_ICON[loc.cat] || CAT_ICON.default)
-    : emoji
+  // Forma do marcador: pin (gota) para locais inativos, círculo para ativos
+  if (isInactive) {
+    // Pin em forma de local com ícone da categoria
+    const pinSize = size
+    return L.divIcon({
+      html: `
+        <div style="position:relative;width:${pinSize}px;height:${pinSize + 8}px;">
+          ${fomoLabel}
+          <div style="
+            width:${pinSize}px;height:${pinSize}px;border-radius:50% 50% 50% 0;
+            transform:rotate(-45deg);
+            background:radial-gradient(circle,${bgColor}dd,${bgColor}99);
+            border:2px solid rgba(255,255,255,.25);
+            box-shadow:0 4px 12px rgba(0,0,0,.4);
+            display:flex;align-items:center;justify-content:center;cursor:pointer;
+          ">
+            <span style="transform:rotate(45deg);font-size:${Math.round(pinSize * .42)}px;">${displayEmoji}</span>
+          </div>
+          ${badge}
+        </div>`,
+      className: '',
+      iconSize:   [pinSize, pinSize + 8],
+      iconAnchor: [pinSize / 2, pinSize + 8],
+    })
+  }
 
-  // Fundo do marcador
-  // Inativo → superfície escura discreta com borda sutil
-  // Ativo   → cor do tipo dominante com glow
-  const bgInactive = `background:#1a1a26;border:1.5px solid #3a3a5a;`
-  const bgActive   = `background:radial-gradient(circle,${color}ee,${color}77);
-                      box-shadow:0 0 ${heat === 'hot' ? 24 : 12}px ${glowHex};
-                      border:2px solid rgba(255,255,255,.15);`
-
+  // Círculo pulsante quando ativo
   return L.divIcon({
     html: `
       <div style="position:relative;width:${size}px;height:${size}px;">
@@ -68,9 +108,11 @@ export function buildMarkerIcon(loc, events, usersMap = {}) {
         ${fomoLabel}
         <div style="
           width:${size}px;height:${size}px;border-radius:50%;
-          ${heat === 'inactive' ? bgInactive : bgActive}
+          background:radial-gradient(circle,${bgColor}ee,${bgColor}77);
+          box-shadow:0 0 ${heat==='hot'?24:12}px ${glowHex};
+          border:2px solid rgba(255,255,255,.2);
           display:flex;align-items:center;justify-content:center;
-          font-size:${Math.round(size * .42)}px;cursor:pointer;
+          font-size:${Math.round(size*.42)}px;cursor:pointer;
         ">${displayEmoji}</div>
         ${badge}
       </div>`,

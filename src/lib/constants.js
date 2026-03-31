@@ -16,19 +16,7 @@ export const EVENT_META = {
   pesado:   { emoji:'🚗', label:'Trânsito pesado', weight:2, cat:'transito', color:'#ff6b35' },
   bloqueio: { emoji:'🚧', label:'Bloqueio',        weight:3, cat:'transito', color:'#ffcc00' },
   acidente: { emoji:'💥', label:'Acidente',        weight:4, cat:'transito', color:'#ff2d55' },
-  blitz:    { emoji:'🚔', label:'Blitz policial',  weight:3, cat:'transito', color:'#4d9fff' },
-}
-
-// Ícone padrão exibido no marcador do mapa quando o local está inativo,
-// baseado na categoria do local.
-export const CAT_ICON = {
-  noturno:  '🍺',
-  transito: '🚦',
-  parque:   '🌳',
-  shopping: '🛍️',
-  show:     '🎵',
-  esporte:  '⚽',
-  default:  '📍',
+  blitz:    { emoji:'🚔', label:'Blitz Policial',  weight:3, cat:'transito', color:'#3b82f6' },
 }
 
 export const EXPIRY_MS = 60 * 60 * 1000
@@ -38,9 +26,6 @@ export const MEDIUM_MS = 30 * 60 * 1000
 export const SPAM_MAX_PER_MIN = 3
 export const SPAM_WINDOW_MS   = 60 * 1000
 
-// VAPID Key via variável de ambiente
-export const VAPID_KEY = import.meta.env.VITE_VAPID_KEY
-
 export function reputationMultiplier(reportCount = 0) {
   if (reportCount < 5)  return 0.5
   if (reportCount > 20) return 1.5
@@ -49,16 +34,20 @@ export function reputationMultiplier(reportCount = 0) {
 
 export function getFomoLabel(heat, cat, domType) {
   if (domType === 'morto') return 'POUCO MOVIMENTO 😴'
+  if (domType === 'blitz') return 'BLITZ POLICIAL 🚔'
+
   if (cat === 'transito') {
     if (domType === 'acidente') return 'ACIDENTE NA VIA 💥'
     if (domType === 'bloqueio') return 'VIA BLOQUEADA 🚧'
-    if (domType === 'blitz')    return 'BLITZ POLICIAL 🚔'
     return heat === 'hot' ? 'TRÂNSITO INTENSO 🚗' : 'TRÂNSITO PESADO 🚗'
   }
+
   if (domType === 'evento') return heat === 'hot' ? 'EVENTO BOMBANDO 🎉' : 'EVENTO ROLANDO 🎉'
   if (domType === 'cheio')  return heat === 'hot' ? 'LOTADO AGORA 🔥'    : 'ENCHENDO 🍻'
+
   return heat === 'hot' ? 'MUITO ATIVO 🔥' : 'MOVIMENTANDO ⚡'
 }
 
 export const DEFAULT_LAT = -22.3154
 export const DEFAULT_LNG = -49.0608
+export const VAPID_KEY   = 'BG6lEkaP-n5PRPH5kX5YsBvrMCQgM7hvbNLAFFFSTAD64w83CJ5z4dWD-I1le1JzOvz070Ysih4hBQWbv9vP81s'
