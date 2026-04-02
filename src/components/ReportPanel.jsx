@@ -25,7 +25,7 @@ export default function ReportPanel({ open, location, onClose, onConfirm }) {
   const nightBtns   = BUTTONS.filter(b => b.group === 'noturno')
   const transitBtns = BUTTONS.filter(b => b.group === 'transito')
 
-  const showNight   = !location?.cat || location.cat === 'noturno'
+  const showNight   = !location?.cat || location.cat === 'noturno' || location.cat === 'estabelecimento'
   const showTransit = !location?.cat || location.cat === 'transito'
 
   return (
@@ -53,7 +53,7 @@ export default function ReportPanel({ open, location, onClose, onConfirm }) {
             borderRadius:12, padding:'10px 14px', marginBottom:20,
           }}>
             <span style={{ fontSize:20 }}>
-              {location.cat === 'transito' ? '🚦' : '📍'}
+              {location.cat === 'transito' ? '🚦' : location.cat === 'estabelecimento' ? '🏪' : '📍'}
             </span>
             <div>
               <div style={{ fontSize:13, fontWeight:700 }}>{location.name}</div>

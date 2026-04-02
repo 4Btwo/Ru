@@ -6,7 +6,7 @@ import { useEvents } from './hooks/useEvents'
 import { useOnline } from './hooks/useOnline'
 import { useNotifications } from './hooks/useNotifications'
 import { usePlaces } from './hooks/usePlaces'
-import { EVENT_META, DEFAULT_LAT, DEFAULT_LNG } from './lib/constants'
+import { EVENT_META, DEFAULT_LAT, DEFAULT_LNG, ADMIN_UIDS } from './lib/constants'
 import { calcScore, getHeatLevel } from './lib/hotspot'
 import { checkAlerts } from './lib/alerts'
 import { seedIfEmpty } from './lib/seed'
@@ -16,22 +16,24 @@ import ReportPanel from './components/ReportPanel'
 import DetailPanel from './components/DetailPanel'
 import NowPanel from './components/NowPanel'
 import AddLocationPanel from './components/AddLocationPanel'
+import AdminPanel from './components/AdminPanel'
 import { useNetworkStatus } from './hooks/useNetworkStatus'
-import NetworkBanner        from './components/NetworkBanner'
+import NetworkBanner from './components/NetworkBanner'
 
 export default function App() {
   const networkStatus = useNetworkStatus()
-  const { user, loading, login, logout }   = useAuth()
-  const { events, addEvent }               = useEvents(user?.uid)
-  const { allPlaces, addPlace }            = usePlaces(user?.uid)
-  const onlineCount                        = useOnline(user?.uid)
-  const { permission, requestPermission }  = useNotifications(user?.uid)
+  const { user, loading, login, logout } = useAuth()
+  const { events, addEvent }             = useEvents(user?.uid)
+  const { allPlaces, addPlace }          = usePlaces(user?.uid)
+  const onlineCount                      = useOnline(user?.uid)
+  const { permission, requestPermission} = useNotifications(user?.uid)
   const mapRef = useRef(null)
 
   const [userPos,      setUserPos]      = useState(null)
   const [reportLoc,    setReportLoc]    = useState(null)
   const [detailLoc,    setDetailLoc]    = useState(null)
   const [nowOpen,      setNowOpen]      = useState(false)
+  const [adminOpen,    setAdminOpen]    = useState(false)
   const [activeFilter, setActiveFilter] = useState('all')
   const [toast,        setToast]        = useState(null)
   const [pointsAlert,  setPointsAlert]  = useState(null)
@@ -39,10 +41,11 @@ export default function App() {
   const [usersMap,     setUsersMap]     = useState({})
   const [seeded,       setSeeded]       = useState(false)
 
-  // Modo de criação de novo local
-  const [pickMode,     setPickMode]     = useState(false)   // cursor crosshair
-  const [pickedCoords, setPickedCoords] = useState(null)    // coordenadas clicadas
-  const [addLocOpen,   setAddLocOpen]   = useState(false)   // painel de criação
+  const [pickMode,     setPickMode]     = useState(false)
+  const [pickedCoords, setPickedCoords] = useState(null)
+  const [addLocOpen,   setAddLocOpen]   = useState(false)
+
+  const isAdmin = ADMIN_UIDS.includes(user?.uid)
 
   // Geolocalização
   useEffect(() => {
@@ -59,10 +62,7 @@ export default function App() {
   }, [user])
 
   useEffect(() => {
-    if (user && !seeded) {
-      setSeeded(true)
-      seedIfEmpty(user.uid, user.name)
-    }
+    if (user && !seeded) { setSeeded(true); seedIfEmpty(user.uid, user.name) }
   }, [user, seeded])
 
   useEffect(() => {
@@ -82,7 +82,7 @@ export default function App() {
   }, [])
 
   const handleMarkerClick = useCallback((loc) => {
-    if (pickMode) return  // em pick mode não abre detail
+    if (pickMode) return
     setDetailLoc(loc)
   }, [pickMode])
 
@@ -105,52 +105,58 @@ export default function App() {
     setTimeout(() => setPointsAlert(null), 2200)
   }, [user, addEvent, showToast])
 
-  // ── FLUXO CRIAR LOCAL ─────────────────────────────────────────────────────
   const handleStartPick = useCallback(() => {
     setPickedCoords(null)
     setPickMode(true)
     showToast('Toque no mapa para marcar o local', 'rgba(18,18,26,.98)', '#f0f0ff')
   }, [showToast])
 
-  // Usuário clicou no mapa em pick mode
   const handlePick = useCallback((coords) => {
     setPickedCoords(coords)
     setPickMode(false)
     setAddLocOpen(true)
   }, [])
 
-  // Salva novo local no Firebase
   const handleSavePlace = useCallback(async (placeData) => {
     if (!user) return
     await addPlace(placeData, user.uid, user.name)
     setAddLocOpen(false)
     setPickedCoords(null)
-    showToast(`📍 "${placeData.name}" criado!`)
+    const isMod = placeData.needsModeration
+    showToast(isMod
+      ? `🛡️ "${placeData.name}" enviado para moderação`
+      : `📍 "${placeData.name}" criado!`)
   }, [user, addPlace, showToast])
 
-  // Cancela criação
   const handleCancelAdd = useCallback(() => {
-    setPickMode(false)
-    setPickedCoords(null)
-    setAddLocOpen(false)
+    setPickMode(false); setPickedCoords(null); setAddLocOpen(false)
   }, [])
 
-  // Stats
+  // Stats — só mostra estabelecimentos aprovados
   const now = Date.now()
   let hotCount = 0, totalActive = 0, alertCount = 0
-  allPlaces.forEach(loc => {
+  const visiblePlaces = allPlaces.filter(loc =>
+    !loc.needsModeration || loc.status === 'approved'
+  )
+
+  visiblePlaces.forEach(loc => {
     const score = calcScore(loc.id, events, usersMap)
     if (score >= 6) hotCount++
     if (loc.cat === 'transito' && score > 0) alertCount++
     totalActive += events.filter(e => e.locationId === loc.id && now - e.ts < 3600000).length
   })
 
+  // Contagem de pendentes para badge admin
+  const pendingCount = allPlaces.filter(p => p.needsModeration && (!p.status || p.status === 'pending')).length
+
   // Filtro
-  const filteredIds = allPlaces.filter(loc => {
-    if (activeFilter === 'all')      return true
-    if (activeFilter === 'noturno')  return loc.cat === 'noturno'
-    if (activeFilter === 'transito') return loc.cat === 'transito'
-    if (activeFilter === 'hot')      return getHeatLevel(calcScore(loc.id, events, usersMap)) !== 'inactive'
+  const filteredIds = visiblePlaces.filter(loc => {
+    if (activeFilter === 'all')            return true
+    if (activeFilter === 'noturno')        return loc.cat === 'noturno'
+    if (activeFilter === 'transito')       return loc.cat === 'transito'
+    if (activeFilter === 'hot')            return getHeatLevel(calcScore(loc.id, events, usersMap)) !== 'inactive'
+    if (activeFilter === 'blitz')          return events.some(e => e.locationId === loc.id && e.type === 'blitz')
+    if (activeFilter === 'estabelecimento') return loc.cat === 'estabelecimento'
     return true
   }).map(l => l.id)
 
@@ -171,7 +177,7 @@ export default function App() {
       <NetworkBanner status={networkStatus} />
       <MapView
         ref={mapRef}
-        allPlaces={allPlaces}
+        allPlaces={visiblePlaces}
         events={events}
         usersMap={usersMap}
         filteredIds={filteredIds}
@@ -225,6 +231,27 @@ export default function App() {
             )}
           </div>
           <div style={{ display:'flex', gap:8, alignItems:'center', pointerEvents:'all' }}>
+            {/* Badge admin */}
+            {isAdmin && (
+              <button onClick={() => setAdminOpen(true)} style={{
+                position:'relative',
+                background: pendingCount > 0 ? 'rgba(255,204,0,.15)' : '#12121a',
+                border: `1px solid ${pendingCount > 0 ? 'rgba(255,204,0,.5)' : '#2a2a3d'}`,
+                borderRadius:10, padding:'6px 10px', cursor:'pointer',
+                color: pendingCount > 0 ? '#ffcc00' : '#6666aa',
+                fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:12,
+                display:'flex', alignItems:'center', gap:5,
+              }}>
+                🛡️ Admin
+                {pendingCount > 0 && (
+                  <span style={{
+                    background:'#ff2d55', color:'#fff', fontSize:9, fontWeight:800,
+                    borderRadius:'50%', width:16, height:16,
+                    display:'flex', alignItems:'center', justifyContent:'center',
+                  }}>{pendingCount}</span>
+                )}
+              </button>
+            )}
             <div style={{ background:'#12121a', border:'1px solid rgba(255,204,0,.3)',
               borderRadius:20, padding:'6px 12px',
               fontFamily:"'Space Mono',monospace", fontSize:11, color:'#ffcc00' }}>
@@ -274,19 +301,20 @@ export default function App() {
           overflowX:'auto', scrollbarWidth:'none', transition:'top .3s',
         }}>
           {[
-            { id:'all',      label:'🗺️ Tudo'     },
-            { id:'noturno',  label:'🌙 Noturno'  },
-            { id:'transito', label:'🚦 Trânsito' },
-            { id:'hot',      label:'🔥 Ativos'   },
+            { id:'all',             label:'🗺️ Tudo',            col:'#ff2d55' },
+            { id:'noturno',         label:'🌙 Noturno',          col:'#bf5fff' },
+            { id:'transito',        label:'🚦 Trânsito',          col:'#ff6b35' },
+            { id:'blitz',           label:'🚔 Blitz',            col:'#3b82f6' },
+            { id:'estabelecimento', label:'🏪 Estabelecimentos',  col:'#ffcc00' },
+            { id:'hot',             label:'🔥 Ativos',           col:'#ff2d55' },
           ].map(f => {
             const active = activeFilter === f.id
-            const col    = f.id === 'transito' ? '#ff6b35' : '#ff2d55'
             return (
               <button key={f.id} onClick={() => setActiveFilter(f.id)} style={{
                 flexShrink:0, padding:'6px 14px', borderRadius:20,
-                background: active ? `${col}22` : 'rgba(18,18,26,.92)',
-                border:`1px solid ${active ? col : '#2a2a3d'}`,
-                fontSize:11, fontWeight:600, cursor:'pointer', color: active ? col : '#6666aa',
+                background: active ? `${f.col}22` : 'rgba(18,18,26,.92)',
+                border:`1px solid ${active ? f.col : '#2a2a3d'}`,
+                fontSize:11, fontWeight:600, cursor:'pointer', color: active ? f.col : '#6666aa',
                 fontFamily:"'Syne',sans-serif", backdropFilter:'blur(8px)', transition:'all .2s',
               }}>{f.label}</button>
             )
@@ -294,29 +322,7 @@ export default function App() {
         </div>
       )}
 
-      {/* LEGENDA */}
-      {!pickMode && (
-        <div style={{
-          position:'absolute', bottom:138, left:16, zIndex:1000,
-          background:'rgba(18,18,26,.94)', border:'1px solid #2a2a3d',
-          borderRadius:12, padding:'10px 12px', backdropFilter:'blur(8px)',
-        }}>
-          {[
-            { c:'#ff2d55', label:'Forte (0–10min)'  },
-            { c:'#ffcc00', label:'Médio (10–30min)' },
-            { c:'#4a4a6a', label:'Fraco (30–60min)' },
-          ].map(l => (
-            <div key={l.label} style={{ display:'flex', alignItems:'center', gap:7,
-              fontSize:11, color:'#6666aa', marginBottom:5 }}>
-              <div style={{ width:8, height:8, borderRadius:'50%', background:l.c, flexShrink:0,
-                boxShadow: l.c !== '#4a4a6a' ? `0 0 5px ${l.c}` : 'none' }}/>
-              {l.label}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* BOTTOM STATS */}
+      {/* BOTTOM BAR */}
       {!pickMode && (
         <div style={{
           position:'absolute', bottom:0, left:0, right:0, zIndex:1000,
@@ -339,11 +345,11 @@ export default function App() {
             <div style={{ fontSize:10, color:'#6666aa', marginTop:2 }}>hotspots</div>
           </button>
 
-          <StatCard label="📍 Reportes" value={totalActive}  sub="última hora"  color="#f0f0ff"/>
-          <StatCard label="🚦 Alertas"  value={alertCount}   sub="no trânsito"  color="#ffcc00"/>
-          <StatCard label="👥 Online"   value={onlineCount}  sub="agora"        color="#f0f0ff"/>
+          <StatCard label="📍 Reportes" value={totalActive} sub="última hora"  color="#f0f0ff"/>
+          <StatCard label="🚦 Alertas"  value={alertCount}  sub="no trânsito" color="#ffcc00"/>
+          <StatCard label="👥 Online"   value={onlineCount} sub="agora"        color="#f0f0ff"/>
 
-          {/* Botão CRIAR LOCAL — Bloco novo */}
+          {/* Botão CRIAR LOCAL */}
           <button onClick={handleStartPick} style={{
             flexShrink:0, minWidth:100, background:'#12121a',
             border:'1px solid #2a2a3d', borderRadius:12, padding:'10px 14px',
@@ -395,10 +401,13 @@ export default function App() {
       <NowPanel open={nowOpen} onClose={() => setNowOpen(false)}
         events={events} usersMap={usersMap} onLocationClick={handleMarkerClick} />
       <AddLocationPanel
-        open={addLocOpen}
-        coords={pickedCoords}
-        onClose={handleCancelAdd}
-        onSave={handleSavePlace}
+        open={addLocOpen} coords={pickedCoords}
+        onClose={handleCancelAdd} onSave={handleSavePlace}
+      />
+      <AdminPanel
+        open={adminOpen}
+        onClose={() => setAdminOpen(false)}
+        adminUid={user?.uid}
       />
 
       <style>{`
