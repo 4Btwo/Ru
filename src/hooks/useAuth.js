@@ -6,13 +6,13 @@ import {
   getRedirectResult,
   signOut,
   setPersistence,
-  browserLocalPersistence
+  indexedDBLocalPersistence
 } from 'firebase/auth'
 
 import { ref, set, get, onValue } from 'firebase/database'
 import { auth, googleProvider, db } from '../lib/firebase'
 
-// Detecta mobile/Safari
+// Detecta mobile/Safari (popup quebra nesses casos)
 function isMobileOrSafari() {
   const ua = navigator.userAgent
   const isSafari = /Safari/i.test(ua) && !/Chrome/i.test(ua)
@@ -27,19 +27,19 @@ export function useAuth() {
   useEffect(() => {
     let unsubProfile = null
 
-    // 🔥 ESSENCIAL PRA MOBILE
-    setPersistence(auth, browserLocalPersistence)
+    const initAuth = async () => {
+      try {
+        // 🔥 PERSISTÊNCIA FORTE (resolve mobile)
+        await setPersistence(auth, indexedDBLocalPersistence)
 
-    // 🔥 PROCESSA RETORNO DO GOOGLE
-    getRedirectResult(auth)
-      .then((result) => {
-        if (result?.user) {
-          console.log('Login via redirect OK')
-        }
-      })
-      .catch((err) => {
-        console.error('Redirect error:', err)
-      })
+        // 🔥 PROCESSA RETORNO DO GOOGLE (evita loop)
+        await getRedirectResult(auth)
+      } catch (err) {
+        console.error('Auth init error:', err)
+      }
+    }
+
+    initAuth()
 
     const unsubAuth = onAuthStateChanged(auth, async (fireUser) => {
       if (unsubProfile) {
@@ -61,6 +61,7 @@ export function useAuth() {
           })
         }
 
+        // 🔥 realtime do usuário (score etc)
         unsubProfile = onValue(profileRef, (s) => {
           const d = s.val() || {}
 
@@ -88,11 +89,14 @@ export function useAuth() {
 
   const login = async () => {
     if (isMobileOrSafari()) {
+      // 🔥 MOBILE → REDIRECT (100% confiável)
       await signInWithRedirect(auth, googleProvider)
     } else {
+      // 🔥 DESKTOP → POPUP (mais rápido)
       try {
         await signInWithPopup(auth, googleProvider)
       } catch (e) {
+        // fallback automático
         if (
           e.code === 'auth/popup-blocked' ||
           e.code === 'auth/popup-closed-by-user'
@@ -105,10 +109,12 @@ export function useAuth() {
     }
   }
 
+  const logout = () => signOut(auth)
+
   return {
     user,
     loading,
     login,
-    logout: () => signOut(auth),
+    logout,
   }
 }
