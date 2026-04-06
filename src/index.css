@@ -3,12 +3,29 @@
   --border: #2a2a3d; --red: #ff2d55; --yellow: #ffcc00;
   --green: #00ff88; --blue: #4d9fff; --orange: #ff6b35;
   --purple: #bf5fff; --text: #f0f0ff; --muted: #6666aa;
+  /* Safe area para iPhones com notch/Dynamic Island */
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
 }
-* { box-sizing:border-box; margin:0; padding:0; }
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
 html, body, #root { height:100%; overflow:hidden; }
-body { font-family:'Syne',sans-serif; background:var(--bg); color:var(--text); height:100dvh; }
+body {
+  font-family:'Syne',sans-serif; background:var(--bg); color:var(--text);
+  height:100dvh;
+  /* Previne scroll bounce no iOS */
+  overscroll-behavior:none;
+  -webkit-overflow-scrolling:touch;
+}
+/* Bottom bar fica acima da home indicator no iPhone */
+.safe-bottom { padding-bottom:calc(28px + var(--sab)); }
+.safe-top    { padding-top:calc(12px + var(--sat)); }
 ::-webkit-scrollbar { display:none; }
 scrollbar-width: none;
+
+/* Touch: previne delay de 300ms no iOS antigo */
+button, a { touch-action: manipulation; }
 
 /* Leaflet dark */
 .leaflet-tile { filter:invert(1) hue-rotate(195deg) saturate(1.4) brightness(.8); }

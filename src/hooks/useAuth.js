@@ -1,75 +1,70 @@
 import { useState, useEffect } from 'react'
 import {
   onAuthStateChanged,
-  signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
   signOut,
   setPersistence,
-  indexedDBLocalPersistence
+  indexedDBLocalPersistence,
 } from 'firebase/auth'
-
 import { ref, set, get, onValue } from 'firebase/database'
 import { auth, googleProvider, db } from '../lib/firebase'
 
-// Detecta mobile/Safari (popup quebra nesses casos)
-function isMobileOrSafari() {
-  const ua = navigator.userAgent
-  const isSafari = /Safari/i.test(ua) && !/Chrome/i.test(ua)
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(ua)
-  return isMobile || isSafari
-}
-
 export function useAuth() {
-  const [user, setUser] = useState(null)
+  const [user,    setUser]    = useState(null)
   const [loading, setLoading] = useState(true)
+  const [authError, setAuthError] = useState(null)
 
   useEffect(() => {
     let unsubProfile = null
 
     const initAuth = async () => {
       try {
-        // 🔥 PERSISTÊNCIA FORTE (resolve mobile)
         await setPersistence(auth, indexedDBLocalPersistence)
 
-        // 🔥 PROCESSA RETORNO DO GOOGLE (evita loop)
-        await getRedirectResult(auth)
+        // Processa retorno do redirect do Google
+        const result = await getRedirectResult(auth)
+        if (result?.user) {
+          // Usuário voltou do redirect — será capturado pelo onAuthStateChanged
+          console.log('[Auth] Redirect result OK:', result.user.displayName)
+        }
       } catch (err) {
-        console.error('Auth init error:', err)
+        console.error('[Auth] Init error:', err.code, err.message)
+        // auth/unauthorized-domain → mostra mensagem clara
+        if (err.code === 'auth/unauthorized-domain') {
+          setAuthError('unauthorized-domain')
+        }
+        setLoading(false)
       }
     }
 
     initAuth()
 
     const unsubAuth = onAuthStateChanged(auth, async (fireUser) => {
-      if (unsubProfile) {
-        unsubProfile()
-        unsubProfile = null
-      }
+      if (unsubProfile) { unsubProfile(); unsubProfile = null }
 
       if (fireUser) {
+        setAuthError(null)
         const profileRef = ref(db, `users/${fireUser.uid}`)
         const snap = await get(profileRef)
 
         if (!snap.exists()) {
           await set(profileRef, {
-            name: fireUser.displayName,
-            photo: fireUser.photoURL,
-            score: 0,
-            reports: 0,
+            name:      fireUser.displayName,
+            photo:     fireUser.photoURL,
+            score:     0,
+            reports:   0,
             createdAt: Date.now(),
           })
         }
 
-        // 🔥 realtime do usuário (score etc)
         unsubProfile = onValue(profileRef, (s) => {
           const d = s.val() || {}
-
           setUser({
-            uid: fireUser.uid,
-            name: fireUser.displayName,
-            photo: fireUser.photoURL,
-            score: d.score || 0,
+            uid:     fireUser.uid,
+            name:    fireUser.displayName,
+            photo:   fireUser.photoURL,
+            score:   d.score   || 0,
             reports: d.reports || 0,
           })
         })
@@ -81,40 +76,24 @@ export function useAuth() {
       }
     })
 
-    return () => {
-      unsubAuth()
-      if (unsubProfile) unsubProfile()
-    }
+    return () => { unsubAuth(); if (unsubProfile) unsubProfile() }
   }, [])
 
+  // SEMPRE usa redirect — funciona em qualquer domínio/browser/mobile
+  // Popup falha quando o domínio não está autorizado no Firebase Console
   const login = async () => {
-    if (isMobileOrSafari()) {
-      // 🔥 MOBILE → REDIRECT (100% confiável)
+    try {
+      setAuthError(null)
       await signInWithRedirect(auth, googleProvider)
-    } else {
-      // 🔥 DESKTOP → POPUP (mais rápido)
-      try {
-        await signInWithPopup(auth, googleProvider)
-      } catch (e) {
-        // fallback automático
-        if (
-          e.code === 'auth/popup-blocked' ||
-          e.code === 'auth/popup-closed-by-user'
-        ) {
-          await signInWithRedirect(auth, googleProvider)
-        } else {
-          throw e
-        }
+    } catch (e) {
+      console.error('[Auth] Login error:', e.code, e.message)
+      if (e.code === 'auth/unauthorized-domain') {
+        setAuthError('unauthorized-domain')
       }
     }
   }
 
   const logout = () => signOut(auth)
 
-  return {
-    user,
-    loading,
-    login,
-    logout,
-  }
+  return { user, loading, login, logout, authError }
 }

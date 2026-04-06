@@ -1,28 +1,38 @@
-// ── CRIAR NOVO LOCAL — inclui estabelecimento com moderação ───────────────────
+// ── CRIAR NOVO LOCAL — fixos com moderação, temporários com duração ───────────
 import React, { useState } from 'react'
-import { PLACE_CATS } from '../lib/constants'
+import { PLACE_CATS, DURATION_OPTIONS } from '../lib/constants'
 
 export default function AddLocationPanel({ open, coords, onClose, onSave }) {
-  const [name,   setName]   = useState('')
-  const [cat,    setCat]    = useState(null)
-  const [saving, setSaving] = useState(false)
+  const [name,     setName]     = useState('')
+  const [cat,      setCat]      = useState(null)
+  const [duration, setDuration] = useState(null)
+  const [saving,   setSaving]   = useState(false)
 
-  const reset = () => { setName(''); setCat(null); setSaving(false) }
+  const reset = () => { setName(''); setCat(null); setDuration(null); setSaving(false) }
   const handleClose = () => { reset(); onClose() }
 
-  const selectedCat = PLACE_CATS.find(c => c.id === cat)
+  const selectedCat   = PLACE_CATS.find(c => c.id === cat)
+  const needsDuration = selectedCat?.durationRequired === true
+  const canSave       = name.trim() && cat && coords && (!needsDuration || duration)
 
   const handleSave = async () => {
-    if (!name.trim() || !cat || !coords) return
+    if (!canSave) return
     setSaving(true)
     try {
+      const expiresAt = needsDuration && duration
+        ? Date.now() + duration * 60 * 60 * 1000
+        : null
+
       await onSave({
         name: name.trim(),
         cat,
         lat: coords.lat,
         lng: coords.lng,
-        // Estabelecimentos entram como pendentes
-        ...(selectedCat?.needsModeration ? { status: 'pending', needsModeration: true } : {}),
+        isFixed: selectedCat.isFixed ?? true,
+        ...(expiresAt ? { expiresAt, durationHours: duration } : {}),
+        ...(selectedCat?.needsModeration
+          ? { status: 'pending', needsModeration: true }
+          : { status: 'approved' }),
       })
       reset()
     } catch (e) {
@@ -46,12 +56,13 @@ export default function AddLocationPanel({ open, coords, onClose, onSave }) {
         borderRadius:'20px 20px 0 0', padding:'0 16px 36px',
         transform: open ? 'translateY(0)' : 'translateY(100%)',
         transition:'transform .35s cubic-bezier(.4,0,.2,1)',
+        maxHeight:'92dvh', overflowY:'auto',
       }}>
         <div style={{ width:40, height:4, background:'#2a2a3d', borderRadius:2, margin:'12px auto 20px' }}/>
 
         <p style={{ fontSize:16, fontWeight:800, marginBottom:4 }}>📍 Novo local</p>
+        <p style={{ fontSize:12, color:'#6666aa', marginBottom:16 }}>Marque um ponto no mapa da cidade</p>
 
-        {/* Coordenadas */}
         {coords && (
           <div style={{
             display:'flex', alignItems:'center', gap:8,
@@ -68,13 +79,12 @@ export default function AddLocationPanel({ open, coords, onClose, onSave }) {
           </div>
         )}
 
-        {/* Nome */}
         <p style={{ fontSize:11, textTransform:'uppercase', letterSpacing:'.1em', color:'#6666aa', marginBottom:8 }}>Nome do local</p>
         <input
           value={name}
           onChange={e => setName(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleSave()}
-          placeholder="Ex: Bar do João, Av. Paulista..."
+          placeholder="Ex: Bar do João, Show da Banda X..."
           maxLength={60}
           style={{
             width:'100%', background:'#1a1a26', border:'1px solid #2a2a3d',
@@ -86,34 +96,85 @@ export default function AddLocationPanel({ open, coords, onClose, onSave }) {
           onBlur={e  => e.target.style.borderColor='#2a2a3d'}
         />
 
-        {/* Categoria */}
-        <p style={{ fontSize:11, textTransform:'uppercase', letterSpacing:'.1em', color:'#6666aa', marginBottom:10 }}>Tipo de local</p>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8, marginBottom:16 }}>
+        <p style={{ fontSize:11, textTransform:'uppercase', letterSpacing:'.1em', color:'#6666aa', marginBottom:10 }}>Tipo de local *</p>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:8, marginBottom:16 }}>
           {PLACE_CATS.map(c => (
-            <button key={c.id} onClick={() => setCat(c.id)} style={{
+            <button key={c.id} onClick={() => { setCat(c.id); setDuration(null) }} style={{
               background: cat === c.id ? `${c.color}18` : '#1a1a26',
               border:     `1px solid ${cat === c.id ? c.color : '#2a2a3d'}`,
-              borderRadius:14, padding:'12px 8px', cursor:'pointer',
+              borderRadius:14, padding:'12px 10px', cursor:'pointer',
               color:       cat === c.id ? c.color : '#f0f0ff',
-              fontFamily:  "'Syne',sans-serif", textAlign:'center',
+              fontFamily:  "'Syne',sans-serif", textAlign:'left',
               transition:  'all .15s', position:'relative',
             }}>
-              <div style={{ fontSize:22, marginBottom:5 }}>{c.emoji}</div>
-              <div style={{ fontSize:12, fontWeight:700, marginBottom:2 }}>{c.label}</div>
-              <div style={{ fontSize:10, color: cat === c.id ? c.color : '#6666aa', lineHeight:1.4 }}>
-                {c.desc}
+              <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}>
+                <span style={{ fontSize:20 }}>{c.emoji}</span>
+                <span style={{ fontSize:13, fontWeight:700 }}>{c.label}</span>
               </div>
+              <div style={{ fontSize:10, color: cat === c.id ? c.color : '#6666aa', lineHeight:1.4 }}>{c.desc}</div>
+
               {c.needsModeration && (
-                <div style={{
-                  position:'absolute', top:-6, right:-6,
-                  background:'#ffcc00', color:'#000',
-                  fontSize:8, fontWeight:800, borderRadius:10,
-                  padding:'1px 5px', letterSpacing:'.04em',
-                }}>MOD</div>
+                <div style={{ position:'absolute', top:-6, right:-6, background:'#ffcc00', color:'#000', fontSize:8, fontWeight:800, borderRadius:10, padding:'1px 5px' }}>MOD</div>
+              )}
+              {c.durationRequired && (
+                <div style={{ position:'absolute', top:-6, right:-6, background:'#ff2d55', color:'#fff', fontSize:8, fontWeight:800, borderRadius:10, padding:'1px 5px' }}>⏱ TEMP</div>
+              )}
+              {c.isFixed && !c.needsModeration && !c.durationRequired && (
+                <div style={{ position:'absolute', top:-6, right:-6, background:'#00ff88', color:'#000', fontSize:8, fontWeight:800, borderRadius:10, padding:'1px 5px' }}>FIXO</div>
               )}
             </button>
           ))}
         </div>
+
+        {/* ── DURAÇÃO obrigatória para temporários ── */}
+        {needsDuration && (
+          <>
+            <div style={{
+              display:'flex', alignItems:'center', gap:8,
+              background:'rgba(255,45,85,.08)', border:'1px solid rgba(255,45,85,.25)',
+              borderRadius:10, padding:'10px 14px', marginBottom:14,
+            }}>
+              <span style={{ fontSize:18 }}>⏱️</span>
+              <div>
+                <div style={{ fontSize:12, fontWeight:700, color:'#ff2d55', marginBottom:2 }}>Duração obrigatória</div>
+                <div style={{ fontSize:11, color:'#6666aa', lineHeight:1.5 }}>
+                  Este local some automaticamente após o tempo escolhido.
+                </div>
+              </div>
+            </div>
+
+            <p style={{ fontSize:11, textTransform:'uppercase', letterSpacing:'.1em', color:'#6666aa', marginBottom:10 }}>
+              Por quanto tempo? *
+            </p>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8, marginBottom:14 }}>
+              {DURATION_OPTIONS.map(opt => (
+                <button key={opt.value} onClick={() => setDuration(opt.value)} style={{
+                  padding:'11px 6px',
+                  background: duration === opt.value ? 'rgba(255,45,85,.15)' : '#1a1a26',
+                  border:`1px solid ${duration === opt.value ? '#ff2d55' : '#2a2a3d'}`,
+                  borderRadius:12, cursor:'pointer',
+                  color: duration === opt.value ? '#ff2d55' : '#f0f0ff',
+                  fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:12,
+                  transition:'all .15s',
+                }}>
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+
+            {duration && (
+              <div style={{
+                background:'rgba(0,255,136,.06)', border:'1px solid rgba(0,255,136,.15)',
+                borderRadius:10, padding:'8px 12px', marginBottom:14,
+                fontSize:12, color:'#00ff88',
+              }}>
+                🕐 Expira em: {new Date(Date.now() + duration * 3600000).toLocaleString('pt-BR', {
+                  day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'
+                })}
+              </div>
+            )}
+          </>
+        )}
 
         {/* Aviso de moderação */}
         {selectedCat?.needsModeration && (
@@ -124,11 +185,9 @@ export default function AddLocationPanel({ open, coords, onClose, onSave }) {
           }}>
             <span style={{ fontSize:16, flexShrink:0 }}>🛡️</span>
             <div>
-              <div style={{ fontSize:12, fontWeight:700, color:'#ffcc00', marginBottom:3 }}>
-                Passará por moderação
-              </div>
+              <div style={{ fontSize:12, fontWeight:700, color:'#ffcc00', marginBottom:3 }}>Passará por moderação</div>
               <div style={{ fontSize:11, color:'#6666aa', lineHeight:1.5 }}>
-                Estabelecimentos são revisados antes de aparecer no mapa para todos os usuários.
+                Bares, baladas e estabelecimentos são revisados antes de aparecer para todos.
               </div>
             </div>
           </div>
@@ -136,21 +195,17 @@ export default function AddLocationPanel({ open, coords, onClose, onSave }) {
 
         <button
           onClick={handleSave}
-          disabled={!name.trim() || !cat || !coords || saving}
+          disabled={!canSave || saving}
           style={{
             width:'100%', padding:16, borderRadius:14, border:'none',
-            background: (name.trim() && cat && coords) ? '#ff2d55' : '#2a2a3d',
-            color:      (name.trim() && cat && coords) ? '#fff'    : '#6666aa',
+            background: canSave ? '#ff2d55' : '#2a2a3d',
+            color:      canSave ? '#fff'    : '#6666aa',
             fontFamily: "'Syne',sans-serif", fontWeight:800, fontSize:15,
-            cursor:     (name.trim() && cat && coords) ? 'pointer' : 'not-allowed',
+            cursor:     canSave ? 'pointer' : 'not-allowed',
             transition: 'all .2s', textTransform:'uppercase', letterSpacing:'.05em',
             opacity: saving ? .7 : 1,
           }}>
-          {saving
-            ? '⏳ Salvando...'
-            : selectedCat?.needsModeration
-              ? '📤 Enviar para moderação'
-              : '✅ Criar local'}
+          {saving ? '⏳ Salvando...' : selectedCat?.needsModeration ? '📤 Enviar para moderação' : '✅ Criar local'}
         </button>
       </div>
     </>

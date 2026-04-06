@@ -17,12 +17,14 @@ import DetailPanel from './components/DetailPanel'
 import NowPanel from './components/NowPanel'
 import AddLocationPanel from './components/AddLocationPanel'
 import AdminPanel from './components/AdminPanel'
+import TrafficConfirmBanner from './components/TrafficConfirmBanner'
+import { useTrafficConfirm } from './hooks/useTrafficConfirm'
 import { useNetworkStatus } from './hooks/useNetworkStatus'
 import NetworkBanner from './components/NetworkBanner'
 
 export default function App() {
   const networkStatus = useNetworkStatus()
-  const { user, loading, login, logout } = useAuth()
+  const { user, loading, login, logout, authError } = useAuth()
   const { events, addEvent }             = useEvents(user?.uid)
   const { allPlaces, addPlace }          = usePlaces(user?.uid)
   const onlineCount                      = useOnline(user?.uid)
@@ -44,8 +46,17 @@ export default function App() {
   const [pickMode,     setPickMode]     = useState(false)
   const [pickedCoords, setPickedCoords] = useState(null)
   const [addLocOpen,   setAddLocOpen]   = useState(false)
+  const [trafficPrompt, setTrafficPrompt] = useState(null)
 
   const isAdmin = ADMIN_UIDS.includes(user?.uid)
+
+  const { confirmStillHappening, markResolved } = useTrafficConfirm({
+    userPos,
+    events,
+    places: allPlaces,
+    user,
+    onConfirmPrompt: setTrafficPrompt,
+  })
 
   // Geolocalização
   useEffect(() => {
@@ -132,12 +143,16 @@ export default function App() {
     setPickMode(false); setPickedCoords(null); setAddLocOpen(false)
   }, [])
 
-  // Stats — só mostra estabelecimentos aprovados
+  // Stats — só mostra estabelecimentos aprovados e temporários não expirados
   const now = Date.now()
   let hotCount = 0, totalActive = 0, alertCount = 0
-  const visiblePlaces = allPlaces.filter(loc =>
-    !loc.needsModeration || loc.status === 'approved'
-  )
+  const visiblePlaces = allPlaces.filter(loc => {
+    // Temporários expirados somem do mapa
+    if (loc.expiresAt && loc.expiresAt < now) return false
+    // Locais com moderação só aparecem se aprovados
+    if (loc.needsModeration && loc.status !== 'approved') return false
+    return true
+  })
 
   visiblePlaces.forEach(loc => {
     const score = calcScore(loc.id, events, usersMap)
@@ -169,12 +184,18 @@ export default function App() {
     </div>
   )
 
-  if (!user) return <LoginScreen onLogin={login} />
+  if (!user) return <LoginScreen onLogin={login} authError={authError} />
 
   return (
     <div style={{ position:'relative', height:'100dvh', overflow:'hidden',
       fontFamily:"'Syne',sans-serif", background:'#0a0a0f', color:'#f0f0ff' }}>
       <NetworkBanner status={networkStatus} />
+      <TrafficConfirmBanner
+        prompt={trafficPrompt}
+        onConfirm={confirmStillHappening}
+        onResolve={markResolved}
+        onDismiss={() => setTrafficPrompt(null)}
+      />
       <MapView
         ref={mapRef}
         allPlaces={visiblePlaces}
@@ -326,7 +347,8 @@ export default function App() {
       {!pickMode && (
         <div style={{
           position:'absolute', bottom:0, left:0, right:0, zIndex:1000,
-          padding:'12px 16px 28px',
+          paddingTop:12, paddingLeft:16, paddingRight:16,
+          paddingBottom:'calc(28px + env(safe-area-inset-bottom, 0px))',
           background:'linear-gradient(to top,rgba(10,10,15,.98) 60%,transparent)',
           display:'flex', gap:10, overflowX:'auto', scrollbarWidth:'none',
         }}>

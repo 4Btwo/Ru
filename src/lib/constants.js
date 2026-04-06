@@ -67,11 +67,55 @@ export function getFomoLabel(heat, cat, domType) {
   return heat === 'hot' ? 'MUITO ATIVO 🔥' : 'MOVIMENTANDO ⚡'
 }
 
-// Categorias de local — estabelecimento precisa de moderação
+// Categorias de local — fixos precisam de moderação, temporários têm duração obrigatória
 export const PLACE_CATS = [
-  { id:'noturno',         emoji:'🌙', label:'Festa / Noturno',   desc:'Bar, balada, show',       color:'#bf5fff', needsModeration: false },
-  { id:'transito',        emoji:'🚦', label:'Trânsito / Via',    desc:'Avenida, cruzamento',     color:'#ff6b35', needsModeration: false },
-  { id:'estabelecimento', emoji:'🏪', label:'Estabelecimento',   desc:'Loja, restaurante, café', color:'#ffcc00', needsModeration: true  },
+  {
+    id:'noturno',
+    emoji:'🌙',
+    label:'Bar / Balada',
+    desc:'Local fixo — aparece sempre',
+    color:'#bf5fff',
+    needsModeration: true,
+    isFixed: true,           // local permanente, sem duração
+  },
+  {
+    id:'transito',
+    emoji:'🚦',
+    label:'Trânsito / Via',
+    desc:'Avenida, cruzamento',
+    color:'#ff6b35',
+    needsModeration: false,
+    isFixed: true,           // via permanente
+  },
+  {
+    id:'estabelecimento',
+    emoji:'🏪',
+    label:'Estabelecimento',
+    desc:'Loja, restaurante, café',
+    color:'#ffcc00',
+    needsModeration: true,
+    isFixed: true,
+  },
+  {
+    id:'evento',
+    emoji:'🎉',
+    label:'Evento temporário',
+    desc:'Show, feira, festa — some após encerrar',
+    color:'#ff2d55',
+    needsModeration: false,
+    isFixed: false,          // exige duração
+    durationRequired: true,
+  },
+]
+
+// Opções de duração para locais temporários
+export const DURATION_OPTIONS = [
+  { value: 2,   label: '2 horas'  },
+  { value: 4,   label: '4 horas'  },
+  { value: 8,   label: '8 horas'  },
+  { value: 24,  label: '1 dia'    },
+  { value: 72,  label: '3 dias'   },
+  { value: 168, label: '1 semana' },
 ]
 
 export const DEFAULT_LAT = -22.3154

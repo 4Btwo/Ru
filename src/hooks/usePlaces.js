@@ -13,7 +13,11 @@ export function usePlaces(uid) {
     const unsub = onValue(ref(db, 'places'), snap => {
       const data = snap.val()
       if (!data) return setUserPlaces([])
-      const list = Object.entries(data).map(([id, v]) => ({ id, ...v }))
+      const now  = Date.now()
+      const list = Object.entries(data)
+        .map(([id, v]) => ({ id, ...v }))
+        // Remove temporários já expirados
+        .filter(p => !p.expiresAt || p.expiresAt > now)
       setUserPlaces(list)
     }, (error) => {
       console.warn('[usePlaces] erro:', error.message)
@@ -26,12 +30,18 @@ export function usePlaces(uid) {
     ...userPlaces.filter(p => !LOCATIONS.find(l => l.id === p.id)),
   ]
 
-  const addPlace = useCallback(async ({ name, cat, lat, lng }, userId, userName) => {
+  const addPlace = useCallback(async (placeData, userId, userName) => {
+    const { name, cat, lat, lng, status, needsModeration, isFixed, expiresAt, durationHours } = placeData
     const newRef = await push(ref(db, 'places'), {
       name, cat, lat, lng,
       createdBy:   userId,
       createdName: userName,
       createdAt:   Date.now(),
+      status:      status ?? 'approved',
+      ...(needsModeration ? { needsModeration: true } : {}),
+      ...(isFixed !== undefined ? { isFixed } : {}),
+      ...(expiresAt    ? { expiresAt }    : {}),
+      ...(durationHours ? { durationHours } : {}),
     })
     return newRef.key
   }, [])
