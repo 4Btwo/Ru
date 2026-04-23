@@ -4,11 +4,12 @@
       ".read": "auth != null",
       "$eventId": {
         ".write": "auth != null && (!data.exists() || data.child('userId').val() === auth.uid)",
-        ".validate": "newData.hasChildren(['locationId','type','userId','ts']) && newData.child('userId').val() === auth.uid && newData.child('ts').val() <= now && newData.child('ts').val() >= now - 5000"
+        ".validate": "newData.hasChildren(['locationId','type','userId','ts']) && newData.child('userId').val() === auth.uid && newData.child('ts').val() <= now && newData.child('ts').val() >= now - 60000"
       },
       ".indexOn": ["ts", "locationId"]
     },
     "users": {
+      ".read": "auth != null",
       "$uid": {
         ".read": "auth != null",
         ".write": "auth.uid === $uid",
