@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { ref, onValue, update, remove, get, query, orderByChild, endAt } from 'firebase/database'
 import { db } from '../lib/firebase'
-import { EVENT_META, LOCATIONS } from '../lib/constants'
+import { EVENT_META } from '../lib/constants'
 
 const C = {
   bg:      '#0d0d15',
@@ -363,55 +363,48 @@ export default function AdminPanel({ open, onClose, adminUid }) {
             <>
               <InfoBanner
                 color={C.blue}
-                text='Locais hardcoded no código. "Ocultar" remove do mapa para todos sem alterar o código. "Restaurar" os traz de volta.'
+                text='Locais base migrados para o Firebase. Use 🗑️ Remover para apagar permanentemente do mapa.'
               />
-              <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-                {LOCATIONS.map(loc => {
-                  const hidden = hiddenIds.has(loc.id)
-                  const isBusy = busy === loc.id
-                  return (
-                    <div key={loc.id} style={{
-                      background: C.surface, border:`1px solid ${hidden ? 'rgba(255,45,85,.3)' : C.border}`,
-                      borderRadius:12, padding:'12px 14px',
-                      display:'flex', alignItems:'center', gap:12,
-                      opacity: isBusy ? .5 : 1, transition:'opacity .2s',
-                    }}>
-                      <div style={{
-                        width:34, height:34, borderRadius:9, flexShrink:0,
-                        background: loc.cat==='transito' ? 'rgba(255,107,53,.15)' : 'rgba(191,95,255,.15)',
-                        border:`1px solid ${loc.cat==='transito' ? 'rgba(255,107,53,.3)' : 'rgba(191,95,255,.3)'}`,
-                        display:'flex', alignItems:'center', justifyContent:'center', fontSize:16,
-                      }}>
-                        {loc.cat === 'transito' ? '🚦' : '🌙'}
-                      </div>
-                      <div style={{ flex:1 }}>
-                        <div style={{ fontSize:13, fontWeight:700, color: hidden ? C.muted : C.text }}>
-                          {loc.name}
-                          {hidden && <span style={{ marginLeft:8, fontSize:10, color: C.red }}>OCULTO</span>}
+              {allPlaces.filter(p => p.isBase).length === 0
+                ? <EmptyState icon="📍" title="Nenhum local base" sub="Os locais base aparecem aqui após o primeiro login." />
+                : (
+                  <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                    {allPlaces.filter(p => p.isBase).map(loc => {
+                      const isBusy = busy === loc.id
+                      const catEmoji = loc.cat === 'transito' ? '🚦' : loc.cat === 'noturno' ? '🌙' : '🏪'
+                      return (
+                        <div key={loc.id} style={{
+                          background: C.surface, border:`1px solid ${C.border}`,
+                          borderRadius:12, padding:'12px 14px',
+                          display:'flex', alignItems:'center', gap:12,
+                          opacity: isBusy ? .5 : 1, transition:'opacity .2s',
+                        }}>
+                          <div style={{
+                            width:34, height:34, borderRadius:9, flexShrink:0,
+                            background: loc.cat==='transito' ? 'rgba(255,107,53,.15)' : 'rgba(191,95,255,.15)',
+                            border:`1px solid ${loc.cat==='transito' ? 'rgba(255,107,53,.3)' : 'rgba(191,95,255,.3)'}`,
+                            display:'flex', alignItems:'center', justifyContent:'center', fontSize:16,
+                          }}>
+                            {catEmoji}
+                          </div>
+                          <div style={{ flex:1 }}>
+                            <div style={{ fontSize:13, fontWeight:700, color: C.text }}>{loc.name}</div>
+                            <div style={{ fontSize:11, color: C.muted, marginTop:2 }}>
+                              ID {loc.id} · {loc.cat} · {Number(loc.lat).toFixed(4)}, {Number(loc.lng).toFixed(4)}
+                            </div>
+                          </div>
+                          <ActionBtn
+                            color={C.red} bg="rgba(255,45,85,.08)"
+                            label="🗑️ Remover"
+                            onClick={() => deletePlace(loc)}
+                            disabled={isBusy}
+                          />
                         </div>
-                        <div style={{ fontSize:11, color: C.muted, marginTop:2 }}>
-                          ID {loc.id} · {loc.cat} · {loc.lat.toFixed(4)}, {loc.lng.toFixed(4)}
-                        </div>
-                      </div>
-                      {hidden ? (
-                        <ActionBtn
-                          color={C.green} bg="rgba(0,255,136,.1)"
-                          label="↩️ Restaurar"
-                          onClick={() => restoreBase(loc)}
-                          disabled={isBusy}
-                        />
-                      ) : (
-                        <ActionBtn
-                          color={C.red} bg="rgba(255,45,85,.08)"
-                          label="🙈 Ocultar"
-                          onClick={() => hideBase(loc)}
-                          disabled={isBusy}
-                        />
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
+                      )
+                    })}
+                  </div>
+                )
+              }
             </>
           )}
 
