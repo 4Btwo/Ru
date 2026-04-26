@@ -90,12 +90,21 @@ export default function AdminPanel({ open, onClose, adminUid }) {
   const deletePlace = async (p) => {
     if (!confirm(`Remover "${p.name}" permanentemente?`)) return
     setBusy(p.id)
-    await remove(ref(db, `places/${p.id}`))
-    setBusy(null)
+    try {
+      await remove(ref(db, `places/${p.id}`))
+    } catch (err) {
+      alert(`Erro ao remover local: ${err.message}\n\nVerifique se você é admin ou se as regras do Firebase foram atualizadas.`)
+    } finally {
+      setBusy(null)
+    }
   }
   const deleteEvent = async (ev) => {
     if (!confirm('Remover este reporte?')) return
-    await remove(ref(db, `events/${ev.id}`))
+    try {
+      await remove(ref(db, `events/${ev.id}`))
+    } catch (err) {
+      alert(`Erro ao remover reporte: ${err.message}`)
+    }
   }
 
   // ── Locais Base (hardcoded) ────────────────────────────────────────────────

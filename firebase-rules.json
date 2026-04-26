@@ -3,64 +3,65 @@
     "events": {
       ".read": "auth != null",
       "$eventId": {
-        ".write": "auth != null && (!data.exists() || data.child('userId').val() === auth.uid)",
-        ".validate": "newData.hasChildren(['locationId','type','userId','ts']) && newData.child('userId').val() === auth.uid && newData.child('ts').val() <= now && newData.child('ts').val() >= now - 60000"
+        ".write": "auth != null && (!data.exists() || data.child('userId').val() === auth.uid || root.child('users/' + auth.uid + '/isAdmin').val() === true)",
+        ".validate": "!newData.exists() || (newData.hasChildren(['locationId','type','userId','ts']) && newData.child('userId').val() === auth.uid && newData.child('ts').val() <= now && newData.child('ts').val() >= now - 60000)"
       },
-      ".indexOn": [
-        "ts",
-        "locationId"
-      ]
+      ".indexOn": ["ts", "locationId"]
     },
+
     "users": {
       ".read": "auth != null",
       "$uid": {
         ".read": "auth != null",
         ".write": "auth.uid === $uid",
-        ".validate": "newData.hasChildren(['name'])"
+        ".validate": "newData.hasChildren(['name']) && newData.child('name').val().length >= 1 && newData.child('name').val().length <= 60"
       }
     },
+
     "comments": {
       "$locId": {
         ".read": "auth != null",
         "$commentId": {
-          ".write": "auth != null && (!data.exists() || data.child('userId').val() === auth.uid)",
-          ".validate": "newData.hasChildren(['text','userId','userName','ts']) && newData.child('userId').val() === auth.uid && newData.child('text').val().length >= 1 && newData.child('text').val().length <= 200 && newData.child('ts').val() <= now"
+          ".write": "auth != null && (!data.exists() || data.child('userId').val() === auth.uid || root.child('users/' + auth.uid + '/isAdmin').val() === true)",
+          ".validate": "!newData.exists() || (newData.hasChildren(['text','userId','userName','ts']) && newData.child('userId').val() === auth.uid && newData.child('text').val().length >= 1 && newData.child('text').val().length <= 200 && newData.child('ts').val() <= now)"
         },
-        ".indexOn": [
-          "ts"
-        ]
+        ".indexOn": ["ts"]
       }
     },
+
     "presence": {
+      ".read": "auth != null",
       "$uid": {
-        ".read": "auth != null",
         ".write": "auth.uid === $uid"
       }
     },
+
     "places": {
       ".read": "auth != null",
       "$placeId": {
-        ".write": "auth != null && (!data.exists() || data.child('ownerId').val() === auth.uid)"
+        ".write": "auth != null && (!data.exists() || data.child('ownerId').val() === auth.uid || root.child('users/' + auth.uid + '/isAdmin').val() === true)",
+        ".validate": "!newData.exists() || (newData.hasChildren(['name','lat','lng','cat','ownerId']) && newData.child('name').val().length >= 2 && newData.child('name').val().length <= 80 && newData.child('ownerId').val() === auth.uid)"
       }
     },
+
     "rateLimit": {
       "$uid": {
         ".read": "auth.uid === $uid",
         ".write": "auth.uid === $uid"
       }
     },
+
     "chats": {
       "$locId": {
         ".read": "auth != null",
         "$msgId": {
-          ".write": "auth != null && (!data.exists() || data.child('userId').val() === auth.uid)",
-          ".validate": "newData.hasChildren(['text','userId','ts']) && newData.child('userId').val() === auth.uid && newData.child('text').val().length >= 1 && newData.child('text').val().length <= 500"
+          ".write": "auth != null && (!data.exists() || data.child('userId').val() === auth.uid || root.child('users/' + auth.uid + '/isAdmin').val() === true)",
+          ".validate": "!newData.exists() || (newData.hasChildren(['userId','ts']) && newData.child('userId').val() === auth.uid && newData.child('ts').val() <= now && (newData.child('text').exists() || newData.child('imageUrl').exists()) && (!newData.child('text').exists() || (newData.child('text').val().length >= 1 && newData.child('text').val().length <= 500)) && (!newData.child('imageUrl').exists() || (newData.child('imageUrl').val().length <= 500 && newData.child('imageUrl').val().matches(/^https:\\/\\/res\\.cloudinary\\.com\\/.*$/))))"
         },
-        ".indexOn": [
-          "ts"
-        ]
+        ".indexOn": ["ts"]
       }
     },
+
     "going": {
       "$locId": {
         ".read": "auth != null",
@@ -69,10 +70,11 @@
         }
       }
     },
+
     "settings": {
       "hiddenLocations": {
         ".read": "auth != null",
-        ".write": "auth != null && root.child(\"users/\" + auth.uid + \"/isAdmin\").val() === true || [\"nDg7v4RL91NqGkr16Gei9DrInWv1\"].indexOf(auth.uid) >= 0"
+        ".write": "root.child('users/' + auth.uid + '/isAdmin').val() === true"
       }
     }
   }

@@ -34,7 +34,9 @@ export default function ChatPanel({ open, location, user, onClose }) {
       const imageUrl = await uploadToCloudinary(file)
       await sendMessage({ imageUrl, userName: user.name, userPhoto: user.photo })
     } catch (err) {
-      alert('Erro ao enviar foto. Verifique as credenciais do Cloudinary no arquivo cloudinary.js')
+      // Mostra a mensagem real do erro (inclui instrução de configuração do .env)
+      alert(`Erro ao enviar foto:\n${err.message}`)
+      console.error('[ChatPanel] upload error:', err)
     } finally {
       setUploading(false)
       e.target.value = ''

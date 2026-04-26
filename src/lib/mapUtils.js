@@ -2,6 +2,10 @@
 import L from 'leaflet'
 import { calcScore, getHeatLevel, getLocationStatus } from './hotspot'
 
+// Arredonda coordenadas SVG para evitar floats longos que quebram o atributo 'd'
+const r = (n) => Math.round(n * 100) / 100
+
+
 function markerSize(score) {
   return Math.min(60, 28 + score * 3.5)
 }
@@ -9,7 +13,7 @@ function markerSize(score) {
 // ── SVG por tipo de reporte dominante (ativo) ──────────────────────────────────
 function buildActiveSvg(type, color, size) {
   const s = size
-  const half = s / 2
+  const half = Math.round(s / 2)
 
   const svgs = {
     cheio: `
@@ -105,43 +109,43 @@ function buildInactiveSvg(cat, size) {
   const icons = {
     noturno: `
       <!-- lua -->
-      <path d="M${s*.55} ${s*.25} A${s*.22} ${s*.22} 0 1 1 ${s*.55} ${s*.75} A${s*.15} ${s*.15} 0 0 0 ${s*.55} ${s*.25}Z" fill="#fff" opacity=".9"/>
-      <circle cx="${s*.52}" cy="${s*.48}" r="${s*.07}" fill="#fff" opacity=".5"/>`,
+      <path d="M${r(s*.55)} ${r(s*.25)} A${r(s*.22)} ${r(s*.22)} 0 1 1 ${r(s*.55)} ${r(s*.75)} A${r(s*.15)} ${r(s*.15)} 0 0 0 ${r(s*.55)} ${r(s*.25)}Z" fill="#fff" opacity=".9"/>
+      <circle cx="${r(s*.52)}" cy="${r(s*.48)}" r="${r(s*.07)}" fill="#fff" opacity=".5"/>`,
 
     transito: `
       <!-- semáforo -->
-      <rect x="${s*.33}" y="${s*.2}" width="${s*.34}" height="${s*.55}" rx="${s*.06}" fill="rgba(0,0,0,.4)"/>
-      <circle cx="${s*.5}" cy="${s*.3}" r="${s*.07}" fill="#ff4444"/>
-      <circle cx="${s*.5}" cy="${s*.48}" r="${s*.07}" fill="#ffcc00"/>
-      <circle cx="${s*.5}" cy="${s*.66}" r="${s*.07}" fill="#44ff44"/>`,
+      <rect x="${r(s*.33)}" y="${r(s*.2)}" width="${r(s*.34)}" height="${r(s*.55)}" rx="${r(s*.06)}" fill="rgba(0,0,0,.4)"/>
+      <circle cx="${r(s*.5)}" cy="${r(s*.3)}" r="${r(s*.07)}" fill="#ff4444"/>
+      <circle cx="${r(s*.5)}" cy="${r(s*.48)}" r="${r(s*.07)}" fill="#ffcc00"/>
+      <circle cx="${r(s*.5)}" cy="${r(s*.66)}" r="${r(s*.07)}" fill="#44ff44"/>`,
 
     estabelecimento: `
       <!-- lojinha -->
-      <rect x="${s*.2}" y="${s*.35}" width="${s*.6}" height="${s*.38}" rx="${s*.04}" fill="rgba(255,255,255,.85)"/>
-      <path d="${s*.2} ${s*.35} L${s*.5} ${s*.18} L${s*.8} ${s*.35}Z" fill="rgba(255,255,255,.6)"/>
-      <rect x="${s*.42}" y="${s*.5}" width="${s*.16}" height="${s*.23}" rx="${s*.03}" fill="${bg}"/>`,
+      <rect x="${r(s*.2)}" y="${r(s*.35)}" width="${r(s*.6)}" height="${r(s*.38)}" rx="${r(s*.04)}" fill="rgba(255,255,255,.85)"/>
+      <path d="${r(s*.2)} ${r(s*.35)} L${r(s*.5)} ${r(s*.18)} L${r(s*.8)} ${r(s*.35)}Z" fill="rgba(255,255,255,.6)"/>
+      <rect x="${r(s*.42)}" y="${r(s*.5)}" width="${r(s*.16)}" height="${r(s*.23)}" rx="${r(s*.03)}" fill="${bg}"/>`,
 
     parque: `
       <!-- árvore -->
-      <ellipse cx="${s*.5}" cy="${s*.35}" rx="${s*.18}" ry="${s*.2}" fill="rgba(255,255,255,.85)"/>
-      <rect x="${s*.46}" y="${s*.52}" width="${s*.08}" height="${s*.2}" rx="${s*.03}" fill="rgba(255,255,255,.7)"/>`,
+      <ellipse cx="${r(s*.5)}" cy="${r(s*.35)}" rx="${r(s*.18)}" ry="${r(s*.2)}" fill="rgba(255,255,255,.85)"/>
+      <rect x="${r(s*.46)}" y="${r(s*.52)}" width="${r(s*.08)}" height="${r(s*.2)}" rx="${r(s*.03)}" fill="rgba(255,255,255,.7)"/>`,
 
     show: `
       <!-- nota musical -->
-      <text x="${s*.28}" y="${s*.68}" font-size="${s*.42}" fill="rgba(255,255,255,.9)" font-family="sans-serif">♪</text>`,
+      <text x="${r(s*.28)}" y="${r(s*.68)}" font-size="${r(s*.42)}" fill="rgba(255,255,255,.9)" font-family="sans-serif">♪</text>`,
   }
 
-  const inner = icons[cat] || `<circle cx="${s/2}" cy="${s/2}" r="${s*.18}" fill="rgba(255,255,255,.8)"/>`
+  const inner = icons[cat] || `<circle cx="${r(s/2)}" cy="${r(s/2)}" r="${r(s*.18)}" fill="rgba(255,255,255,.8)"/>`
 
   return `
-    <svg width="${s}" height="${h}" viewBox="0 0 ${s} ${h}" xmlns="http://www.w3.org/2000/svg">
+    <svg width="${r(s)}" height="${h}" viewBox="0 0 ${r(s)} ${h}" xmlns="http://www.w3.org/2000/svg">
       <!-- sombra -->
-      <ellipse cx="${s/2}" cy="${h-3}" rx="${s*.28}" ry="${s*.1}" fill="rgba(0,0,0,.25)"/>
+      <ellipse cx="${r(s/2)}" cy="${h-3}" rx="${r(s*.28)}" ry="${r(s*.1)}" fill="rgba(0,0,0,.25)"/>
       <!-- corpo do pin -->
-      <path d="M${s/2} ${h-5}
-               C${s/2} ${h-5} ${s*.1} ${s*.65} ${s*.1} ${s*.42}
-               A${s*.4} ${s*.4} 0 1 1 ${s*.9} ${s*.42}
-               C${s*.9} ${s*.65} ${s/2} ${h-5} ${s/2} ${h-5}Z"
+      <path d="M${r(s/2)} ${h-5}
+               C${r(s/2)} ${h-5} ${r(s*.1)} ${r(s*.65)} ${r(s*.1)} ${r(s*.42)}
+               A${r(s*.4)} ${r(s*.4)} 0 1 1 ${r(s*.9)} ${r(s*.42)}
+               C${r(s*.9)} ${r(s*.65)} ${r(s/2)} ${h-5} ${r(s/2)} ${h-5}Z"
             fill="${bg}" stroke="${stroke}" stroke-width="1.5"/>
       <!-- ícone interno -->
       ${inner}
