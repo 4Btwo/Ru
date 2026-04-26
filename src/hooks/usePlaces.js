@@ -20,7 +20,7 @@ export function usePlaces(uid) {
           // Filtra expirados
           if (p.expiresAt && p.expiresAt <= now) return false
           // Filtra ocultos pelo admin
-          if (hiddenIds.has(id)) return false
+          if (hiddenIds.has(p.id)) return false
           return true
         })
       setAllPlaces(list)
