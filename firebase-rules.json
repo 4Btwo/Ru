@@ -40,7 +40,7 @@
       ".read": "auth != null",
       "$placeId": {
         ".write": "auth != null && (!data.exists() || data.child('ownerId').val() === auth.uid || root.child('users/' + auth.uid + '/isAdmin').val() === true)",
-        ".validate": "!newData.exists() || (newData.hasChildren(['name','lat','lng','cat','ownerId']) && newData.child('name').val().length >= 2 && newData.child('name').val().length <= 80 && newData.child('ownerId').val() === auth.uid)"
+        ".validate": "!newData.exists() || (newData.hasChildren(['name','lat','lng','cat','ownerId']) && newData.child('ownerId').val() === auth.uid && newData.child('name').val().length >= 2 && newData.child('name').val().length <= 80)"
       }
     },
 

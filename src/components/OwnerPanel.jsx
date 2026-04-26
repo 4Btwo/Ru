@@ -146,7 +146,7 @@ export default function OwnerPanel({ open, place, uid, onClose }) {
             <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8, marginBottom:12 }}>
               {OCCUPANCY_STEPS.map(p => (
                 <button key={p} onClick={() => setOcc(p)} style={{
-                  padding:'12px 8px', borderRadius:12, border:'none', cursor:'pointer',
+                  padding:'12px 8px', borderRadius:12, cursor:'pointer',
                   background: occupancy===p ? `${OccupancyColor(p)}22` : '#1a1a26',
                   border:     `1px solid ${occupancy===p ? OccupancyColor(p) : '#2a2a3d'}`,
                   color:       occupancy===p ? OccupancyColor(p) : '#f0f0ff',

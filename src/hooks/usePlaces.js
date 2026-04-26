@@ -43,6 +43,7 @@ export function usePlaces(uid) {
     const { name, cat, lat, lng, status, needsModeration, isFixed, expiresAt, durationHours } = placeData
     const newRef = await push(ref(db, 'places'), {
       name, cat, lat, lng,
+      ownerId:     userId,
       createdBy:   userId,
       createdName: userName,
       createdAt:   Date.now(),
