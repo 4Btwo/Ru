@@ -24,7 +24,7 @@ import NetworkBanner from './components/NetworkBanner'
 
 export default function App() {
   const networkStatus = useNetworkStatus()
-  const { user, loading, login, logout, authError } = useAuth()
+  const { user, loading, login, loginWithEmail, registerWithEmail, resetPassword, logout, authError, setAuthError } = useAuth()
   const { events, addEvent }             = useEvents(user?.uid)
   const { allPlaces, addPlace }          = usePlaces(user?.uid)
   const onlineCount                      = useOnline(user?.uid)
@@ -184,7 +184,7 @@ export default function App() {
     </div>
   )
 
-  if (!user) return <LoginScreen onLogin={login} authError={authError} />
+  if (!user) return <LoginScreen onLogin={login} loginWithEmail={loginWithEmail} registerWithEmail={registerWithEmail} resetPassword={resetPassword} authError={authError} setAuthError={setAuthError} />
 
   return (
     <div style={{ position:'relative', height:'100dvh', overflow:'hidden',
