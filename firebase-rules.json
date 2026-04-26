@@ -6,7 +6,10 @@
         ".write": "auth != null && (!data.exists() || data.child('userId').val() === auth.uid)",
         ".validate": "newData.hasChildren(['locationId','type','userId','ts']) && newData.child('userId').val() === auth.uid && newData.child('ts').val() <= now && newData.child('ts').val() >= now - 60000"
       },
-      ".indexOn": ["ts", "locationId"]
+      ".indexOn": [
+        "ts",
+        "locationId"
+      ]
     },
     "users": {
       ".read": "auth != null",
@@ -23,7 +26,9 @@
           ".write": "auth != null && (!data.exists() || data.child('userId').val() === auth.uid)",
           ".validate": "newData.hasChildren(['text','userId','userName','ts']) && newData.child('userId').val() === auth.uid && newData.child('text').val().length >= 1 && newData.child('text').val().length <= 200 && newData.child('ts').val() <= now"
         },
-        ".indexOn": ["ts"]
+        ".indexOn": [
+          "ts"
+        ]
       }
     },
     "presence": {
@@ -51,7 +56,9 @@
           ".write": "auth != null && (!data.exists() || data.child('userId').val() === auth.uid)",
           ".validate": "newData.hasChildren(['text','userId','ts']) && newData.child('userId').val() === auth.uid && newData.child('text').val().length >= 1 && newData.child('text').val().length <= 500"
         },
-        ".indexOn": ["ts"]
+        ".indexOn": [
+          "ts"
+        ]
       }
     },
     "going": {
@@ -60,6 +67,12 @@
         "$uid": {
           ".write": "auth.uid === $uid"
         }
+      }
+    },
+    "settings": {
+      "hiddenLocations": {
+        ".read": "auth != null",
+        ".write": "auth != null && root.child(\"users/\" + auth.uid + \"/isAdmin\").val() === true || [\"nDg7v4RL91NqGkr16Gei9DrInWv1\"].indexOf(auth.uid) >= 0"
       }
     }
   }

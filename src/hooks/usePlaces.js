@@ -1,32 +1,41 @@
 import { useState, useEffect, useCallback } from 'react'
-import { ref, push, onValue } from 'firebase/database'
+import { ref, push, onValue, update } from 'firebase/database'
 import { db } from '../lib/firebase'
 import { LOCATIONS } from '../lib/constants'
 
 export function usePlaces(uid) {
-  const [userPlaces, setUserPlaces] = useState([])
+  const [userPlaces,    setUserPlaces]    = useState([])
+  const [hiddenIds,     setHiddenIds]     = useState(new Set())
 
   useEffect(() => {
-    // Só escuta depois de autenticado
     if (!uid) return
 
-    const unsub = onValue(ref(db, 'places'), snap => {
+    // ── Firebase places ───────────────────────────────────────────────────────
+    const unsubPlaces = onValue(ref(db, 'places'), snap => {
       const data = snap.val()
       if (!data) return setUserPlaces([])
       const now  = Date.now()
       const list = Object.entries(data)
         .map(([id, v]) => ({ id, ...v }))
-        // Remove temporários já expirados
         .filter(p => !p.expiresAt || p.expiresAt > now)
       setUserPlaces(list)
-    }, (error) => {
-      console.warn('[usePlaces] erro:', error.message)
-    })
-    return unsub
+    }, err => console.warn('[usePlaces] erro:', err.message))
+
+    // ── Locais base ocultos pelo admin ────────────────────────────────────────
+    // Quando o admin "exclui" um local do LOCATIONS (hardcoded), o ID vai
+    // para settings/hiddenLocations — assim ele desaparece do mapa sem
+    // precisar remover o código.
+    const unsubHidden = onValue(ref(db, 'settings/hiddenLocations'), snap => {
+      const data = snap.val()
+      setHiddenIds(data ? new Set(Object.keys(data).filter(k => data[k])) : new Set())
+    }, () => {})
+
+    return () => { unsubPlaces(); unsubHidden() }
   }, [uid])
 
+  // Mescla hardcoded + Firebase, respeitando locais ocultos pelo admin
   const allPlaces = [
-    ...LOCATIONS,
+    ...LOCATIONS.filter(l => !hiddenIds.has(l.id)),
     ...userPlaces.filter(p => !LOCATIONS.find(l => l.id === p.id)),
   ]
 
@@ -38,7 +47,7 @@ export function usePlaces(uid) {
       createdName: userName,
       createdAt:   Date.now(),
       status:      status ?? 'approved',
-      ...(needsModeration ? { needsModeration: true } : {}),
+      ...(needsModeration  ? { needsModeration: true } : {}),
       ...(isFixed !== undefined ? { isFixed } : {}),
       ...(expiresAt    ? { expiresAt }    : {}),
       ...(durationHours ? { durationHours } : {}),
@@ -46,5 +55,15 @@ export function usePlaces(uid) {
     return newRef.key
   }, [])
 
-  return { allPlaces, userPlaces, addPlace }
+  // Oculta um local base (hardcoded) para todos os usuários
+  const hideBaseLocation = useCallback(async (locationId) => {
+    await update(ref(db, 'settings/hiddenLocations'), { [locationId]: true })
+  }, [])
+
+  // Restaura um local base que estava oculto
+  const restoreBaseLocation = useCallback(async (locationId) => {
+    await update(ref(db, 'settings/hiddenLocations'), { [locationId]: null })
+  }, [])
+
+  return { allPlaces, userPlaces, hiddenIds, addPlace, hideBaseLocation, restoreBaseLocation }
 }
