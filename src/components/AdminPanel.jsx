@@ -28,7 +28,7 @@ const STATUS_COLORS = {
 const MAIN_TABS = [
   { id:'reports',    label:'📊 Reports',      color: C.red    },
   { id:'moderation', label:'🛡️ Moderação',    color: C.yellow },
-  { id:'base',       label:'📍 Locais Base',  color: C.blue   },
+  { id:'base',       label:'📍 Locais',  color: C.blue   },
   { id:'reset',      label:'🔄 Reset',        color:'#bf5fff' },
 ]
 
@@ -363,7 +363,7 @@ export default function AdminPanel({ open, onClose, adminUid }) {
             <>
               <InfoBanner
                 color={C.blue}
-                text='Locais base migrados para o Firebase. Use 🗑️ Remover para apagar permanentemente do mapa.'
+                text='Todos os locais do mapa. Use 🗑️ Remover para apagar permanentemente. Locais de trânsito só aparecem no mapa quando têm reports ativos.'
               />
               {allPlaces.filter(p => p.isBase).length === 0
                 ? <EmptyState icon="📍" title="Nenhum local base" sub="Os locais base aparecem aqui após o primeiro login." />

@@ -151,6 +151,11 @@ export default function App() {
     if (loc.expiresAt && loc.expiresAt < now) return false
     // Locais com moderação só aparecem se aprovados
     if (loc.needsModeration && loc.status !== 'approved') return false
+    // Locais de trânsito base só aparecem quando têm reports ativos
+    if (loc.cat === 'transito' && loc.isBase) {
+      const hasActive = events.some(e => e.locationId === loc.id && (now - e.ts) < 3600000)
+      if (!hasActive) return false
+    }
     return true
   })
 
