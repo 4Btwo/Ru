@@ -52,14 +52,14 @@ export default function PrivacyPolicy() {
 
         <div style={S.logo}>
           <div style={S.dot} />
-          <span style={S.appName}>Radar Urbano</span>
+          <span style={S.appName}>Urbyn</span>
         </div>
 
         <h1 style={S.h1}>Política de Privacidade</h1>
         <p style={S.updated}>Última atualização: março de 2026</p>
 
         <p style={S.p}>
-          Esta política descreve como o <strong>Radar Urbano</strong> coleta, usa e protege
+          Esta política descreve como o <strong>Urbyn</strong> coleta, usa e protege
           as informações dos usuários. Ao usar o aplicativo, você concorda com os termos aqui descritos.
         </p>
 
@@ -120,14 +120,14 @@ export default function PrivacyPolicy() {
 
         <h2 style={S.h2}>7. Cookies e rastreamento</h2>
         <p style={S.p}>
-          O Radar Urbano não utiliza cookies de rastreamento nem ferramentas de analytics de terceiros.
+          O Urbyn não utiliza cookies de rastreamento nem ferramentas de analytics de terceiros.
           O Firebase utiliza cookies técnicos essenciais para autenticação — estes não podem ser desativados
           sem comprometer o funcionamento do login.
         </p>
 
         <h2 style={S.h2}>8. Menores de idade</h2>
         <p style={S.p}>
-          O Radar Urbano não é direcionado a menores de 13 anos. Se você acredita que uma criança
+          O Urbyn não é direcionado a menores de 13 anos. Se você acredita que uma criança
           forneceu informações pessoais ao app, entre em contato para que possamos removê-las.
         </p>
 
@@ -145,8 +145,8 @@ export default function PrivacyPolicy() {
           <p style={{ ...S.p, marginBottom: 0 }}>
             Para dúvidas, solicitações de exclusão de dados ou qualquer questão relacionada
             à privacidade, entre em contato pelo e-mail:{' '}
-            <a href="mailto:privacidade@radarurbano.app" style={S.email}>
-              privacidade@radarurbano.app
+            <a href="mailto:privacidade@urbyn.app" style={S.email}>
+              privacidade@urbyn.app
             </a>
           </p>
         </div>

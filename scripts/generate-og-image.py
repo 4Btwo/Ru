@@ -38,7 +38,7 @@ try:
 except:
     font_big = font_sub = font_tag = ImageFont.load_default()
 
-title    = 'Radar Urbano'
+title    = 'Urbyn'
 subtitle = 'O que está acontecendo agora na sua cidade?'
 tags     = ['🍻 Bares', '🚗 Trânsito', '🎉 Eventos', '🔥 Hotspots']
 

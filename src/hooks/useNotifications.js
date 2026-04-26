@@ -29,7 +29,7 @@ export function useNotifications(uid) {
     if (!messaging) return
     return onMessage(messaging, payload => {
       if (Notification.permission === 'granted') {
-        new Notification(payload.notification?.title || 'Radar Urbano', {
+        new Notification(payload.notification?.title || 'Urbyn', {
           body: payload.notification?.body || '',
           icon: '/icon.png',
         })

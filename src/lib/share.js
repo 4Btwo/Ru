@@ -12,7 +12,7 @@ export function buildShareText(location, events, usersMap = {}) {
   const count    = actEvts.length
 
   if (heat === 'inactive' || count === 0) {
-    return `📍 ${location.name} — tranquilo agora.\nVeja ao vivo: Radar Urbano`
+    return `📍 ${location.name} — tranquilo agora.\nVeja ao vivo: Urbyn`
   }
 
   const fomoLabel = getFomoLabel(heat, location.cat)
@@ -25,7 +25,7 @@ export function buildShareText(location, events, usersMap = {}) {
     `📍 ${location.name}`,
     `👥 ${count} reporte${count > 1 ? 's' : ''} agora`,
     ``,
-    `Acompanhe ao vivo pelo Radar Urbano 🔴`,
+    `Acompanhe ao vivo pelo Urbyn 🔴`,
   ]
 
   return lines.join('\n')
@@ -36,7 +36,7 @@ export function buildShareText(location, events, usersMap = {}) {
  */
 export async function shareLocation(location, events, usersMap = {}) {
   const text  = buildShareText(location, events, usersMap)
-  const title = `Radar Urbano — ${location.name}`
+  const title = `Urbyn — ${location.name}`
 
   // Web Share API (mobile)
   if (navigator.share) {

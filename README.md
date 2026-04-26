@@ -1,4 +1,4 @@
-# Radar Urbano 🔴
+# Urbyn 🔴
 
 App de mapa colaborativo em tempo real — bares, trânsito, eventos e hotspots da cidade.
 
@@ -17,7 +17,7 @@ App de mapa colaborativo em tempo real — bares, trânsito, eventos e hotspots 
 
 ```bash
 git clone <repo>
-cd radar-urbano
+cd urbyn
 npm install
 cd functions && npm install && cd ..
 ```

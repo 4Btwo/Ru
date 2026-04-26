@@ -93,7 +93,10 @@ export async function generateShareImage(location, score, actEvts) {
   ctx.font = 'bold 36px sans-serif'
   ctx.fillStyle = '#f0f0ff'
   ctx.textAlign = 'left'
-  ctx.fillText('RADAR URBANO', 445, 932)
+  ctx.fillText('URBYN', 445, 920)
+  ctx.font = '22px sans-serif'
+  ctx.fillStyle = '#ffffff99'
+  ctx.fillText('Onde a cidade acontece', 445, 948)
 
   ctx.font = '28px sans-serif'
   ctx.fillStyle = '#6666aa'
@@ -111,12 +114,12 @@ export async function generateShareImage(location, score, actEvts) {
 export async function shareWithImage(location, score, actEvts) {
   try {
     const blob = await generateShareImage(location, score, actEvts)
-    const file = new File([blob], 'radar-urbano.png', { type: 'image/png' })
+    const file = new File([blob], 'urbyn.png', { type: 'image/png' })
 
     // Web Share API com arquivo (Chrome/Safari mobile)
     if (navigator.canShare?.({ files: [file] })) {
       await navigator.share({
-        title: `Radar Urbano — ${location.name}`,
+        title: `Urbyn — ${location.name}`,
         files: [file],
       })
       return 'shared'
@@ -126,7 +129,7 @@ export async function shareWithImage(location, score, actEvts) {
     const url  = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href  = url
-    link.download = `radar-urbano-${location.id}.png`
+    link.download = `urbyn-${location.id}.png`
     link.click()
     URL.revokeObjectURL(url)
     return 'downloaded'

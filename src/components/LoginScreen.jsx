@@ -139,7 +139,7 @@ export default function LoginScreen({ onLogin, loginWithEmail, registerWithEmail
         animation:'pulse 1.4s ease infinite',
       }}/>
       <div style={{ fontSize:24, fontWeight:800, letterSpacing:'.14em',
-        textTransform:'uppercase', color:C.text }}>Radar Urbano</div>
+        textTransform:'uppercase', color:C.text }}>Urbyn</div>
       <div style={{ fontSize:12, color:C.muted, marginTop:4 }}>Bauru ao vivo</div>
     </div>
   )

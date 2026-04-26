@@ -1,6 +1,6 @@
 {
-  "name": "Radar Urbano",
-  "short_name": "Radar",
+  "name": "Urbyn",
+  "short_name": "Urbyn",
   "description": "Acompanhe em tempo real o que está acontecendo nos pontos da cidade — bares, trânsito, eventos e muito mais.",
   "start_url": "/",
   "display": "standalone",

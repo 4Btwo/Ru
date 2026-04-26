@@ -248,7 +248,7 @@ export default function App() {
             <div style={{ width:10, height:10, borderRadius:'50%', background:'#ff2d55',
               boxShadow:'0 0 12px #ff2d55', animation:'pulse 1.4s ease infinite' }}/>
             <span style={{ fontSize:13, fontWeight:800, letterSpacing:'.12em', textTransform:'uppercase' }}>
-              Radar Urbano
+              Urbyn
             </span>
             {onlineCount > 1 && (
               <span style={{ background:'rgba(0,255,136,.12)', border:'1px solid rgba(0,255,136,.3)',

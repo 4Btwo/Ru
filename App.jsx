@@ -152,7 +152,7 @@ export default function App() {
             animation: 'pulse 1.4s ease infinite',
           }} />
           <span style={{ fontSize: 13, fontWeight: 800, letterSpacing: '.12em', textTransform: 'uppercase' }}>
-            Radar Urbano
+            Urbyn
           </span>
         </div>
 

@@ -21,7 +21,7 @@ export default function LoginScreen({ onLogin }) {
           fontSize: 22, fontWeight: 800,
           letterSpacing: '.14em', textTransform: 'uppercase',
           color: '#f0f0ff',
-        }}>Radar Urbano</span>
+        }}>Urbyn</span>
       </div>
 
       <p style={{ color: '#6666aa', fontSize: 13, textAlign: 'center', maxWidth: 260, lineHeight: 1.6 }}>

@@ -19,7 +19,7 @@ firebase.initializeApp({
 const messaging = firebase.messaging()
 
 messaging.onBackgroundMessage(payload => {
-  const title = payload.notification?.title || 'Radar Urbano'
+  const title = payload.notification?.title || 'Urbyn'
   const body  = payload.notification?.body  || ''
   const icon  = '/icon-192.png'
   const badge = '/icon-192.png'

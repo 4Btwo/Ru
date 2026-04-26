@@ -1,6 +1,6 @@
 {
-  "name": "radar-urbano-functions",
-  "description": "Cloud Functions do Radar Urbano",
+  "name": "urbyn-functions",
+  "description": "Cloud Functions do Urbyn",
   "scripts": {
     "serve": "firebase emulators:start --only functions",
     "deploy": "firebase deploy --only functions"
