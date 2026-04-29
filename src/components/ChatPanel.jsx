@@ -89,7 +89,7 @@ export default function ChatPanel({ open, location, user, onClose }) {
             </div>
           )}
 
-          {messages.map(msg => {
+          {messages.filter(msg => msg.text || msg.imageUrl).map(msg => {
             const isMe = msg.userId === user.uid
             return (
               <div key={msg.id} style={{
