@@ -6,7 +6,7 @@ import {
   getRedirectResult,
   signOut,
   setPersistence,
-  indexedDBLocalPersistence,
+  browserLocalPersistence,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
@@ -59,7 +59,7 @@ export function useAuth() {
 
     const run = async () => {
       try {
-        await setPersistence(auth, indexedDBLocalPersistence)
+        await setPersistence(auth, browserLocalPersistence)
         const result = await getRedirectResult(auth)
         if (result?.user) {
           console.log('[Auth] Redirect result OK:', result.user.displayName)
@@ -99,8 +99,8 @@ export function useAuth() {
   const loginWithGoogle = async () => {
     try {
       setAuthError(null)
-      const isMobileSafari = /iPhone|iPad|iPod/i.test(navigator.userAgent)
-      if (isMobileSafari) {
+      const isAndroid = /Android/i.test(navigator.userAgent)
+      if (isAndroid) {
         await signInWithRedirect(auth, googleProvider)
       } else {
         await signInWithPopup(auth, googleProvider)
