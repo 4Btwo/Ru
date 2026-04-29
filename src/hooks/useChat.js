@@ -33,7 +33,7 @@ export function useChat(locationId, uid) {
       userId:    uid,
       userName,
       userPhoto,
-      ts:        Date.now(),
+      ts:        serverTimestamp(),
     })
   }, [locationId, uid])
 
