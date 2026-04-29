@@ -365,11 +365,11 @@ export default function AdminPanel({ open, onClose, adminUid }) {
                 color={C.blue}
                 text='Todos os locais do mapa. Use 🗑️ Remover para apagar permanentemente. Locais de trânsito só aparecem no mapa quando têm reports ativos.'
               />
-              {allPlaces.filter(p => p.isBase).length === 0
+              {allPlaces.length === 0
                 ? <EmptyState icon="📍" title="Nenhum local base" sub="Os locais base aparecem aqui após o primeiro login." />
                 : (
                   <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-                    {allPlaces.filter(p => p.isBase).map(loc => {
+                    {allPlaces.map(loc => {
                       const isBusy = busy === loc.id
                       const catEmoji = loc.cat === 'transito' ? '🚦' : loc.cat === 'noturno' ? '🌙' : '🏪'
                       return (
