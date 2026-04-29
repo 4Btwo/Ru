@@ -33,7 +33,8 @@ export default function AddLocationPanel({ open, coords, onClose, onSave }) {
 
   const selectedCat   = PLACE_CATS.find(c => c.id === cat)
   const needsDuration = selectedCat?.durationRequired === true
-  const canSave       = name.trim() && cat && coords && (!needsDuration || duration)
+  const isAutoExpiry  = selectedCat?.autoExpiry != null && !selectedCat?.durationRequired
+  const canSave       = name.trim() && cat && coords && (!needsDuration || duration || isAutoExpiry)
 
   const handleSave = async () => {
     if (!canSave) return
@@ -41,7 +42,7 @@ export default function AddLocationPanel({ open, coords, onClose, onSave }) {
     try {
       const expiresAt = needsDuration && duration
         ? Date.now() + duration * 60 * 60 * 1000
-        : null
+        : (selectedCat?.autoExpiry ? Date.now() + selectedCat.autoExpiry : null)
 
       const chosenIcon = ICON_OPTIONS.find(i => i.id === icon)
 

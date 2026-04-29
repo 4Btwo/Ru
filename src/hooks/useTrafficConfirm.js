@@ -3,7 +3,7 @@
 // dispara uma notificação pedindo confirmação se ainda está acontecendo.
 
 import { useEffect, useRef, useCallback } from 'react'
-import { ref, push, update, increment } from 'firebase/database'
+import { ref, push, update, increment, remove, get } from 'firebase/database'
 import { db } from '../lib/firebase'
 import { EVENT_META } from '../lib/constants'
 
@@ -89,20 +89,26 @@ export function useTrafficConfirm({ userPos, events, places, user, onConfirmProm
     })
   }, [user])
 
-  // Marcar como resolvido (evento terminou)
+  // Marcar como resolvido — expira o place imediatamente + bônus ao usuário
   const markResolved = useCallback(async (locationId, type) => {
     if (!user) return
-    // Adiciona evento "morto" para derrubar o score
+    const now = Date.now()
+    // Expira o place imediatamente no Firebase
+    const placeSnap = await get(ref(db, `places/${locationId}`))
+    if (placeSnap.exists() && placeSnap.val().cat === 'transito') {
+      await update(ref(db, `places/${locationId}`), { expiresAt: now - 1 })
+    }
+    // Adiciona evento de resolução para histórico
     await push(ref(db, 'events'), {
       locationId,
-      type:     'morto',
-      userId:   user.uid,
-      userName: user.name,
-      ts:       Date.now(),
+      type:         'morto',
+      userId:       user.uid,
+      userName:     user.name,
+      ts:           now,
       isResolution: true,
     })
     await update(ref(db, `users/${user.uid}`), {
-      score:   increment(8),  // bônus maior por resolver
+      score:   increment(8),
       reports: increment(1),
     })
   }, [user])

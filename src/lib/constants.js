@@ -82,10 +82,11 @@ export const PLACE_CATS = [
     id:'transito',
     emoji:'🚦',
     label:'Trânsito / Via',
-    desc:'Avenida, cruzamento',
+    desc:'Some em 3h ou quando resolvido',
     color:'#ff6b35',
     needsModeration: false,
-    isFixed: true,           // via permanente
+    isFixed: false,          // temporário — expira em 3h ou ao ser resolvido
+    autoExpiry: 3 * 60 * 60 * 1000,  // 3 horas
   },
   {
     id:'estabelecimento',
