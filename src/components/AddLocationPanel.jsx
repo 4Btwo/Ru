@@ -2,13 +2,33 @@
 import React, { useState } from 'react'
 import { PLACE_CATS, DURATION_OPTIONS } from '../lib/constants'
 
+const ICON_OPTIONS = [
+  { id:'bar',      emoji:'🍺', label:'Bar'      },
+  { id:'club',     emoji:'🎉', label:'Balada'   },
+  { id:'music',    emoji:'🎵', label:'Show'     },
+  { id:'food',     emoji:'🍕', label:'Comida'   },
+  { id:'coffee',   emoji:'☕', label:'Café'     },
+  { id:'store',    emoji:'🏪', label:'Loja'     },
+  { id:'gas',      emoji:'⛽', label:'Posto'    },
+  { id:'park',     emoji:'🌳', label:'Parque'   },
+  { id:'beach',    emoji:'🏖️', label:'Praia'   },
+  { id:'sport',    emoji:'⚽', label:'Esporte'  },
+  { id:'hospital', emoji:'🏥', label:'Saúde'    },
+  { id:'school',   emoji:'🎓', label:'Educação' },
+  { id:'church',   emoji:'⛪', label:'Igreja'   },
+  { id:'road',     emoji:'🚦', label:'Via'      },
+  { id:'star',     emoji:'⭐', label:'Destaque' },
+  { id:'fire',     emoji:'🔥', label:'Agitado'  },
+]
+
 export default function AddLocationPanel({ open, coords, onClose, onSave }) {
   const [name,     setName]     = useState('')
   const [cat,      setCat]      = useState(null)
+  const [icon,     setIcon]     = useState(null)
   const [duration, setDuration] = useState(null)
   const [saving,   setSaving]   = useState(false)
 
-  const reset = () => { setName(''); setCat(null); setDuration(null); setSaving(false) }
+  const reset = () => { setName(''); setCat(null); setIcon(null); setDuration(null); setSaving(false) }
   const handleClose = () => { reset(); onClose() }
 
   const selectedCat   = PLACE_CATS.find(c => c.id === cat)
@@ -23,9 +43,13 @@ export default function AddLocationPanel({ open, coords, onClose, onSave }) {
         ? Date.now() + duration * 60 * 60 * 1000
         : null
 
+      const chosenIcon = ICON_OPTIONS.find(i => i.id === icon)
+
       await onSave({
         name: name.trim(),
         cat,
+        icon: icon || null,
+        iconEmoji: chosenIcon?.emoji || null,
         lat: coords.lat,
         lng: coords.lng,
         isFixed: selectedCat.isFixed ?? true,
@@ -40,6 +64,8 @@ export default function AddLocationPanel({ open, coords, onClose, onSave }) {
       setSaving(false)
     }
   }
+
+  const previewIcon = ICON_OPTIONS.find(i => i.id === icon)
 
   return (
     <>
@@ -79,6 +105,7 @@ export default function AddLocationPanel({ open, coords, onClose, onSave }) {
           </div>
         )}
 
+        {/* ── NOME ── */}
         <p style={{ fontSize:11, textTransform:'uppercase', letterSpacing:'.1em', color:'#6666aa', marginBottom:8 }}>Nome do local</p>
         <input
           value={name}
@@ -90,12 +117,32 @@ export default function AddLocationPanel({ open, coords, onClose, onSave }) {
             width:'100%', background:'#1a1a26', border:'1px solid #2a2a3d',
             borderRadius:12, padding:'12px 14px', color:'#f0f0ff',
             fontFamily:"'Syne',sans-serif", fontSize:14, outline:'none',
-            marginBottom:18, transition:'border-color .2s',
+            marginBottom:18, transition:'border-color .2s', boxSizing:'border-box',
           }}
           onFocus={e => e.target.style.borderColor='#ff2d55'}
           onBlur={e  => e.target.style.borderColor='#2a2a3d'}
         />
 
+        {/* ── ÍCONE ── */}
+        <p style={{ fontSize:11, textTransform:'uppercase', letterSpacing:'.1em', color:'#6666aa', marginBottom:10 }}>
+          Ícone no mapa {previewIcon && <span style={{ color:'#f0f0ff', textTransform:'none', letterSpacing:0 }}>— {previewIcon.emoji} {previewIcon.label}</span>}
+        </p>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8, marginBottom:20 }}>
+          {ICON_OPTIONS.map(opt => (
+            <button key={opt.id} onClick={() => setIcon(icon === opt.id ? null : opt.id)} style={{
+              background: icon === opt.id ? 'rgba(255,45,85,.15)' : '#1a1a26',
+              border:     `1px solid ${icon === opt.id ? '#ff2d55' : '#2a2a3d'}`,
+              borderRadius:12, padding:'10px 6px', cursor:'pointer',
+              display:'flex', flexDirection:'column', alignItems:'center', gap:4,
+              transition:'all .15s',
+            }}>
+              <span style={{ fontSize:22 }}>{opt.emoji}</span>
+              <span style={{ fontSize:9, color: icon === opt.id ? '#ff2d55' : '#6666aa', fontWeight:700 }}>{opt.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* ── TIPO ── */}
         <p style={{ fontSize:11, textTransform:'uppercase', letterSpacing:'.1em', color:'#6666aa', marginBottom:10 }}>Tipo de local *</p>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:8, marginBottom:16 }}>
           {PLACE_CATS.map(c => (
@@ -126,7 +173,7 @@ export default function AddLocationPanel({ open, coords, onClose, onSave }) {
           ))}
         </div>
 
-        {/* ── DURAÇÃO obrigatória para temporários ── */}
+        {/* ── DURAÇÃO ── */}
         {needsDuration && (
           <>
             <div style={{
@@ -176,7 +223,7 @@ export default function AddLocationPanel({ open, coords, onClose, onSave }) {
           </>
         )}
 
-        {/* Aviso de moderação */}
+        {/* ── MODERAÇÃO ── */}
         {selectedCat?.needsModeration && (
           <div style={{
             background:'rgba(255,204,0,.08)', border:'1px solid rgba(255,204,0,.25)',

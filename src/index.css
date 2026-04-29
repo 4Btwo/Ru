@@ -43,3 +43,15 @@ button, a { touch-action: manipulation; }
 @keyframes toastIn  { from{opacity:0;transform:translateX(-50%) translateY(8px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
 @keyframes pointsIn { from{opacity:0;transform:translateY(-12px)} to{opacity:1;transform:translateY(0)} }
 @keyframes slideDown{ from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+
+/* Nome do marcador — oculto por padrão, visível com zoom alto */
+.marker-name-label { opacity: 0; transition: opacity .2s; }
+.leaflet-zoom-animated.leaflet-zoom-anim .marker-name-label { opacity: 0; }
+.marker-with-name .marker-name-label { opacity: 0; }
+
+/* Mostra o nome a partir do zoom 15 */
+.leaflet-zoom-15 .marker-with-name .marker-name-label,
+.leaflet-zoom-16 .marker-with-name .marker-name-label,
+.leaflet-zoom-17 .marker-with-name .marker-name-label,
+.leaflet-zoom-18 .marker-with-name .marker-name-label,
+.leaflet-zoom-19 .marker-with-name .marker-name-label { opacity: 1; }

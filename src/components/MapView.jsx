@@ -38,7 +38,14 @@ const MapView = forwardRef(function MapView(
       .addTo(mapInst.current)
       .bindTooltip('Você', { permanent:false, direction:'top' })
 
-    mapInst.current.on('zoomend', () => setZoom(mapInst.current.getZoom()))
+    mapInst.current.on('zoomend', () => {
+      const z = mapInst.current.getZoom()
+      setZoom(z)
+      // Atualiza classe de zoom no container para CSS de nome do marcador
+      const el = mapInst.current.getContainer()
+      el.className = el.className.replace(/\bleaflet-zoom-\d+\b/g, '')
+      el.classList.add(`leaflet-zoom-${Math.round(z)}`)
+    })
   }, [])
 
   // Modo seleção de ponto — cursor muda + clique coloca marcador temporário

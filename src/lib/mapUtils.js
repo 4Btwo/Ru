@@ -72,6 +72,19 @@ function buildInactiveSvg(cat) {
   return `<svg width="34" height="44" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><ellipse cx="17" cy="41" rx="9" ry="3" fill="rgba(0,0,0,.25)"/><path d="M17 39 C17 39 3 24 3 15 A14 14 0 0 1 31 15 C31 24 17 39 17 39Z" fill="${bg}" stroke="${stroke}" stroke-width="1.5"/>${inner}</svg>`
 }
 
+function buildEmojiPin(emoji, cat) {
+  const colors = {
+    noturno:         { bg: '#7c3aed', stroke: '#a78bfa' },
+    transito:        { bg: '#0369a1', stroke: '#38bdf8' },
+    estabelecimento: { bg: '#92400e', stroke: '#fbbf24' },
+    parque:          { bg: '#15803d', stroke: '#4ade80' },
+    comercio:        { bg: '#92400e', stroke: '#fbbf24' },
+    show:            { bg: '#9d174d', stroke: '#f472b6' },
+  }
+  const { bg, stroke } = colors[cat] || { bg: '#3a3a5a', stroke: '#6666aa' }
+  return `<svg width="34" height="44" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><ellipse cx="17" cy="41" rx="9" ry="3" fill="rgba(0,0,0,.25)"/><path d="M17 39 C17 39 3 24 3 15 A14 14 0 0 1 31 15 C31 24 17 39 17 39Z" fill="${bg}" stroke="${stroke}" stroke-width="1.5"/><text x="17" y="20" font-size="13" text-anchor="middle" dominant-baseline="middle">${emoji}</text></svg>`
+}
+
 export function buildMarkerIcon(loc, events, usersMap = {}) {
   const status = getLocationStatus(loc.id, events, usersMap)
   const { heat, domType, color, score } = status
@@ -98,10 +111,15 @@ export function buildMarkerIcon(loc, events, usersMap = {}) {
 
   // ── INATIVO: pin gota SVG por categoria ──────────────────────────────────────
   if (isInactive) {
-    const svgPin = buildInactiveSvg(loc.cat)
+    const svgPin = loc.iconEmoji
+      ? buildEmojiPin(loc.iconEmoji, loc.cat)
+      : buildInactiveSvg(loc.cat)
+    const nameLabel = loc.name
+      ? `<div class="marker-name-label" style="position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);background:rgba(10,10,15,.85);color:#f0f0ff;font-size:10px;font-weight:700;font-family:'Syne',sans-serif;padding:3px 8px;border-radius:20px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.5);pointer-events:none;border:1px solid rgba(255,255,255,.08);">${loc.name}</div>`
+      : ''
     return L.divIcon({
-      html: `<div style="position:relative;width:34px;height:44px;">${fomoLabel}${svgPin}${badge}</div>`,
-      className: '',
+      html: `<div style="position:relative;width:34px;height:44px;">${nameLabel}${fomoLabel}${svgPin}${badge}</div>`,
+      className: 'marker-with-name',
       iconSize: [34, 44],
       iconAnchor: [17, 41],
     })
