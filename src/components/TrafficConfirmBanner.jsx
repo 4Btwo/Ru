@@ -36,7 +36,7 @@ export default function TrafficConfirmBanner({ prompt, onConfirm, onResolve, onD
     }}>
       <div style={{
         margin:'12px 16px 0',
-        background:'#12121a',
+        background:'var(--surface)',
         border:`1px solid ${color}55`,
         borderRadius:16,
         padding:'14px 16px',
@@ -55,13 +55,13 @@ export default function TrafficConfirmBanner({ prompt, onConfirm, onResolve, onD
             <div style={{ fontSize:13, fontWeight:800, marginBottom:2 }}>
               Você está perto — ainda acontecendo?
             </div>
-            <div style={{ fontSize:11, color:'#6666aa' }}>
+            <div style={{ fontSize:11, color:'var(--muted)' }}>
               📍 {prompt.place.name} · {meta?.label}
             </div>
           </div>
           <button onClick={onDismiss} style={{
             width:28, height:28, borderRadius:8, border:'none',
-            background:'#1a1a26', color:'#6666aa', cursor:'pointer', fontSize:14,
+            background:'var(--surface2)', color:'var(--muted)', cursor:'pointer', fontSize:14,
             display:'flex', alignItems:'center', justifyContent:'center',
           }}>✕</button>
         </div>
@@ -71,7 +71,7 @@ export default function TrafficConfirmBanner({ prompt, onConfirm, onResolve, onD
           <button onClick={handleConfirm} style={{
             flex:1, padding:'10px 8px', borderRadius:10, border:`1px solid ${color}44`,
             background:`${color}15`, color,
-            fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer',
+            fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer',
             transition:'all .15s',
           }}>
             ✅ Ainda acontecendo
@@ -79,7 +79,7 @@ export default function TrafficConfirmBanner({ prompt, onConfirm, onResolve, onD
           <button onClick={handleResolve} style={{
             flex:1, padding:'10px 8px', borderRadius:10, border:'1px solid rgba(0,255,136,.3)',
             background:'rgba(0,255,136,.1)', color:'#00ff88',
-            fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer',
+            fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer',
             transition:'all .15s',
           }}>
             ✅ Já resolveu

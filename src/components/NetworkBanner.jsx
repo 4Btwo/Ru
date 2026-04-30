@@ -11,16 +11,16 @@ export default function NetworkBanner({ status }) {
     offline: {
       icon: '📡',
       msg: 'Sem conexão — você está offline',
-      bg: '#1a1a26',
+      bg: 'var(--surface2)',
       border: 'rgba(255, 204, 0, .35)',
       color: '#ffcc00',
     },
     'firebase-error': {
       icon: '⚠️',
       msg: 'Problema ao conectar ao servidor. Tentando reconectar…',
-      bg: '#1a1a26',
+      bg: 'var(--surface2)',
       border: 'rgba(255, 45, 85, .35)',
-      color: '#ff2d55',
+      color: 'var(--red)',
     },
   }[status] || {}
 

@@ -95,7 +95,7 @@ export default function OwnerPanel({ open, place, uid, onClose }) {
               flex:1, padding:'10px 0', borderRadius:10, border:'none', cursor:'pointer',
               background: tab===t.id ? '#ffcc00' : '#1a1a26',
               color:       tab===t.id ? '#000'    : '#6666aa',
-              fontFamily: "'Syne',sans-serif", fontWeight:700, fontSize:13,
+              fontFamily: "'Inter',sans-serif", fontWeight:700, fontSize:13,
               transition: 'all .15s',
             }}>{t.label}</button>
           ))}
@@ -162,7 +162,7 @@ export default function OwnerPanel({ open, place, uid, onClose }) {
             <button onClick={() => setOcc(null)} style={{
               width:'100%', padding:'10px', borderRadius:10,
               border:'1px solid #2a2a3d', background:'transparent',
-              color:'#6666aa', fontFamily:"'Syne',sans-serif",
+              color:'#6666aa', fontFamily:"'Inter',sans-serif",
               fontSize:12, cursor:'pointer', marginBottom:20,
             }}>
               ✕ Não informar lotação
@@ -171,7 +171,7 @@ export default function OwnerPanel({ open, place, uid, onClose }) {
             <button onClick={handleSaveOccupancy} disabled={saving} style={{
               width:'100%', padding:15, borderRadius:14, border:'none',
               background: saved ? '#00ff88' : '#ffcc00',
-              color: '#000', fontFamily:"'Syne',sans-serif",
+              color: '#000', fontFamily:"'Inter',sans-serif",
               fontWeight:800, fontSize:15, cursor:'pointer', transition:'all .2s',
             }}>
               {saved ? '✅ Salvo!' : saving ? '⏳ Salvando...' : '💾 Atualizar lotação'}
@@ -206,7 +206,7 @@ export default function OwnerPanel({ open, place, uid, onClose }) {
                     style={{
                       width:'100%', background:'#1a1a26', border:'1px solid #2a2a3d',
                       borderRadius:12, padding:'12px 14px', color:'#f0f0ff',
-                      fontFamily:"'Syne',sans-serif", fontSize:13, outline:'none',
+                      fontFamily:"'Inter',sans-serif", fontSize:13, outline:'none',
                       resize:'none', lineHeight:1.5,
                     }}
                     onFocus={e => e.target.style.borderColor='#ffcc00'}
@@ -219,7 +219,7 @@ export default function OwnerPanel({ open, place, uid, onClose }) {
                     style={{
                       width:'100%', background:'#1a1a26', border:'1px solid #2a2a3d',
                       borderRadius:12, padding:'12px 14px', color:'#f0f0ff',
-                      fontFamily:"'Syne',sans-serif", fontSize:13, outline:'none',
+                      fontFamily:"'Inter',sans-serif", fontSize:13, outline:'none',
                     }}
                     onFocus={e => e.target.style.borderColor='#ffcc00'}
                     onBlur={e  => e.target.style.borderColor='#2a2a3d'}
@@ -231,7 +231,7 @@ export default function OwnerPanel({ open, place, uid, onClose }) {
             <button onClick={handleSaveInfo} disabled={saving} style={{
               width:'100%', padding:15, borderRadius:14, border:'none',
               background: saved ? '#00ff88' : '#ffcc00',
-              color:'#000', fontFamily:"'Syne',sans-serif",
+              color:'#000', fontFamily:"'Inter',sans-serif",
               fontWeight:800, fontSize:15, cursor:'pointer', transition:'all .2s',
             }}>
               {saved ? '✅ Salvo!' : saving ? '⏳ Salvando...' : '💾 Salvar informações'}

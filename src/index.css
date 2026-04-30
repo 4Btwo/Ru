@@ -1,87 +1,75 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap');
 
 :root {
-  --bg:        #0b1410;
-  --bg2:       #0f1a14;
-  --surface:   #131f18;
-  --surface2:  #182419;
-  --surface3:  #1e2c20;
-  --border:    #243028;
-  --border2:   #2e3c32;
-  --green:     #1db954;
-  --green-dim: #14a347;
-  --green-glow:rgba(29,185,84,.18);
-  --green-glow2:rgba(29,185,84,.08);
-  --accent:    #00e676;
-  --red:       #ff3b5c;
-  --yellow:    #ffd60a;
-  --orange:    #ff6b35;
-  --blue:      #3d9eff;
-  --purple:    #c77dff;
-  --text:      #e8f5e9;
-  --text2:     #a5c8ab;
-  --muted:     #6a8a72;
-  --dim:       #3a5040;
-  --sat: env(safe-area-inset-top, 0px);
-  --sab: env(safe-area-inset-bottom, 0px);
+  --bg:          #0c1a12;
+  --bg2:         #0a1510;
+  --surface:     #111e16;
+  --surface2:    #162018;
+  --surface3:    #1c2a1f;
+  --border:      #1f2e23;
+  --border2:     #273529;
+  --green:       #22c55e;
+  --green-dark:  #16a34a;
+  --green-glow:  rgba(34,197,94,.18);
+  --green-dim:   rgba(34,197,94,.08);
+  --accent:      #4ade80;
+  --red:         #ef4444;
+  --yellow:      #eab308;
+  --orange:      #f97316;
+  --blue:        #3b82f6;
+  --purple:      #a855f7;
+  --text:        #f0fdf4;
+  --text2:       #bbf7d0;
+  --muted:       #6b7f70;
+  --dim:         #374d3c;
+  --sat: env(safe-area-inset-top,0px);
+  --sab: env(safe-area-inset-bottom,0px);
 }
 
-* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-html, body, #root { height:100%; overflow:hidden; }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body,#root{height:100%;overflow:hidden}
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--bg);color:var(--text);
+  height:100dvh;overscroll-behavior:none;
+  -webkit-overflow-scrolling:touch;
+}
+::-webkit-scrollbar{display:none}
+scrollbar-width:none;
+button,a{touch-action:manipulation}
 
-body {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  height: 100dvh;
-  overscroll-behavior: none;
-  -webkit-overflow-scrolling: touch;
+/* Leaflet escuro verde */
+.leaflet-tile{filter:invert(1) hue-rotate(148deg) saturate(1.1) brightness(.7) contrast(1.05)}
+.leaflet-container{background:var(--bg)!important}
+.leaflet-control-zoom,.leaflet-control-attribution{display:none!important}
+
+/* Chip de filtro */
+.chip{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:7px 14px;border-radius:100px;
+  background:var(--surface2);border:1px solid var(--border2);
+  font-size:12px;font-weight:600;color:var(--muted);
+  cursor:pointer;transition:all .2s;white-space:nowrap;
+  font-family:'Inter',sans-serif;flex-shrink:0;
+}
+.chip.active{
+  background:rgba(34,197,94,.15);
+  border-color:var(--green);color:var(--green);
 }
 
-.safe-bottom { padding-bottom: calc(28px + var(--sab)); }
-.safe-top    { padding-top: calc(12px + var(--sat)); }
-::-webkit-scrollbar { display: none; }
-scrollbar-width: none;
-button, a { touch-action: manipulation; }
-
-/* Leaflet dark green theme */
-.leaflet-tile { filter: invert(1) hue-rotate(155deg) saturate(1.2) brightness(.72) contrast(1.1); }
-.leaflet-container { background: var(--bg) !important; }
-.leaflet-control-zoom, .leaflet-control-attribution { display:none !important; }
-
-/* Chip filters */
-.chip {
-  flex-shrink: 0;
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 7px 14px;
-  border-radius: 100px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  font-size: 12px; font-weight: 600;
-  color: var(--muted);
-  cursor: pointer;
-  transition: all .2s;
-  white-space: nowrap;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-}
-.chip.active {
-  background: rgba(29,185,84,.15);
-  border-color: var(--green);
-  color: var(--green);
-}
-
-/* Animations */
-@keyframes pulse    { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.35);opacity:.65} }
-@keyframes fadeUp   { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-@keyframes slideDown{ from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
-@keyframes toastIn  { from{opacity:0;transform:translateX(-50%) translateY(10px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
-@keyframes pointsIn { 0%{opacity:0;transform:translateX(-50%) scale(.7)} 70%{transform:translateX(-50%) scale(1.08)} 100%{opacity:1;transform:translateX(-50%) scale(1)} }
-@keyframes markerPulse { 0%{transform:scale(1);opacity:.7} 50%{transform:scale(1.6);opacity:.2} 100%{transform:scale(1);opacity:.7} }
+/* Animações */
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.35);opacity:.6}}
+@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes pointsIn{0%{opacity:0;transform:translateX(-50%) scale(.6)}70%{transform:translateX(-50%) scale(1.1)}100%{opacity:1;transform:translateX(-50%) scale(1)}}
+@keyframes markerPulse{0%{transform:scale(1);opacity:.7}50%{transform:scale(1.7);opacity:.15}100%{transform:scale(1);opacity:.7}}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 /* Marker labels */
-.marker-name-label { opacity:0; transition:opacity .2s; }
+.marker-name-label{opacity:0;transition:opacity .2s}
 .leaflet-zoom-15 .marker-with-name .marker-name-label,
 .leaflet-zoom-16 .marker-with-name .marker-name-label,
 .leaflet-zoom-17 .marker-with-name .marker-name-label,
 .leaflet-zoom-18 .marker-with-name .marker-name-label,
-.leaflet-zoom-19 .marker-with-name .marker-name-label { opacity:1; }
+.leaflet-zoom-19 .marker-with-name .marker-name-label{opacity:1}

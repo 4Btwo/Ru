@@ -178,7 +178,7 @@ export default function ChatPanel({ open, location, user, onClose }) {
             style={{
               flex:1, background:'#1a1a26', border:'1px solid #2a2a3d',
               borderRadius:22, padding:'11px 16px', color:'#f0f0ff',
-              fontFamily:"'Syne',sans-serif", fontSize:14, outline:'none',
+              fontFamily:"'Inter',sans-serif", fontSize:14, outline:'none',
             }}
             onFocus={e => e.target.style.borderColor='#ff2d55'}
             onBlur={e  => e.target.style.borderColor='#2a2a3d'}

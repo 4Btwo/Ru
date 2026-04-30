@@ -1,326 +1,313 @@
 import React, { useState } from 'react'
 
-const C = {
-  bg:      '#0b1410',
-  surface: '#131f18',
-  surf2:   '#182419',
-  border:  '#243028',
-  green:   '#1db954',
-  red:     '#ff3b5c',
-  text:    '#e8f5e9',
-  muted:   '#6a8a72',
-  dim:     '#3a5040',
+/* ── Design tokens ─────────────────────────────────────────────────────────── */
+const T = {
+  bg:'#0c1a12', surface:'#111e16', surf2:'#162018',
+  border:'#1f2e23', green:'#22c55e', red:'#ef4444',
+  text:'#f0fdf4', muted:'#6b7f70', dim:'#374d3c',
 }
 
-function RuLogo() {
+/* ── Logo Urbyn ────────────────────────────────────────────────────────────── */
+function Logo() {
   return (
-    <div style={{ display:'flex', alignItems:'center', gap:5 }}>
-      <div style={{ fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:900, fontSize:42, color:C.green, letterSpacing:'-.04em', lineHeight:1 }}>Ru</div>
-      <div style={{ width:11, height:11, borderRadius:'50%', background:C.green, boxShadow:`0 0 12px ${C.green}`, marginTop:-18 }}/>
+    <div style={{textAlign:'center'}}>
+      <div style={{
+        display:'inline-flex', alignItems:'center', gap:6, marginBottom:16,
+      }}>
+        <div style={{
+          width:48, height:48, borderRadius:14,
+          background:`linear-gradient(135deg, ${T.green}, #16a34a)`,
+          display:'flex', alignItems:'center', justifyContent:'center',
+          boxShadow:`0 8px 32px rgba(34,197,94,.35)`,
+        }}>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="white" opacity=".9"/>
+            <circle cx="12" cy="9" r="2.5" fill="white"/>
+          </svg>
+        </div>
+        <span style={{
+          fontSize:30, fontWeight:900, color:T.text,
+          fontFamily:"'Inter',sans-serif", letterSpacing:'-.02em',
+        }}>Urbyn</span>
+      </div>
+      <p style={{fontSize:13, color:T.muted, lineHeight:1.6}}>
+        Sua cidade. <span style={{color:T.green, fontWeight:600}}>Do seu jeito.</span>
+      </p>
     </div>
   )
 }
 
-export default function LoginScreen({ onLogin, loginWithEmail, registerWithEmail, resetPassword, authError, setAuthError }) {
-  const [tab,      setTab]      = useState('main')
-  const [name,     setName]     = useState('')
-  const [email,    setEmail]    = useState('')
-  const [password, setPassword] = useState('')
-  const [confirm,  setConfirm]  = useState('')
-  const [busy,     setBusy]     = useState(false)
-  const [localErr, setLocalErr] = useState(null)
-  const [success,  setSuccess]  = useState(null)
-  const [showPass, setShowPass] = useState(false)
-
-  const err = localErr || authError
-  const clearErr = () => { setLocalErr(null); setAuthError?.(null) }
-  const goTab = (t) => { setTab(t); clearErr(); setSuccess(null) }
-
-  const handleGoogle = async () => { clearErr(); setBusy(true); await onLogin(); setBusy(false) }
-
-  const handleEmailLogin = async (e) => {
-    e.preventDefault(); clearErr()
-    if (!email || !password) { setLocalErr('Preencha e-mail e senha.'); return }
-    setBusy(true)
-    const res = await loginWithEmail?.(email, password)
-    setBusy(false)
-    if (!res?.ok) setLocalErr(res?.error)
-  }
-
-  const handleRegister = async (e) => {
-    e.preventDefault(); clearErr()
-    if (!name.trim())        { setLocalErr('Informe seu nome.'); return }
-    if (!email)              { setLocalErr('Informe seu e-mail.'); return }
-    if (password.length < 6) { setLocalErr('Senha deve ter ao menos 6 caracteres.'); return }
-    if (password !== confirm) { setLocalErr('As senhas não coincidem.'); return }
-    setBusy(true)
-    const res = await registerWithEmail?.(name.trim(), email, password)
-    setBusy(false)
-    if (res?.ok) setSuccess('Conta criada! Verifique seu e-mail para confirmar.')
-    else setLocalErr(res?.error)
-  }
-
-  const handleReset = async (e) => {
-    e.preventDefault(); clearErr()
-    if (!email) { setLocalErr('Informe seu e-mail.'); return }
-    setBusy(true)
-    const res = await resetPassword?.(email)
-    setBusy(false)
-    if (res?.ok) setSuccess('Link de recuperação enviado! Verifique seu e-mail.')
-    else setLocalErr(res?.error)
-  }
-
-  const Input = ({ label, type='text', value, onChange, placeholder, extra }) => (
-    <div style={{ width:'100%' }}>
-      <label style={{ display:'block', fontSize:11, color:C.muted, marginBottom:5, letterSpacing:'.06em', textTransform:'uppercase' }}>
-        {label}
-      </label>
-      <div style={{ position:'relative' }}>
+/* ── Input ─────────────────────────────────────────────────────────────────── */
+function Input({label, type='text', value, onChange, placeholder, extra}) {
+  const [focused, setFocused] = useState(false)
+  const [show, setShow]       = useState(false)
+  return (
+    <div>
+      {label && <label style={{display:'block', fontSize:11, color:T.muted, marginBottom:5, letterSpacing:'.06em', textTransform:'uppercase'}}>{label}</label>}
+      <div style={{position:'relative'}}>
         <input
-          type={type==='password' && showPass ? 'text' : type}
+          type={type==='password' && show ? 'text' : type}
           value={value} onChange={onChange} placeholder={placeholder}
-          autoComplete={type==='password' ? 'current-password' : type==='email' ? 'email' : 'name'}
+          onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
           style={{
-            width:'100%', background:C.surf2, border:`1px solid ${C.border}`,
-            borderRadius:12, padding:'12px 14px', color:C.text,
-            fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:14, outline:'none',
-            boxSizing:'border-box', paddingRight: type==='password' ? 44 : 14,
+            width:'100%', background:T.surf2,
+            border:`1.5px solid ${focused ? T.green : T.border}`,
+            borderRadius:12, padding:'13px 14px', color:T.text,
+            fontFamily:"'Inter',sans-serif", fontSize:14, outline:'none',
+            boxSizing:'border-box', paddingRight: type==='password' ? 46 : 14,
             transition:'border-color .2s',
           }}
-          onFocus={e => e.target.style.borderColor = C.green}
-          onBlur={e => e.target.style.borderColor = C.border}
         />
         {type==='password' && (
-          <button onClick={() => setShowPass(p => !p)} type="button"
-            style={{ position:'absolute', right:12, top:'50%', transform:'translateY(-50%)',
-              background:'none', border:'none', cursor:'pointer', color:C.muted, fontSize:16, padding:0 }}>
-            {showPass ? '🙈' : '👁️'}
-          </button>
+          <button onClick={()=>setShow(s=>!s)} type="button" style={{
+            position:'absolute', right:13, top:'50%', transform:'translateY(-50%)',
+            background:'none', border:'none', cursor:'pointer', color:T.muted, fontSize:17, padding:0,
+          }}>{show?'🙈':'👁️'}</button>
         )}
       </div>
       {extra}
     </div>
   )
+}
 
-  const Btn = ({ children, onClick, type='button', variant='primary', disabled }) => {
-    const styles = {
-      primary:   { background:C.green, color:'#0b1410', border:'none' },
-      secondary: { background:C.surf2, color:C.text, border:`1px solid ${C.border}` },
-      ghost:     { background:'transparent', color:C.muted, border:'none' },
-    }
-    return (
-      <button type={type} onClick={onClick} disabled={disabled || busy}
-        style={{
-          width:'100%', padding:'13px', borderRadius:12, cursor:'pointer',
-          fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:700, fontSize:14,
-          transition:'opacity .15s, transform .1s', opacity:(disabled||busy)?.5:1,
-          ...styles[variant],
-        }}
-        onMouseEnter={e => e.currentTarget.style.opacity='.85'}
-        onMouseLeave={e => e.currentTarget.style.opacity='1'}
-      >{busy && variant==='primary' ? '...' : children}</button>
-    )
+/* ── Button ────────────────────────────────────────────────────────────────── */
+function Btn({children, onClick, type='button', variant='primary', disabled, busy}) {
+  const v = {
+    primary:  {background:T.green,   color:'#052e16', border:'none'},
+    google:   {background:T.surf2,   color:T.text,    border:`1.5px solid ${T.border}`},
+    ghost:    {background:'transparent', color:T.muted, border:'none'},
+  }
+  return (
+    <button type={type} onClick={onClick} disabled={disabled||busy} style={{
+      width:'100%', padding:'14px', borderRadius:12, cursor:(disabled||busy)?'not-allowed':'pointer',
+      fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:14,
+      transition:'opacity .15s, transform .1s',
+      opacity:(disabled||busy)?0.5:1, ...v[variant],
+    }}
+      onMouseEnter={e=>!disabled&&!busy&&(e.currentTarget.style.opacity='.88')}
+      onMouseLeave={e=>e.currentTarget.style.opacity=(disabled||busy)?'.5':'1'}
+      onMouseDown={e=>!disabled&&!busy&&(e.currentTarget.style.transform='scale(.98)')}
+      onMouseUp={e=>e.currentTarget.style.transform='scale(1)'}
+    >{busy?'⏳ Aguarde...':children}</button>
+  )
+}
+
+/* ── Helpers ───────────────────────────────────────────────────────────────── */
+const ErrBox = ({msg}) => msg ? (
+  <div style={{background:'rgba(239,68,68,.08)', border:'1px solid rgba(239,68,68,.3)',
+    borderRadius:10, padding:'10px 14px', fontSize:12, color:T.red, lineHeight:1.6}}>{msg}</div>
+) : null
+
+const OkBox = ({msg}) => msg ? (
+  <div style={{background:'rgba(34,197,94,.08)', border:'1px solid rgba(34,197,94,.3)',
+    borderRadius:10, padding:'10px 14px', fontSize:12, color:T.green, lineHeight:1.6}}>{msg}</div>
+) : null
+
+const Divider = () => (
+  <div style={{display:'flex', alignItems:'center', gap:10}}>
+    <div style={{flex:1, height:1, background:T.border}}/>
+    <span style={{fontSize:11, color:T.muted}}>ou</span>
+    <div style={{flex:1, height:1, background:T.border}}/>
+  </div>
+)
+
+const Back = ({onClick}) => (
+  <button onClick={onClick} type="button" style={{
+    background:'none', border:'none', color:T.muted, cursor:'pointer',
+    fontSize:13, padding:'2px 0', fontFamily:"'Inter',sans-serif", display:'flex', alignItems:'center', gap:4,
+  }}>← Voltar</button>
+)
+
+const TextLink = ({onClick, children}) => (
+  <button onClick={onClick} type="button" style={{
+    background:'none', border:'none', color:T.muted, cursor:'pointer',
+    fontSize:12, fontFamily:"'Inter',sans-serif", textDecoration:'underline', padding:'2px 0',
+  }}>{children}</button>
+)
+
+/* ── Card wrapper ──────────────────────────────────────────────────────────── */
+const Card = ({children}) => (
+  <div style={{
+    width:'100%', maxWidth:380,
+    background:T.surface, border:`1px solid ${T.border}`,
+    borderRadius:20, padding:'24px 22px',
+    display:'flex', flexDirection:'column', gap:14,
+  }}>{children}</div>
+)
+
+const Wrap = ({children}) => (
+  <div style={{
+    position:'fixed', inset:0, background:T.bg,
+    display:'flex', flexDirection:'column', alignItems:'center',
+    justifyContent:'center', gap:20, padding:'24px 20px',
+    overflowY:'auto', fontFamily:"'Inter',sans-serif",
+  }}>
+    {/* Glow decorativo */}
+    <div style={{
+      position:'absolute', top:0, left:'50%', transform:'translateX(-50%)',
+      width:340, height:340, borderRadius:'50%',
+      background:'radial-gradient(circle, rgba(34,197,94,.1) 0%, transparent 65%)',
+      pointerEvents:'none',
+    }}/>
+    {children}
+    <style>{`@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.7}}`}</style>
+  </div>
+)
+
+/* ── Tela principal ────────────────────────────────────────────────────────── */
+export default function LoginScreen({onLogin, loginWithEmail, registerWithEmail, resetPassword, authError, setAuthError}) {
+  const [tab,  setTab]  = useState('main')
+  const [name, setName] = useState('')
+  const [em,   setEm]   = useState('')
+  const [pw,   setPw]   = useState('')
+  const [pw2,  setPw2]  = useState('')
+  const [busy, setBusy] = useState(false)
+  const [err,  setErr]  = useState(null)
+  const [ok,   setOk]   = useState(null)
+
+  const e = err || authError
+  const clear = () => { setErr(null); setAuthError?.(null) }
+  const go = t => { setTab(t); clear(); setOk(null) }
+
+  const google = async () => { clear(); setBusy(true); await onLogin(); setBusy(false) }
+
+  const emailLogin = async (ev) => {
+    ev.preventDefault(); clear()
+    if (!em||!pw) { setErr('Preencha e-mail e senha.'); return }
+    setBusy(true)
+    const r = await loginWithEmail?.(em,pw)
+    setBusy(false)
+    if (!r?.ok) setErr(r?.error)
   }
 
-  const Card = ({ children }) => (
-    <div style={{
-      width:'100%', maxWidth:360,
-      background:C.surface, border:`1px solid ${C.border}`,
-      borderRadius:20, padding:'28px 24px',
-      display:'flex', flexDirection:'column', gap:16,
-    }}>{children}</div>
-  )
+  const register = async (ev) => {
+    ev.preventDefault(); clear()
+    if (!name.trim()) { setErr('Informe seu nome.'); return }
+    if (!em) { setErr('Informe seu e-mail.'); return }
+    if (pw.length<6) { setErr('Senha mínimo 6 caracteres.'); return }
+    if (pw!==pw2) { setErr('Senhas não coincidem.'); return }
+    setBusy(true)
+    const r = await registerWithEmail?.(name.trim(),em,pw)
+    setBusy(false)
+    if (r?.ok) setOk('Conta criada! Verifique seu e-mail.')
+    else setErr(r?.error)
+  }
 
-  const ErrBox = ({ msg }) => msg ? (
-    <div style={{ background:'rgba(255,59,92,.08)', border:'1px solid rgba(255,59,92,.3)',
-      borderRadius:10, padding:'10px 14px', fontSize:12, color:C.red, lineHeight:1.6 }}>{msg}</div>
-  ) : null
+  const reset = async (ev) => {
+    ev.preventDefault(); clear()
+    if (!em) { setErr('Informe seu e-mail.'); return }
+    setBusy(true)
+    const r = await resetPassword?.(em)
+    setBusy(false)
+    if (r?.ok) setOk('Link enviado! Verifique seu e-mail.')
+    else setErr(r?.error)
+  }
 
-  const SuccessBox = ({ msg }) => msg ? (
-    <div style={{ background:'rgba(29,185,84,.08)', border:'1px solid rgba(29,185,84,.3)',
-      borderRadius:10, padding:'10px 14px', fontSize:12, color:C.green, lineHeight:1.6 }}>{msg}</div>
-  ) : null
-
-  const Divider = () => (
-    <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-      <div style={{ flex:1, height:1, background:C.border }}/>
-      <span style={{ fontSize:11, color:C.muted }}>ou</span>
-      <div style={{ flex:1, height:1, background:C.border }}/>
-    </div>
-  )
-
-  const BackBtn = ({ to }) => (
-    <button onClick={() => goTab(to)} type="button"
-      style={{ background:'none', border:'none', color:C.muted, cursor:'pointer',
-        fontSize:12, padding:'4px 0', textAlign:'left', fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
-      ← Voltar
-    </button>
-  )
-
-  if (tab === 'main') return (
+  /* ── main ── */
+  if (tab==='main') return (
     <Wrap>
-      {/* Decorative glow */}
-      <div style={{
-        position:'absolute', top:'-20%', left:'50%', transform:'translateX(-50%)',
-        width:300, height:300, borderRadius:'50%',
-        background:'radial-gradient(circle, rgba(29,185,84,.12) 0%, transparent 70%)',
-        pointerEvents:'none',
-      }}/>
-
-      <RuLogo />
-      <div style={{ textAlign:'center' }}>
-        <div style={{ fontSize:26, fontWeight:900, color:C.text, lineHeight:1.2, marginBottom:8 }}>
-          Sua cidade.<br/><span style={{ color:C.green }}>Do seu jeito.</span>
-        </div>
-        <p style={{ color:C.muted, fontSize:13, lineHeight:1.8 }}>
-          Descubra, avalie e compartilhe os<br/>melhores lugares da sua cidade.
-        </p>
-      </div>
-
-      {/* Feature pills */}
-      <div style={{ display:'flex', gap:8, flexWrap:'wrap', justifyContent:'center', maxWidth:320 }}>
-        {['🔍 Descubra lugares', '👥 Conecte-se', '⭐ Avalie e compartilhe'].map(f => (
-          <div key={f} style={{
-            background:'rgba(29,185,84,.08)', border:'1px solid rgba(29,185,84,.2)',
-            borderRadius:100, padding:'6px 14px', fontSize:12, color:C.green, fontWeight:600,
-          }}>{f}</div>
+      <Logo/>
+      <div style={{display:'flex', flexWrap:'wrap', justifyContent:'center', gap:8, maxWidth:320}}>
+        {['🔍 Descubra lugares','👥 Conecte-se','⭐ Avalie e compartilhe'].map(f=>(
+          <span key={f} style={{
+            background:'rgba(34,197,94,.08)', border:'1px solid rgba(34,197,94,.2)',
+            borderRadius:100, padding:'5px 12px', fontSize:11, color:'#22c55e', fontWeight:600,
+          }}>{f}</span>
         ))}
       </div>
 
-      {authError === 'unauthorized-domain' && (
-        <div style={{ width:'100%', maxWidth:360, background:'rgba(255,59,92,.08)',
-          border:'1px solid rgba(255,59,92,.35)', borderRadius:14, padding:16 }}>
-          <div style={{ fontSize:13, fontWeight:800, color:C.red, marginBottom:8 }}>⚠️ Domínio não autorizado</div>
-          <div style={{ fontSize:11, color:'#aaaacc', lineHeight:1.7 }}>
-            Firebase Console → Authentication → Authorized domains → Add:
-          </div>
-          <div style={{ background:C.bg, borderRadius:8, padding:'8px 12px',
-            fontFamily:"'Space Mono',monospace", fontSize:11, color:C.green, margin:'8px 0' }}>
-            {window.location.hostname}
-          </div>
+      {authError==='unauthorized-domain' && (
+        <div style={{width:'100%', maxWidth:380, background:'rgba(239,68,68,.08)', border:'1px solid rgba(239,68,68,.3)', borderRadius:14, padding:14}}>
+          <div style={{fontSize:12, fontWeight:700, color:T.red, marginBottom:6}}>⚠️ Domínio não autorizado no Firebase</div>
+          <div style={{fontFamily:"'Space Mono',monospace", fontSize:11, color:'#22c55e', background:T.bg, borderRadius:8, padding:'6px 10px'}}>{window.location.hostname}</div>
         </div>
       )}
 
       <Card>
-        <Btn onClick={handleGoogle} variant="primary">
-          <span style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:10 }}>
-            <GoogleIcon /> Continuar com Google
+        <Btn onClick={google} variant="google" busy={busy}>
+          <span style={{display:'flex', alignItems:'center', justifyContent:'center', gap:9}}>
+            <GoogleSVG/> Continuar com Google
           </span>
         </Btn>
-        <Divider />
-        <Btn onClick={() => goTab('email-login')} variant="secondary">✉️ &nbsp;Entrar com E-mail</Btn>
-        <button onClick={() => goTab('email-register')} type="button"
-          style={{ background:'none', border:'none', color:C.muted, cursor:'pointer',
-            fontSize:12, fontFamily:"'Plus Jakarta Sans',sans-serif", textDecoration:'underline', padding:'2px 0' }}>
-          Não tem conta? Criar conta
-        </button>
+        <Divider/>
+        <Btn onClick={()=>go('login')} variant="google">✉️  Entrar com E-mail</Btn>
+        <TextLink onClick={()=>go('register')}>Não tem conta? Criar conta grátis</TextLink>
       </Card>
 
-      <div style={{ fontSize:11, color:C.dim, textAlign:'center', lineHeight:1.6 }}>
-        <a href="/privacy" style={{ color:C.muted }}>Política de Privacidade</a>
-      </div>
-      <style>{`@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.7}}`}</style>
+      <p style={{fontSize:11, color:T.dim, textAlign:'center'}}>
+        <a href="/privacy" style={{color:T.muted}}>Política de Privacidade</a>
+      </p>
     </Wrap>
   )
 
-  if (tab === 'email-login') return (
+  /* ── login ── */
+  if (tab==='login') return (
     <Wrap>
-      <RuLogo />
+      <Logo/>
       <Card>
-        <BackBtn to="main" />
-        <div style={{ fontSize:16, fontWeight:700, color:C.text }}>Bem-vindo de volta! 👋</div>
-        <ErrBox msg={err} /><SuccessBox msg={success} />
-        <form onSubmit={handleEmailLogin} style={{ display:'flex', flexDirection:'column', gap:14 }}>
-          <Input label="E-mail" type="email" value={email} onChange={e => { setEmail(e.target.value); clearErr() }} placeholder="seu@email.com" />
-          <Input label="Senha" type="password" value={password} onChange={e => { setPassword(e.target.value); clearErr() }} placeholder="••••••••"
-            extra={<button onClick={() => goTab('reset')} type="button"
-              style={{ background:'none', border:'none', color:C.muted, cursor:'pointer',
-                fontSize:11, padding:'4px 0', textAlign:'right', width:'100%',
-                fontFamily:"'Plus Jakarta Sans',sans-serif", textDecoration:'underline', marginTop:4 }}>
-              Esqueci minha senha</button>}
+        <Back onClick={()=>go('main')}/>
+        <p style={{fontSize:17, fontWeight:800}}>Bem-vindo de volta! 👋</p>
+        <ErrBox msg={e}/><OkBox msg={ok}/>
+        <form onSubmit={emailLogin} style={{display:'flex', flexDirection:'column', gap:12}}>
+          <Input label="E-mail" type="email" value={em} onChange={ev=>{setEm(ev.target.value);clear()}} placeholder="seu@email.com"/>
+          <Input label="Senha" type="password" value={pw} onChange={ev=>{setPw(ev.target.value);clear()}} placeholder="••••••••"
+            extra={<button onClick={()=>go('reset')} type="button" style={{background:'none', border:'none', color:T.muted, cursor:'pointer', fontSize:11, padding:'4px 0', textAlign:'right', width:'100%', fontFamily:"'Inter',sans-serif", textDecoration:'underline', marginTop:3}}>Esqueci minha senha</button>}
           />
-          <Btn type="submit" variant="primary">Entrar</Btn>
+          <Btn type="submit" variant="primary" busy={busy}>Entrar</Btn>
         </form>
-        <Divider />
-        <Btn onClick={handleGoogle} variant="secondary">
-          <span style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:10 }}>
-            <GoogleIcon /> Continuar com Google
-          </span>
-        </Btn>
-        <button onClick={() => goTab('email-register')} type="button"
-          style={{ background:'none', border:'none', color:C.muted, cursor:'pointer',
-            fontSize:12, fontFamily:"'Plus Jakarta Sans',sans-serif", textDecoration:'underline', padding:'2px 0' }}>
-          Não tem conta? Criar conta
-        </button>
+        <Divider/>
+        <Btn onClick={google} variant="google" busy={busy}><span style={{display:'flex', alignItems:'center', justifyContent:'center', gap:9}}><GoogleSVG/> Continuar com Google</span></Btn>
+        <TextLink onClick={()=>go('register')}>Não tem conta? Criar conta</TextLink>
       </Card>
-      <style>{`@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.7}}`}</style>
     </Wrap>
   )
 
-  if (tab === 'email-register') return (
+  /* ── register ── */
+  if (tab==='register') return (
     <Wrap>
-      <RuLogo />
+      <Logo/>
       <Card>
-        <BackBtn to="main" />
-        <div style={{ fontSize:16, fontWeight:700, color:C.text }}>Criar conta</div>
-        <ErrBox msg={err} /><SuccessBox msg={success} />
-        {!success && (
-          <form onSubmit={handleRegister} style={{ display:'flex', flexDirection:'column', gap:14 }}>
-            <Input label="Seu nome" type="text" value={name} onChange={e => { setName(e.target.value); clearErr() }} placeholder="Como quer ser chamado?" />
-            <Input label="E-mail" type="email" value={email} onChange={e => { setEmail(e.target.value); clearErr() }} placeholder="seu@email.com" />
-            <Input label="Senha" type="password" value={password} onChange={e => { setPassword(e.target.value); clearErr() }} placeholder="Mínimo 6 caracteres" />
-            <Input label="Confirmar senha" type="password" value={confirm} onChange={e => { setConfirm(e.target.value); clearErr() }} placeholder="Repita a senha" />
-            <Btn type="submit" variant="primary">Criar conta</Btn>
+        <Back onClick={()=>go('main')}/>
+        <p style={{fontSize:17, fontWeight:800}}>Criar conta</p>
+        <ErrBox msg={e}/><OkBox msg={ok}/>
+        {!ok && (
+          <form onSubmit={register} style={{display:'flex', flexDirection:'column', gap:12}}>
+            <Input label="Seu nome" value={name} onChange={ev=>{setName(ev.target.value);clear()}} placeholder="Como quer ser chamado?"/>
+            <Input label="E-mail" type="email" value={em} onChange={ev=>{setEm(ev.target.value);clear()}} placeholder="seu@email.com"/>
+            <Input label="Senha" type="password" value={pw} onChange={ev=>{setPw(ev.target.value);clear()}} placeholder="Mínimo 6 caracteres"/>
+            <Input label="Confirmar senha" type="password" value={pw2} onChange={ev=>{setPw2(ev.target.value);clear()}} placeholder="Repita a senha"/>
+            <Btn type="submit" variant="primary" busy={busy}>Criar conta</Btn>
           </form>
         )}
-        {success && <Btn onClick={() => goTab('email-login')} variant="secondary">Ir para o login</Btn>}
-        <button onClick={() => goTab('email-login')} type="button"
-          style={{ background:'none', border:'none', color:C.muted, cursor:'pointer',
-            fontSize:12, fontFamily:"'Plus Jakarta Sans',sans-serif", textDecoration:'underline', padding:'2px 0' }}>
-          Já tem conta? Entrar
-        </button>
+        {ok && <Btn onClick={()=>go('login')} variant="google">Ir para o login</Btn>}
+        <TextLink onClick={()=>go('login')}>Já tem conta? Entrar</TextLink>
       </Card>
-      <style>{`@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.7}}`}</style>
     </Wrap>
   )
 
-  if (tab === 'reset') return (
+  /* ── reset ── */
+  if (tab==='reset') return (
     <Wrap>
-      <RuLogo />
+      <Logo/>
       <Card>
-        <BackBtn to="email-login" />
-        <div style={{ fontSize:16, fontWeight:700, color:C.text }}>Recuperar senha</div>
-        <div style={{ fontSize:13, color:C.muted, lineHeight:1.7 }}>
-          Informe seu e-mail e enviaremos um link para redefinir sua senha.
-        </div>
-        <ErrBox msg={err} /><SuccessBox msg={success} />
-        {!success && (
-          <form onSubmit={handleReset} style={{ display:'flex', flexDirection:'column', gap:14 }}>
-            <Input label="E-mail" type="email" value={email} onChange={e => { setEmail(e.target.value); clearErr() }} placeholder="seu@email.com" />
-            <Btn type="submit" variant="primary">Enviar link</Btn>
+        <Back onClick={()=>go('login')}/>
+        <p style={{fontSize:17, fontWeight:800}}>Recuperar senha</p>
+        <p style={{fontSize:13, color:T.muted, lineHeight:1.7}}>Enviaremos um link para redefinir sua senha.</p>
+        <ErrBox msg={e}/><OkBox msg={ok}/>
+        {!ok && (
+          <form onSubmit={reset} style={{display:'flex', flexDirection:'column', gap:12}}>
+            <Input label="E-mail" type="email" value={em} onChange={ev=>{setEm(ev.target.value);clear()}} placeholder="seu@email.com"/>
+            <Btn type="submit" variant="primary" busy={busy}>Enviar link</Btn>
           </form>
         )}
-        {success && <Btn onClick={() => goTab('email-login')} variant="secondary">Voltar para o login</Btn>}
+        {ok && <Btn onClick={()=>go('login')} variant="google">Voltar para o login</Btn>}
       </Card>
-      <style>{`@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.7}}`}</style>
     </Wrap>
   )
-
   return null
 }
 
-function Wrap({ children }) {
-  return (
-    <div style={{
-      position:'fixed', inset:0, background:'#0b1410',
-      display:'flex', flexDirection:'column', alignItems:'center',
-      justifyContent:'center', fontFamily:"'Plus Jakarta Sans',sans-serif",
-      gap:22, padding:'24px 16px', overflowY:'auto', position:'relative',
-    }}>{children}</div>
-  )
-}
-
-function GoogleIcon() {
+function GoogleSVG() {
   return (
     <svg width="18" height="18" viewBox="0 0 48 48">
       <path fill="#FFC107" d="M43.6 20H24v8h11.3C33.7 32.8 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.7 1.1 7.8 2.9l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 19.7-8 19.7-20 0-1.3-.1-2.7-.1-4z"/>

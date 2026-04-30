@@ -6,17 +6,17 @@ import { EVENT_META } from '../lib/constants'
 
 const C = {
   bg:      '#0d0d15',
-  surface: '#12121a',
-  s2:      '#1a1a26',
+  surface: 'var(--surface)',
+  s2:      'var(--surface2)',
   border:  '#1e1e30',
-  border2: '#2a2a3d',
-  red:     '#ff2d55',
+  border2: 'var(--border)',
+  red:     'var(--red)',
   green:   '#00ff88',
   yellow:  '#ffcc00',
   blue:    '#4d9fff',
-  muted:   '#6666aa',
+  muted:   'var(--muted)',
   dim:     '#3a3a5a',
-  text:    '#f0f0ff',
+  text:    'var(--text)',
 }
 
 const STATUS_COLORS = {
@@ -187,7 +187,7 @@ export default function AdminPanel({ open, onClose, adminUid }) {
         transform: open ? 'translateY(0)' : 'translateY(100%)',
         transition:'transform .35s cubic-bezier(.4,0,.2,1)',
         display:'flex', flexDirection:'column',
-        fontFamily:"'Syne',sans-serif",
+        fontFamily:"'Inter',sans-serif",
       }}>
         {/* Header */}
         <div style={{
@@ -225,7 +225,7 @@ export default function AdminPanel({ open, onClose, adminUid }) {
                 flex:1, padding:'10px 4px', border:'none', minWidth:0,
                 borderBottom: mainTab===t.id ? `2px solid ${t.color}` : '2px solid transparent',
                 background:'transparent', cursor:'pointer',
-                fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:12,
+                fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:12,
                 color: mainTab===t.id ? t.color : '#4a4a6a',
                 transition:'all .2s', whiteSpace:'nowrap',
               }}>
@@ -260,7 +260,7 @@ export default function AdminPanel({ open, onClose, adminUid }) {
                     background: reportFilter===f.id ? 'rgba(255,45,85,.15)' : C.s2,
                     border:`1px solid ${reportFilter===f.id ? C.red : C.border2}`,
                     color: reportFilter===f.id ? C.red : C.muted,
-                    fontFamily:"'Syne',sans-serif", fontWeight:600, fontSize:11, cursor:'pointer',
+                    fontFamily:"'Inter',sans-serif", fontWeight:600, fontSize:11, cursor:'pointer',
                   }}>{f.label}</button>
                 ))}
                 <div style={{ marginLeft:'auto', fontSize:11, color: C.dim, alignSelf:'center' }}>
@@ -332,7 +332,7 @@ export default function AdminPanel({ open, onClose, adminUid }) {
                     background: modTab===t.id ? `${t.color}18` : C.s2,
                     border:`1px solid ${modTab===t.id ? t.color : C.border2}`,
                     color: modTab===t.id ? t.color : '#4a4a6a',
-                    fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer',
+                    fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer',
                     transition:'all .2s',
                   }}>
                     {t.label}{t.count > 0 && <span style={{ marginLeft:4, fontSize:10, opacity:.8 }}>({t.count})</span>}
@@ -524,7 +524,7 @@ function MiniTag({ label, color }) {
 function ResetCard({ icon, title, desc, color, busy, onClick, danger }) {
   return (
     <div style={{
-      background: danger ? 'rgba(255,45,85,.04)' : '#12121a',
+      background: danger ? 'rgba(255,45,85,.04)' : 'var(--surface)',
       border:`1px solid ${danger ? 'rgba(255,45,85,.2)' : '#1e1e30'}`,
       borderRadius:14, padding:'16px',
       display:'flex', alignItems:'center', gap:14,
@@ -535,8 +535,8 @@ function ResetCard({ icon, title, desc, color, busy, onClick, danger }) {
         display:'flex', alignItems:'center', justifyContent:'center', fontSize:20,
       }}>{icon}</div>
       <div style={{ flex:1 }}>
-        <div style={{ fontSize:13, fontWeight:700, color: danger ? '#ff2d55' : '#f0f0ff', marginBottom:3 }}>{title}</div>
-        <div style={{ fontSize:11, color:'#6666aa', lineHeight:1.5 }}>{desc}</div>
+        <div style={{ fontSize:13, fontWeight:700, color: danger ? 'var(--red)' : 'var(--text)', marginBottom:3 }}>{title}</div>
+        <div style={{ fontSize:11, color:'var(--muted)', lineHeight:1.5 }}>{desc}</div>
       </div>
       <button
         onClick={onClick}
@@ -545,7 +545,7 @@ function ResetCard({ icon, title, desc, color, busy, onClick, danger }) {
           flexShrink:0, padding:'8px 14px', borderRadius:10,
           background:`${color}18`, border:`1px solid ${color}44`,
           color, cursor: busy ? 'wait' : 'pointer',
-          fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:12,
+          fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:12,
           opacity: busy ? .5 : 1, transition:'all .15s',
         }}
       >
@@ -562,7 +562,7 @@ function PlaceCard({ place, tab, busy, onApprove, onReject, onDelete, onRestore 
 
   return (
     <div style={{
-      background:'#12121a', border:'1px solid #1e1e30',
+      background:'var(--surface)', border:'1px solid #1e1e30',
       borderRadius:16, padding:'16px',
       opacity: busy ? 0.6 : 1, transition:'opacity .2s',
     }}>
@@ -586,9 +586,9 @@ function PlaceCard({ place, tab, busy, onApprove, onReject, onDelete, onRestore 
       </div>
 
       <div style={{ display:'flex', gap:8 }}>
-        {tab === 'pending'  && <><ActionBtn color="#00ff88" bg="rgba(0,255,136,.12)" label="✅ Aprovar"  onClick={onApprove} disabled={busy} /><ActionBtn color="#ff2d55" bg="rgba(255,45,85,.12)" label="❌ Rejeitar" onClick={onReject} disabled={busy} /></>}
-        {tab === 'approved' && <><ActionBtn color="#ff6b35" bg="rgba(255,107,53,.12)" label="↩️ Rever"  onClick={onRestore} disabled={busy} /><ActionBtn color="#ff2d55" bg="rgba(255,45,85,.08)" label="🗑️ Remover" onClick={onDelete} disabled={busy} /></>}
-        {tab === 'rejected' && <><ActionBtn color="#00ff88" bg="rgba(0,255,136,.08)" label="↩️ Reabrir" onClick={onRestore} disabled={busy} /><ActionBtn color="#ff2d55" bg="rgba(255,45,85,.08)" label="🗑️ Remover" onClick={onDelete} disabled={busy} /></>}
+        {tab === 'pending'  && <><ActionBtn color="#00ff88" bg="rgba(0,255,136,.12)" label="✅ Aprovar"  onClick={onApprove} disabled={busy} /><ActionBtn color="var(--red)" bg="rgba(255,45,85,.12)" label="❌ Rejeitar" onClick={onReject} disabled={busy} /></>}
+        {tab === 'approved' && <><ActionBtn color="#ff6b35" bg="rgba(255,107,53,.12)" label="↩️ Rever"  onClick={onRestore} disabled={busy} /><ActionBtn color="var(--red)" bg="rgba(255,45,85,.08)" label="🗑️ Remover" onClick={onDelete} disabled={busy} /></>}
+        {tab === 'rejected' && <><ActionBtn color="#00ff88" bg="rgba(0,255,136,.08)" label="↩️ Reabrir" onClick={onRestore} disabled={busy} /><ActionBtn color="var(--red)" bg="rgba(255,45,85,.08)" label="🗑️ Remover" onClick={onDelete} disabled={busy} /></>}
       </div>
     </div>
   )
@@ -597,10 +597,10 @@ function PlaceCard({ place, tab, busy, onApprove, onReject, onDelete, onRestore 
 function Tag({ icon, label, mono }) {
   return (
     <span style={{
-      background:'#1a1a26', border:'1px solid #2a2a3d',
+      background:'var(--surface2)', border:'1px solid var(--border)',
       borderRadius:20, padding:'3px 10px',
-      fontSize:11, color:'#6666aa',
-      fontFamily: mono ? "'Space Mono',monospace" : "'Syne',sans-serif",
+      fontSize:11, color:'var(--muted)',
+      fontFamily: mono ? "'Space Mono',monospace" : "'Inter',sans-serif",
     }}>
       {icon} {label}
     </span>
@@ -612,7 +612,7 @@ function ActionBtn({ color, bg, label, onClick, disabled }) {
     <button onClick={onClick} disabled={disabled} style={{
       flex:1, padding:'10px 8px', borderRadius:10, border:`1px solid ${color}44`,
       background:bg, color, cursor:disabled ? 'wait' : 'pointer',
-      fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:12,
+      fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:12,
       transition:'all .15s', opacity:disabled ? .5 : 1,
     }}
       onMouseDown={e  => !disabled && (e.currentTarget.style.transform='scale(.97)')}

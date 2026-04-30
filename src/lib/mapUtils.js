@@ -100,7 +100,7 @@ export function buildMarkerIcon(loc, events, usersMap = {}) {
   // Label FOMO
   const showFomo = (heat === 'hot' || heat === 'mid') && domType !== 'morto'
   const fomoLabel = showFomo
-    ? `<div style="position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:${color};color:#fff;font-size:9px;font-weight:800;font-family:'Syne',sans-serif;padding:3px 8px;border-radius:20px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.4);letter-spacing:.03em;pointer-events:none;">${status.label}</div>`
+    ? `<div style="position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:${color};color:#fff;font-size:9px;font-weight:800;font-family:'Inter',sans-serif;padding:3px 8px;border-radius:20px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.4);letter-spacing:.03em;pointer-events:none;">${status.label}</div>`
     : ''
 
   // Anel pulsante
@@ -115,7 +115,7 @@ export function buildMarkerIcon(loc, events, usersMap = {}) {
       ? buildEmojiPin(loc.iconEmoji, loc.cat)
       : buildInactiveSvg(loc.cat)
     const nameLabel = loc.name
-      ? `<div class="marker-name-label" style="position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);background:rgba(10,10,15,.85);color:#f0f0ff;font-size:10px;font-weight:700;font-family:'Syne',sans-serif;padding:3px 8px;border-radius:20px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.5);pointer-events:none;border:1px solid rgba(255,255,255,.08);">${loc.name}</div>`
+      ? `<div class="marker-name-label" style="position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);background:rgba(10,10,15,.85);color:#f0f0ff;font-size:10px;font-weight:700;font-family:'Inter',sans-serif;padding:3px 8px;border-radius:20px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.5);pointer-events:none;border:1px solid rgba(255,255,255,.08);">${loc.name}</div>`
       : ''
     return L.divIcon({
       html: `<div style="position:relative;width:34px;height:44px;">${nameLabel}${fomoLabel}${svgPin}${badge}</div>`,

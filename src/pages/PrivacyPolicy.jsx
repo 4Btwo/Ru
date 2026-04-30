@@ -17,7 +17,7 @@ const S = {
   back: {
     display: 'inline-flex', alignItems: 'center', gap: 6,
     background: 'none', border: 'none', color: '#6666aa',
-    cursor: 'pointer', fontFamily: "'Syne',sans-serif",
+    cursor: 'pointer', fontFamily: "'Inter',sans-serif",
     fontSize: 13, marginBottom: 32, padding: 0,
   },
   logo: {
