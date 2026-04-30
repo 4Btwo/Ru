@@ -31,7 +31,7 @@ const MapView = forwardRef(function MapView(
 
     // Marcador do usuário
     const uIcon = L.divIcon({
-      html:`<div style="width:14px;height:14px;background:#4d9fff;border-radius:50%;border:3px solid #fff;box-shadow:0 0 14px #4d9fff"></div>`,
+      html:`<div style="width:14px;height:14px;background:#1db954;border-radius:50%;border:3px solid #fff;box-shadow:0 0 14px #1db954"></div>`,
       className:'', iconSize:[14,14], iconAnchor:[7,7],
     })
     L.marker([DEFAULT_LAT, DEFAULT_LNG], { icon: uIcon })

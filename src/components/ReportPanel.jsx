@@ -39,7 +39,7 @@ export default function ReportPanel({ open, location, onClose, onConfirm }) {
 
       <div style={{
         position:'fixed', bottom:0, left:0, right:0, zIndex:2000,
-        background:'#12121a', borderTop:'1px solid #2a2a3d',
+        background:'var(--surface)', borderTop:'1px solid #2a2a3d',
         borderRadius:'20px 20px 0 0', padding:'0 16px 36px',
         transform: open ? 'translateY(0)' : 'translateY(100%)',
         transition:'transform .35s cubic-bezier(.4,0,.2,1)',
@@ -49,7 +49,7 @@ export default function ReportPanel({ open, location, onClose, onConfirm }) {
         {location && (
           <div style={{
             display:'flex', alignItems:'center', gap:10,
-            background:'#1a1a26', border:'1px solid #2a2a3d',
+            background:'var(--surface2)', border:'1px solid var(--border)',
             borderRadius:12, padding:'10px 14px', marginBottom:20,
           }}>
             <span style={{ fontSize:20 }}>
@@ -57,7 +57,7 @@ export default function ReportPanel({ open, location, onClose, onConfirm }) {
             </span>
             <div>
               <div style={{ fontSize:13, fontWeight:700 }}>{location.name}</div>
-              <div style={{ fontSize:11, color:'#6666aa', marginTop:1 }}>
+              <div style={{ fontSize:11, color:'var(--muted)', marginTop:1 }}>
                 Reportando neste local
               </div>
             </div>
@@ -65,13 +65,13 @@ export default function ReportPanel({ open, location, onClose, onConfirm }) {
         )}
 
         <p style={{ fontSize:16, fontWeight:800, marginBottom:4 }}>O que está rolando?</p>
-        <p style={{ fontSize:12, color:'#6666aa', marginBottom:20 }}>
+        <p style={{ fontSize:12, color:'var(--muted)', marginBottom:20 }}>
           Selecione e confirme em 1 toque
         </p>
 
         {showNight && (
           <>
-            <p style={{ fontSize:10, textTransform:'uppercase', letterSpacing:'.12em', color:'#6666aa', marginBottom:10 }}>🌙 Vida Noturna</p>
+            <p style={{ fontSize:10, textTransform:'uppercase', letterSpacing:'.12em', color:'var(--muted)', marginBottom:10 }}>🌙 Vida Noturna</p>
             <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8, marginBottom:20 }}>
               {nightBtns.map(b => (
                 <Btn key={b.type} {...b} active={selected === b.type}
@@ -83,7 +83,7 @@ export default function ReportPanel({ open, location, onClose, onConfirm }) {
 
         {showTransit && (
           <>
-            <p style={{ fontSize:10, textTransform:'uppercase', letterSpacing:'.12em', color:'#6666aa', marginBottom:10 }}>🚦 Trânsito</p>
+            <p style={{ fontSize:10, textTransform:'uppercase', letterSpacing:'.12em', color:'var(--muted)', marginBottom:10 }}>🚦 Trânsito</p>
             <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8, marginBottom:8 }}>
               {transitBtns.filter(b => b.type !== 'blitz').map(b => (
                 <Btn key={b.type} {...b} active={selected === b.type}

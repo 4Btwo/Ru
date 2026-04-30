@@ -1,57 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+
 :root {
-  --bg: #0a0a0f; --surface: #12121a; --surface2: #1a1a26;
-  --border: #2a2a3d; --red: #ff2d55; --yellow: #ffcc00;
-  --green: #00ff88; --blue: #4d9fff; --orange: #ff6b35;
-  --purple: #bf5fff; --text: #f0f0ff; --muted: #6666aa;
-  /* Safe area para iPhones com notch/Dynamic Island */
+  --bg:        #0b1410;
+  --bg2:       #0f1a14;
+  --surface:   #131f18;
+  --surface2:  #182419;
+  --surface3:  #1e2c20;
+  --border:    #243028;
+  --border2:   #2e3c32;
+  --green:     #1db954;
+  --green-dim: #14a347;
+  --green-glow:rgba(29,185,84,.18);
+  --green-glow2:rgba(29,185,84,.08);
+  --accent:    #00e676;
+  --red:       #ff3b5c;
+  --yellow:    #ffd60a;
+  --orange:    #ff6b35;
+  --blue:      #3d9eff;
+  --purple:    #c77dff;
+  --text:      #e8f5e9;
+  --text2:     #a5c8ab;
+  --muted:     #6a8a72;
+  --dim:       #3a5040;
   --sat: env(safe-area-inset-top, 0px);
   --sab: env(safe-area-inset-bottom, 0px);
-  --sal: env(safe-area-inset-left, 0px);
-  --sar: env(safe-area-inset-right, 0px);
 }
+
 * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
 html, body, #root { height:100%; overflow:hidden; }
-body {
-  font-family:'Syne',sans-serif; background:var(--bg); color:var(--text);
-  height:100dvh;
-  /* Previne scroll bounce no iOS */
-  overscroll-behavior:none;
-  -webkit-overflow-scrolling:touch;
-}
-/* Bottom bar fica acima da home indicator no iPhone */
-.safe-bottom { padding-bottom:calc(28px + var(--sab)); }
-.safe-top    { padding-top:calc(12px + var(--sat)); }
-::-webkit-scrollbar { display:none; }
-scrollbar-width: none;
 
-/* Touch: previne delay de 300ms no iOS antigo */
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100dvh;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.safe-bottom { padding-bottom: calc(28px + var(--sab)); }
+.safe-top    { padding-top: calc(12px + var(--sat)); }
+::-webkit-scrollbar { display: none; }
+scrollbar-width: none;
 button, a { touch-action: manipulation; }
 
-/* Leaflet dark */
-.leaflet-tile { filter:invert(1) hue-rotate(195deg) saturate(1.4) brightness(.8); }
-.leaflet-container { background:#0a0a0f !important; }
+/* Leaflet dark green theme */
+.leaflet-tile { filter: invert(1) hue-rotate(155deg) saturate(1.2) brightness(.72) contrast(1.1); }
+.leaflet-container { background: var(--bg) !important; }
 .leaflet-control-zoom, .leaflet-control-attribution { display:none !important; }
 
-/* Animação pulse do ring do marcador */
-@keyframes markerPulse {
-  0%   { transform:scale(1);   opacity:.7; }
-  50%  { transform:scale(1.6); opacity:.2; }
-  100% { transform:scale(1);   opacity:.7; }
+/* Chip filters */
+.chip {
+  flex-shrink: 0;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px;
+  border-radius: 100px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 12px; font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .2s;
+  white-space: nowrap;
+  font-family: 'Plus Jakarta Sans', sans-serif;
 }
-@keyframes pulse    { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.3);opacity:.7} }
-@keyframes fabPulse { 0%{box-shadow:0 0 0 0 rgba(255,45,85,.6)} 70%{box-shadow:0 0 0 18px rgba(255,45,85,0)} 100%{box-shadow:0 0 0 0 rgba(255,45,85,0)} }
-@keyframes toastIn  { from{opacity:0;transform:translateX(-50%) translateY(8px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
-@keyframes pointsIn { from{opacity:0;transform:translateY(-12px)} to{opacity:1;transform:translateY(0)} }
-@keyframes slideDown{ from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+.chip.active {
+  background: rgba(29,185,84,.15);
+  border-color: var(--green);
+  color: var(--green);
+}
 
-/* Nome do marcador — oculto por padrão, visível com zoom alto */
-.marker-name-label { opacity: 0; transition: opacity .2s; }
-.leaflet-zoom-animated.leaflet-zoom-anim .marker-name-label { opacity: 0; }
-.marker-with-name .marker-name-label { opacity: 0; }
+/* Animations */
+@keyframes pulse    { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.35);opacity:.65} }
+@keyframes fadeUp   { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+@keyframes slideDown{ from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+@keyframes toastIn  { from{opacity:0;transform:translateX(-50%) translateY(10px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+@keyframes pointsIn { 0%{opacity:0;transform:translateX(-50%) scale(.7)} 70%{transform:translateX(-50%) scale(1.08)} 100%{opacity:1;transform:translateX(-50%) scale(1)} }
+@keyframes markerPulse { 0%{transform:scale(1);opacity:.7} 50%{transform:scale(1.6);opacity:.2} 100%{transform:scale(1);opacity:.7} }
 
-/* Mostra o nome a partir do zoom 15 */
+/* Marker labels */
+.marker-name-label { opacity:0; transition:opacity .2s; }
 .leaflet-zoom-15 .marker-with-name .marker-name-label,
 .leaflet-zoom-16 .marker-with-name .marker-name-label,
 .leaflet-zoom-17 .marker-with-name .marker-name-label,
 .leaflet-zoom-18 .marker-with-name .marker-name-label,
-.leaflet-zoom-19 .marker-with-name .marker-name-label { opacity: 1; }
+.leaflet-zoom-19 .marker-with-name .marker-name-label { opacity:1; }

@@ -1,20 +1,27 @@
 import React, { useState } from 'react'
 
 const C = {
-  bg:       '#0a0a0f',
-  surface:  '#12121a',
-  surface2: '#1a1a26',
-  border:   '#2a2a3d',
-  red:      '#ff2d55',
-  green:    '#00ff88',
-  blue:     '#4d9fff',
-  text:     '#f0f0ff',
-  muted:    '#6666aa',
-  dim:      '#3a3a5a',
+  bg:      '#0b1410',
+  surface: '#131f18',
+  surf2:   '#182419',
+  border:  '#243028',
+  green:   '#1db954',
+  red:     '#ff3b5c',
+  text:    '#e8f5e9',
+  muted:   '#6a8a72',
+  dim:     '#3a5040',
+}
+
+function RuLogo() {
+  return (
+    <div style={{ display:'flex', alignItems:'center', gap:5 }}>
+      <div style={{ fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:900, fontSize:42, color:C.green, letterSpacing:'-.04em', lineHeight:1 }}>Ru</div>
+      <div style={{ width:11, height:11, borderRadius:'50%', background:C.green, boxShadow:`0 0 12px ${C.green}`, marginTop:-18 }}/>
+    </div>
+  )
 }
 
 export default function LoginScreen({ onLogin, loginWithEmail, registerWithEmail, resetPassword, authError, setAuthError }) {
-  // tab: 'main' | 'email-login' | 'email-register' | 'reset'
   const [tab,      setTab]      = useState('main')
   const [name,     setName]     = useState('')
   const [email,    setEmail]    = useState('')
@@ -26,17 +33,10 @@ export default function LoginScreen({ onLogin, loginWithEmail, registerWithEmail
   const [showPass, setShowPass] = useState(false)
 
   const err = localErr || authError
-
   const clearErr = () => { setLocalErr(null); setAuthError?.(null) }
-
   const goTab = (t) => { setTab(t); clearErr(); setSuccess(null) }
 
-  // ── Handlers ───────────────────────────────────────────────────────────────
-  const handleGoogle = async () => {
-    clearErr(); setBusy(true)
-    await onLogin()
-    setBusy(false)
-  }
+  const handleGoogle = async () => { clearErr(); setBusy(true); await onLogin(); setBusy(false) }
 
   const handleEmailLogin = async (e) => {
     e.preventDefault(); clearErr()
@@ -56,11 +56,8 @@ export default function LoginScreen({ onLogin, loginWithEmail, registerWithEmail
     setBusy(true)
     const res = await registerWithEmail?.(name.trim(), email, password)
     setBusy(false)
-    if (res?.ok) {
-      setSuccess('Conta criada! Verifique seu e-mail para confirmar.')
-    } else {
-      setLocalErr(res?.error)
-    }
+    if (res?.ok) setSuccess('Conta criada! Verifique seu e-mail para confirmar.')
+    else setLocalErr(res?.error)
   }
 
   const handleReset = async (e) => {
@@ -73,29 +70,27 @@ export default function LoginScreen({ onLogin, loginWithEmail, registerWithEmail
     else setLocalErr(res?.error)
   }
 
-  // ── Componentes locais ─────────────────────────────────────────────────────
-  const Input = ({ label, type = 'text', value, onChange, placeholder, extra }) => (
-    <div style={{ width: '100%' }}>
-      <label style={{ display:'block', fontSize:11, color:C.muted,
-        marginBottom:5, letterSpacing:'.06em', textTransform:'uppercase' }}>
+  const Input = ({ label, type='text', value, onChange, placeholder, extra }) => (
+    <div style={{ width:'100%' }}>
+      <label style={{ display:'block', fontSize:11, color:C.muted, marginBottom:5, letterSpacing:'.06em', textTransform:'uppercase' }}>
         {label}
       </label>
       <div style={{ position:'relative' }}>
         <input
-          type={type === 'password' && showPass ? 'text' : type}
-          value={value}
-          onChange={onChange}
-          placeholder={placeholder}
-          autoComplete={type === 'password' ? 'current-password' : type === 'email' ? 'email' : 'name'}
+          type={type==='password' && showPass ? 'text' : type}
+          value={value} onChange={onChange} placeholder={placeholder}
+          autoComplete={type==='password' ? 'current-password' : type==='email' ? 'email' : 'name'}
           style={{
-            width:'100%', background:C.surface2, border:`1px solid ${C.border}`,
-            borderRadius:10, padding:'11px 14px', color:C.text,
-            fontFamily:"'Syne',sans-serif", fontSize:14, outline:'none',
-            boxSizing:'border-box',
-            paddingRight: type === 'password' ? 42 : 14,
+            width:'100%', background:C.surf2, border:`1px solid ${C.border}`,
+            borderRadius:12, padding:'12px 14px', color:C.text,
+            fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:14, outline:'none',
+            boxSizing:'border-box', paddingRight: type==='password' ? 44 : 14,
+            transition:'border-color .2s',
           }}
+          onFocus={e => e.target.style.borderColor = C.green}
+          onBlur={e => e.target.style.borderColor = C.border}
         />
-        {type === 'password' && (
+        {type==='password' && (
           <button onClick={() => setShowPass(p => !p)} type="button"
             style={{ position:'absolute', right:12, top:'50%', transform:'translateY(-50%)',
               background:'none', border:'none', cursor:'pointer', color:C.muted, fontSize:16, padding:0 }}>
@@ -107,42 +102,25 @@ export default function LoginScreen({ onLogin, loginWithEmail, registerWithEmail
     </div>
   )
 
-  const Btn = ({ children, onClick, type = 'button', variant = 'primary', disabled }) => {
+  const Btn = ({ children, onClick, type='button', variant='primary', disabled }) => {
     const styles = {
-      primary:   { background:C.red,     color:'#fff',  border:'none' },
-      secondary: { background:C.surface2, color:C.text, border:`1px solid ${C.border}` },
+      primary:   { background:C.green, color:'#0b1410', border:'none' },
+      secondary: { background:C.surf2, color:C.text, border:`1px solid ${C.border}` },
       ghost:     { background:'transparent', color:C.muted, border:'none' },
     }
     return (
       <button type={type} onClick={onClick} disabled={disabled || busy}
         style={{
           width:'100%', padding:'13px', borderRadius:12, cursor:'pointer',
-          fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:14,
-          transition:'opacity .15s, transform .1s',
-          opacity: (disabled || busy) ? .5 : 1,
+          fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:700, fontSize:14,
+          transition:'opacity .15s, transform .1s', opacity:(disabled||busy)?.5:1,
           ...styles[variant],
         }}
         onMouseEnter={e => e.currentTarget.style.opacity='.85'}
         onMouseLeave={e => e.currentTarget.style.opacity='1'}
-      >
-        {busy && variant === 'primary' ? '...' : children}
-      </button>
+      >{busy && variant==='primary' ? '...' : children}</button>
     )
   }
-
-  // ── Logo ───────────────────────────────────────────────────────────────────
-  const Logo = () => (
-    <div style={{ textAlign:'center', marginBottom:8 }}>
-      <div style={{
-        width:14, height:14, borderRadius:'50%', background:C.red,
-        boxShadow:`0 0 18px ${C.red}`, margin:'0 auto 12px',
-        animation:'pulse 1.4s ease infinite',
-      }}/>
-      <div style={{ fontSize:24, fontWeight:800, letterSpacing:'.14em',
-        textTransform:'uppercase', color:C.text }}>Urbyn</div>
-      <div style={{ fontSize:12, color:C.muted, marginTop:4 }}>Bauru ao vivo</div>
-    </div>
-  )
 
   const Card = ({ children }) => (
     <div style={{
@@ -150,25 +128,17 @@ export default function LoginScreen({ onLogin, loginWithEmail, registerWithEmail
       background:C.surface, border:`1px solid ${C.border}`,
       borderRadius:20, padding:'28px 24px',
       display:'flex', flexDirection:'column', gap:16,
-    }}>
-      {children}
-    </div>
+    }}>{children}</div>
   )
 
   const ErrBox = ({ msg }) => msg ? (
-    <div style={{
-      background:'rgba(255,45,85,.08)', border:`1px solid rgba(255,45,85,.3)`,
-      borderRadius:10, padding:'10px 14px',
-      fontSize:12, color:C.red, lineHeight:1.6,
-    }}>{msg}</div>
+    <div style={{ background:'rgba(255,59,92,.08)', border:'1px solid rgba(255,59,92,.3)',
+      borderRadius:10, padding:'10px 14px', fontSize:12, color:C.red, lineHeight:1.6 }}>{msg}</div>
   ) : null
 
   const SuccessBox = ({ msg }) => msg ? (
-    <div style={{
-      background:'rgba(0,255,136,.08)', border:`1px solid rgba(0,255,136,.3)`,
-      borderRadius:10, padding:'10px 14px',
-      fontSize:12, color:C.green, lineHeight:1.6,
-    }}>{msg}</div>
+    <div style={{ background:'rgba(29,185,84,.08)', border:'1px solid rgba(29,185,84,.3)',
+      borderRadius:10, padding:'10px 14px', fontSize:12, color:C.green, lineHeight:1.6 }}>{msg}</div>
   ) : null
 
   const Divider = () => (
@@ -182,28 +152,47 @@ export default function LoginScreen({ onLogin, loginWithEmail, registerWithEmail
   const BackBtn = ({ to }) => (
     <button onClick={() => goTab(to)} type="button"
       style={{ background:'none', border:'none', color:C.muted, cursor:'pointer',
-        fontSize:12, padding:'4px 0', textAlign:'left', fontFamily:"'Syne',sans-serif" }}>
+        fontSize:12, padding:'4px 0', textAlign:'left', fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
       ← Voltar
     </button>
   )
 
-  // ── Tela principal (Google + botão email) ──────────────────────────────────
   if (tab === 'main') return (
-    <Wrapper>
-      <Logo />
-      <p style={{ color:C.muted, fontSize:13, textAlign:'center', maxWidth:240, lineHeight:1.8, margin:'0 auto' }}>
-        Veja e reporte o que está<br/>acontecendo na cidade agora.
-      </p>
+    <Wrap>
+      {/* Decorative glow */}
+      <div style={{
+        position:'absolute', top:'-20%', left:'50%', transform:'translateX(-50%)',
+        width:300, height:300, borderRadius:'50%',
+        background:'radial-gradient(circle, rgba(29,185,84,.12) 0%, transparent 70%)',
+        pointerEvents:'none',
+      }}/>
+
+      <RuLogo />
+      <div style={{ textAlign:'center' }}>
+        <div style={{ fontSize:26, fontWeight:900, color:C.text, lineHeight:1.2, marginBottom:8 }}>
+          Sua cidade.<br/><span style={{ color:C.green }}>Do seu jeito.</span>
+        </div>
+        <p style={{ color:C.muted, fontSize:13, lineHeight:1.8 }}>
+          Descubra, avalie e compartilhe os<br/>melhores lugares da sua cidade.
+        </p>
+      </div>
+
+      {/* Feature pills */}
+      <div style={{ display:'flex', gap:8, flexWrap:'wrap', justifyContent:'center', maxWidth:320 }}>
+        {['🔍 Descubra lugares', '👥 Conecte-se', '⭐ Avalie e compartilhe'].map(f => (
+          <div key={f} style={{
+            background:'rgba(29,185,84,.08)', border:'1px solid rgba(29,185,84,.2)',
+            borderRadius:100, padding:'6px 14px', fontSize:12, color:C.green, fontWeight:600,
+          }}>{f}</div>
+        ))}
+      </div>
 
       {authError === 'unauthorized-domain' && (
-        <div style={{ width:'100%', maxWidth:360,
-          background:'rgba(255,45,85,.08)', border:`1px solid rgba(255,45,85,.35)`,
-          borderRadius:14, padding:16 }}>
-          <div style={{ fontSize:13, fontWeight:800, color:C.red, marginBottom:8 }}>
-            ⚠️ Domínio não autorizado no Firebase
-          </div>
+        <div style={{ width:'100%', maxWidth:360, background:'rgba(255,59,92,.08)',
+          border:'1px solid rgba(255,59,92,.35)', borderRadius:14, padding:16 }}>
+          <div style={{ fontSize:13, fontWeight:800, color:C.red, marginBottom:8 }}>⚠️ Domínio não autorizado</div>
           <div style={{ fontSize:11, color:'#aaaacc', lineHeight:1.7 }}>
-            Acesse Firebase Console → Authentication → Settings → Authorized domains → Add domain:
+            Firebase Console → Authentication → Authorized domains → Add:
           </div>
           <div style={{ background:C.bg, borderRadius:8, padding:'8px 12px',
             fontFamily:"'Space Mono',monospace", fontSize:11, color:C.green, margin:'8px 0' }}>
@@ -213,176 +202,121 @@ export default function LoginScreen({ onLogin, loginWithEmail, registerWithEmail
       )}
 
       <Card>
-        <Btn onClick={handleGoogle} variant="secondary">
+        <Btn onClick={handleGoogle} variant="primary">
           <span style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:10 }}>
-            <GoogleIcon /> Entrar com Google
+            <GoogleIcon /> Continuar com Google
           </span>
         </Btn>
-
         <Divider />
-
-        <Btn onClick={() => goTab('email-login')} variant="secondary">
-          ✉️ &nbsp;Entrar com E-mail
-        </Btn>
-
+        <Btn onClick={() => goTab('email-login')} variant="secondary">✉️ &nbsp;Entrar com E-mail</Btn>
         <button onClick={() => goTab('email-register')} type="button"
           style={{ background:'none', border:'none', color:C.muted, cursor:'pointer',
-            fontSize:12, fontFamily:"'Syne',sans-serif",
-            textDecoration:'underline', padding:'2px 0' }}>
+            fontSize:12, fontFamily:"'Plus Jakarta Sans',sans-serif", textDecoration:'underline', padding:'2px 0' }}>
           Não tem conta? Criar conta
         </button>
       </Card>
 
-      <div style={{ fontSize:11, color:C.dim, textAlign:'center', maxWidth:260, lineHeight:1.6 }}>
-        Nenhuma senha é armazenada aqui.<br/>
+      <div style={{ fontSize:11, color:C.dim, textAlign:'center', lineHeight:1.6 }}>
         <a href="/privacy" style={{ color:C.muted }}>Política de Privacidade</a>
       </div>
-
       <style>{`@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.7}}`}</style>
-    </Wrapper>
+    </Wrap>
   )
 
-  // ── Login com e-mail ───────────────────────────────────────────────────────
   if (tab === 'email-login') return (
-    <Wrapper>
-      <Logo />
+    <Wrap>
+      <RuLogo />
       <Card>
         <BackBtn to="main" />
-        <div style={{ fontSize:16, fontWeight:700, color:C.text }}>Entrar com e-mail</div>
-
-        <ErrBox msg={err} />
-        <SuccessBox msg={success} />
-
+        <div style={{ fontSize:16, fontWeight:700, color:C.text }}>Bem-vindo de volta! 👋</div>
+        <ErrBox msg={err} /><SuccessBox msg={success} />
         <form onSubmit={handleEmailLogin} style={{ display:'flex', flexDirection:'column', gap:14 }}>
-          <Input label="E-mail" type="email" value={email}
-            onChange={e => { setEmail(e.target.value); clearErr() }}
-            placeholder="seu@email.com" />
-          <Input label="Senha" type="password" value={password}
-            onChange={e => { setPassword(e.target.value); clearErr() }}
-            placeholder="••••••••"
-            extra={
-              <button onClick={() => goTab('reset')} type="button"
-                style={{ background:'none', border:'none', color:C.muted, cursor:'pointer',
-                  fontSize:11, padding:'4px 0', textAlign:'right', width:'100%',
-                  fontFamily:"'Syne',sans-serif", textDecoration:'underline', marginTop:4 }}>
-                Esqueci minha senha
-              </button>
-            }
+          <Input label="E-mail" type="email" value={email} onChange={e => { setEmail(e.target.value); clearErr() }} placeholder="seu@email.com" />
+          <Input label="Senha" type="password" value={password} onChange={e => { setPassword(e.target.value); clearErr() }} placeholder="••••••••"
+            extra={<button onClick={() => goTab('reset')} type="button"
+              style={{ background:'none', border:'none', color:C.muted, cursor:'pointer',
+                fontSize:11, padding:'4px 0', textAlign:'right', width:'100%',
+                fontFamily:"'Plus Jakarta Sans',sans-serif", textDecoration:'underline', marginTop:4 }}>
+              Esqueci minha senha</button>}
           />
           <Btn type="submit" variant="primary">Entrar</Btn>
         </form>
-
         <Divider />
         <Btn onClick={handleGoogle} variant="secondary">
           <span style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:10 }}>
             <GoogleIcon /> Continuar com Google
           </span>
         </Btn>
-
         <button onClick={() => goTab('email-register')} type="button"
           style={{ background:'none', border:'none', color:C.muted, cursor:'pointer',
-            fontSize:12, fontFamily:"'Syne',sans-serif",
-            textDecoration:'underline', padding:'2px 0' }}>
+            fontSize:12, fontFamily:"'Plus Jakarta Sans',sans-serif", textDecoration:'underline', padding:'2px 0' }}>
           Não tem conta? Criar conta
         </button>
       </Card>
       <style>{`@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.7}}`}</style>
-    </Wrapper>
+    </Wrap>
   )
 
-  // ── Criar conta ────────────────────────────────────────────────────────────
   if (tab === 'email-register') return (
-    <Wrapper>
-      <Logo />
+    <Wrap>
+      <RuLogo />
       <Card>
         <BackBtn to="main" />
         <div style={{ fontSize:16, fontWeight:700, color:C.text }}>Criar conta</div>
-
-        <ErrBox msg={err} />
-        <SuccessBox msg={success} />
-
+        <ErrBox msg={err} /><SuccessBox msg={success} />
         {!success && (
           <form onSubmit={handleRegister} style={{ display:'flex', flexDirection:'column', gap:14 }}>
-            <Input label="Seu nome" type="text" value={name}
-              onChange={e => { setName(e.target.value); clearErr() }}
-              placeholder="Como quer ser chamado?" />
-            <Input label="E-mail" type="email" value={email}
-              onChange={e => { setEmail(e.target.value); clearErr() }}
-              placeholder="seu@email.com" />
-            <Input label="Senha" type="password" value={password}
-              onChange={e => { setPassword(e.target.value); clearErr() }}
-              placeholder="Mínimo 6 caracteres" />
-            <Input label="Confirmar senha" type="password" value={confirm}
-              onChange={e => { setConfirm(e.target.value); clearErr() }}
-              placeholder="Repita a senha" />
+            <Input label="Seu nome" type="text" value={name} onChange={e => { setName(e.target.value); clearErr() }} placeholder="Como quer ser chamado?" />
+            <Input label="E-mail" type="email" value={email} onChange={e => { setEmail(e.target.value); clearErr() }} placeholder="seu@email.com" />
+            <Input label="Senha" type="password" value={password} onChange={e => { setPassword(e.target.value); clearErr() }} placeholder="Mínimo 6 caracteres" />
+            <Input label="Confirmar senha" type="password" value={confirm} onChange={e => { setConfirm(e.target.value); clearErr() }} placeholder="Repita a senha" />
             <Btn type="submit" variant="primary">Criar conta</Btn>
           </form>
         )}
-
-        {success && (
-          <Btn onClick={() => goTab('email-login')} variant="secondary">
-            Ir para o login
-          </Btn>
-        )}
-
+        {success && <Btn onClick={() => goTab('email-login')} variant="secondary">Ir para o login</Btn>}
         <button onClick={() => goTab('email-login')} type="button"
           style={{ background:'none', border:'none', color:C.muted, cursor:'pointer',
-            fontSize:12, fontFamily:"'Syne',sans-serif",
-            textDecoration:'underline', padding:'2px 0' }}>
+            fontSize:12, fontFamily:"'Plus Jakarta Sans',sans-serif", textDecoration:'underline', padding:'2px 0' }}>
           Já tem conta? Entrar
         </button>
       </Card>
       <style>{`@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.7}}`}</style>
-    </Wrapper>
+    </Wrap>
   )
 
-  // ── Recuperar senha ────────────────────────────────────────────────────────
   if (tab === 'reset') return (
-    <Wrapper>
-      <Logo />
+    <Wrap>
+      <RuLogo />
       <Card>
         <BackBtn to="email-login" />
         <div style={{ fontSize:16, fontWeight:700, color:C.text }}>Recuperar senha</div>
         <div style={{ fontSize:13, color:C.muted, lineHeight:1.7 }}>
           Informe seu e-mail e enviaremos um link para redefinir sua senha.
         </div>
-
-        <ErrBox msg={err} />
-        <SuccessBox msg={success} />
-
+        <ErrBox msg={err} /><SuccessBox msg={success} />
         {!success && (
           <form onSubmit={handleReset} style={{ display:'flex', flexDirection:'column', gap:14 }}>
-            <Input label="E-mail" type="email" value={email}
-              onChange={e => { setEmail(e.target.value); clearErr() }}
-              placeholder="seu@email.com" />
+            <Input label="E-mail" type="email" value={email} onChange={e => { setEmail(e.target.value); clearErr() }} placeholder="seu@email.com" />
             <Btn type="submit" variant="primary">Enviar link</Btn>
           </form>
         )}
-
-        {success && (
-          <Btn onClick={() => goTab('email-login')} variant="secondary">
-            Voltar para o login
-          </Btn>
-        )}
+        {success && <Btn onClick={() => goTab('email-login')} variant="secondary">Voltar para o login</Btn>}
       </Card>
       <style>{`@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.7}}`}</style>
-    </Wrapper>
+    </Wrap>
   )
 
   return null
 }
 
-// ── Layout wrapper ─────────────────────────────────────────────────────────────
-function Wrapper({ children }) {
+function Wrap({ children }) {
   return (
     <div style={{
-      position:'fixed', inset:0, background:'#0a0a0f',
+      position:'fixed', inset:0, background:'#0b1410',
       display:'flex', flexDirection:'column', alignItems:'center',
-      justifyContent:'center', fontFamily:"'Syne',sans-serif", gap:20,
-      padding:'24px 16px', overflowY:'auto',
-    }}>
-      {children}
-    </div>
+      justifyContent:'center', fontFamily:"'Plus Jakarta Sans',sans-serif",
+      gap:22, padding:'24px 16px', overflowY:'auto', position:'relative',
+    }}>{children}</div>
   )
 }
 

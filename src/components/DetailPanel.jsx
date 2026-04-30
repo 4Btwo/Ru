@@ -11,7 +11,7 @@ import ChatPanel from './ChatPanel'
 
 function occupancyColor(p) {
   if (p === null || p === undefined) return null
-  if (p >= 90) return { color:'#ff2d55', label:`🚨 Lotado (${p}%)`,  bg:'rgba(255,45,85,.12)'  }
+  if (p >= 90) return { color:'var(--red)', label:`🚨 Lotado (${p}%)`,  bg:'rgba(255,45,85,.12)'  }
   if (p >= 60) return { color:'#ffcc00', label:`⚡ Quase cheio (${p}%)`, bg:'rgba(255,204,0,.1)' }
   return              { color:'#00ff88', label:`✅ Tem espaço (${p}%)`, bg:'rgba(0,255,136,.08)' }
 }
@@ -20,7 +20,7 @@ function occupancyColor(p) {
 function HistBar({ pct, color, highlight }) {
   return (
     <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:4 }}>
-      <div style={{ width:'100%', height:40, background:'#1a1a26', borderRadius:6,
+      <div style={{ width:'100%', height:40, background:'var(--surface2)', borderRadius:6,
         display:'flex', alignItems:'flex-end', overflow:'hidden',
         border: highlight ? `1px solid ${color}` : '1px solid #2a2a3d' }}>
         <div style={{
@@ -88,13 +88,13 @@ export default function DetailPanel({ location, events, usersMap, user, onClose,
 
       <div style={{
         position:'fixed', bottom:0, left:0, right:0, zIndex:2000,
-        background:'#12121a', borderTop:'1px solid #2a2a3d',
+        background:'var(--surface)', borderTop:'1px solid #2a2a3d',
         borderRadius:'20px 20px 0 0', padding:'0 16px 36px',
         maxHeight:'85vh', overflowY:'auto',
         transform: open ? 'translateY(0)' : 'translateY(100%)',
         transition:'transform .35s cubic-bezier(.4,0,.2,1)',
       }}>
-        <div style={{ width:40, height:4, background:'#2a2a3d', borderRadius:2, margin:'12px auto 18px' }}/>
+        <div style={{ width:40, height:4, background:'var(--border)', borderRadius:2, margin:'12px auto 18px' }}/>
 
         {/* Header */}
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:12 }}>
@@ -124,8 +124,8 @@ export default function DetailPanel({ location, events, usersMap, user, onClose,
             </div>
           </div>
           <button onClick={onClose} style={{
-            width:32, height:32, borderRadius:'50%', background:'#1a1a26',
-            border:'1px solid #2a2a3d', cursor:'pointer', color:'#6666aa',
+            width:32, height:32, borderRadius:'50%', background:'var(--surface2)',
+            border:'1px solid var(--border)', cursor:'pointer', color:'var(--muted)',
             fontSize:14, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0,
           }}>✕</button>
         </div>
@@ -166,7 +166,7 @@ export default function DetailPanel({ location, events, usersMap, user, onClose,
           }}>
             <div style={{ flex:1 }}>
               <div style={{ fontSize:13, fontWeight:700, color: occCfg.color }}>{occCfg.label}</div>
-              <div style={{ background:'#2a2a3d', borderRadius:10, height:6, marginTop:6, overflow:'hidden' }}>
+              <div style={{ background:'var(--border)', borderRadius:10, height:6, marginTop:6, overflow:'hidden' }}>
                 <div style={{ height:'100%', borderRadius:10, background: occCfg.color,
                   width:`${occ}%`, transition:'width .4s' }}/>
               </div>
@@ -179,11 +179,11 @@ export default function DetailPanel({ location, events, usersMap, user, onClose,
         {/* DESCRIÇÃO DO DONO */}
         {location.description && (
           <div style={{
-            background:'#1a1a26', border:'1px solid #2a2a3d',
+            background:'var(--surface2)', border:'1px solid var(--border)',
             borderRadius:12, padding:'12px 14px', marginBottom:12,
           }}>
             <div style={{ fontSize:10, textTransform:'uppercase', letterSpacing:'.1em',
-              color:'#6666aa', marginBottom:6 }}>📝 Sobre o local</div>
+              color:'var(--muted)', marginBottom:6 }}>📝 Sobre o local</div>
             <div style={{ fontSize:13, color:'#c0c0e0', lineHeight:1.6 }}>
               {location.description}
             </div>
@@ -194,7 +194,7 @@ export default function DetailPanel({ location, events, usersMap, user, onClose,
         {(location.schedule || location.instagram || location.phone) && (
           <div style={{ display:'flex', flexWrap:'wrap', gap:8, marginBottom:12 }}>
             {location.schedule && (
-              <span style={{ background:'#1a1a26', border:'1px solid #2a2a3d',
+              <span style={{ background:'var(--surface2)', border:'1px solid var(--border)',
                 borderRadius:20, padding:'5px 12px', fontSize:12, color:'#a0a0cc' }}>
                 🕐 {location.schedule}
               </span>
@@ -202,7 +202,7 @@ export default function DetailPanel({ location, events, usersMap, user, onClose,
             {location.instagram && (
               <a href={`https://instagram.com/${location.instagram.replace('@','')}`}
                 target="_blank" rel="noopener" style={{
-                  background:'#1a1a26', border:'1px solid #bf5fff44',
+                  background:'var(--surface2)', border:'1px solid #bf5fff44',
                   borderRadius:20, padding:'5px 12px', fontSize:12, color:'#bf5fff',
                   textDecoration:'none',
                 }}>
@@ -212,7 +212,7 @@ export default function DetailPanel({ location, events, usersMap, user, onClose,
             {location.phone && (
               <a href={`https://wa.me/55${location.phone.replace(/\D/g,'')}`}
                 target="_blank" rel="noopener" style={{
-                  background:'#1a1a26', border:'1px solid #00ff8844',
+                  background:'var(--surface2)', border:'1px solid #00ff8844',
                   borderRadius:20, padding:'5px 12px', fontSize:12, color:'#00ff88',
                   textDecoration:'none',
                 }}>
@@ -234,15 +234,15 @@ export default function DetailPanel({ location, events, usersMap, user, onClose,
         <div style={{ display:'flex', gap:10, marginBottom:14 }}>
           {[
             { val: status.score.toFixed(1), label:'INTENSIDADE', color:status.color },
-            { val: actEvts.length,          label:'REPORTES',    color:'#f0f0ff' },
+            { val: actEvts.length,          label:'REPORTES',    color:'var(--text)' },
             { val: location.cat === 'transito' ? '🚦' : '🌙',
-              label: location.cat === 'transito' ? 'TRÂNSITO' : 'NOTURNO', color:'#f0f0ff' },
+              label: location.cat === 'transito' ? 'TRÂNSITO' : 'NOTURNO', color:'var(--text)' },
           ].map((c, i) => (
-            <div key={i} style={{ flex:1, background:'#1a1a26', border:'1px solid #2a2a3d',
+            <div key={i} style={{ flex:1, background:'var(--surface2)', border:'1px solid var(--border)',
               borderRadius:12, padding:'10px 0', textAlign:'center' }}>
               <div style={{ fontFamily:"'Space Mono',monospace",
                 fontSize:i===2?18:22, fontWeight:700, color:c.color }}>{c.val}</div>
-              <div style={{ fontSize:10, color:'#6666aa', marginTop:3 }}>{c.label}</div>
+              <div style={{ fontSize:10, color:'var(--muted)', marginTop:3 }}>{c.label}</div>
             </div>
           ))}
         </div>
@@ -270,12 +270,12 @@ export default function DetailPanel({ location, events, usersMap, user, onClose,
         {/* ── HISTÓRICO ─────────────────────────────────────────────────────── */}
         {history && (
           <div style={{
-            background:'#1a1a26', border:'1px solid #2a2a3d',
+            background:'var(--surface2)', border:'1px solid var(--border)',
             borderRadius:14, padding:'14px', marginBottom:14,
           }}>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
               <div>
-                <div style={{ fontSize:10, textTransform:'uppercase', letterSpacing:'.1em', color:'#6666aa' }}>
+                <div style={{ fontSize:10, textTransform:'uppercase', letterSpacing:'.1em', color:'var(--muted)' }}>
                   📊 MOVIMENTO HISTÓRICO
                 </div>
                 <div style={{ fontSize:12, color: HIST_COLOR, marginTop:3, fontWeight:700 }}>
@@ -341,9 +341,9 @@ export default function DetailPanel({ location, events, usersMap, user, onClose,
 
         {/* Timeline */}
         <p style={{ fontSize:10, textTransform:'uppercase', letterSpacing:'.1em',
-          color:'#6666aa', marginBottom:10 }}>📋 ÚLTIMOS REPORTES</p>
+          color:'var(--muted)', marginBottom:10 }}>📋 ÚLTIMOS REPORTES</p>
         {actEvts.length === 0 ? (
-          <p style={{ color:'#6666aa', fontSize:13, padding:'8px 0 14px' }}>
+          <p style={{ color:'var(--muted)', fontSize:13, padding:'8px 0 14px' }}>
             Sem reportes. Seja o primeiro! 👇
           </p>
         ) : (
@@ -366,7 +366,7 @@ export default function DetailPanel({ location, events, usersMap, user, onClose,
                     <div style={{ fontSize:11, color:str.color, marginTop:1 }}>sinal {str.label}</div>
                   </div>
                   <div style={{ textAlign:'right' }}>
-                    <div style={{ fontFamily:"'Space Mono',monospace", fontSize:11, color:'#6666aa' }}>
+                    <div style={{ fontFamily:"'Space Mono',monospace", fontSize:11, color:'var(--muted)' }}>
                       {timeAgo(ev.ts)}
                     </div>
                     {ev.userName && (
@@ -385,7 +385,7 @@ export default function DetailPanel({ location, events, usersMap, user, onClose,
         <div style={{ display:'flex', gap:8, marginBottom:10 }}>
           <button onClick={() => { onClose(); onReport(location) }} style={{
             flex:2, padding:14, borderRadius:14, border:'none',
-            background:'#ff2d55', color:'#fff',
+            background:'var(--red)', color:'#fff',
             fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:14,
             cursor:'pointer', textTransform:'uppercase', letterSpacing:'.04em',
           }}
@@ -397,13 +397,13 @@ export default function DetailPanel({ location, events, usersMap, user, onClose,
 
           <button onClick={() => setChatOpen(true)} style={{
             flex:1, padding:14, borderRadius:14,
-            border:'1px solid #2a2a3d', background:'#1a1a26', color:'#f0f0ff',
+            border:'1px solid var(--border)', background:'var(--surface2)', color:'var(--text)',
             fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer',
           }}>💬</button>
 
           <button onClick={handleShareImage} disabled={sharing} style={{
             flex:1, padding:14, borderRadius:14,
-            border:'1px solid #2a2a3d', background:'#1a1a26', color:'#f0f0ff',
+            border:'1px solid var(--border)', background:'var(--surface2)', color:'var(--text)',
             fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:14,
             cursor: sharing ? 'wait' : 'pointer', opacity: sharing ? .6 : 1,
           }}>

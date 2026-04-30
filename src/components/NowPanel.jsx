@@ -29,29 +29,29 @@ export default function NowPanel({ open, onClose, events, usersMap, onLocationCl
 
       <div style={{
         position:'fixed', bottom:0, left:0, right:0, zIndex:2000,
-        background:'#12121a', borderTop:'1px solid #2a2a3d',
+        background:'var(--surface)', borderTop:'1px solid #2a2a3d',
         borderRadius:'20px 20px 0 0',
         maxHeight:'80vh', overflowY:'auto',
         transform: open ? 'translateY(0)' : 'translateY(100%)',
         transition:'transform .35s cubic-bezier(.4,0,.2,1)',
       }}>
         <div style={{
-          position:'sticky', top:0, background:'#12121a',
+          position:'sticky', top:0, background:'var(--surface)',
           padding:'0 16px 16px', zIndex:1, borderBottom:'1px solid #2a2a3d',
         }}>
           <div style={{ width:40, height:4, background:'#2a2a3d', borderRadius:2, margin:'12px auto 18px' }}/>
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
             <div>
               <p style={{ fontSize:18, fontWeight:800 }}>🔴 Agora em Bauru</p>
-              <p style={{ fontSize:12, color:'#6666aa', marginTop:3 }}>
+              <p style={{ fontSize:12, color:'var(--muted)', marginTop:3 }}>
                 {ranked.length > 0
                   ? `${ranked.length} local${ranked.length > 1 ? 'is' : ''} com atividade`
                   : 'Nenhuma atividade registrada'}
               </p>
             </div>
             <button onClick={onClose} style={{
-              width:32, height:32, borderRadius:'50%', background:'#1a1a26',
-              border:'1px solid #2a2a3d', cursor:'pointer', color:'#6666aa',
+              width:32, height:32, borderRadius:'50%', background:'var(--surface2)',
+              border:'1px solid var(--border)', cursor:'pointer', color:'var(--muted)',
               fontSize:14, display:'flex', alignItems:'center', justifyContent:'center',
             }}>✕</button>
           </div>
@@ -59,7 +59,7 @@ export default function NowPanel({ open, onClose, events, usersMap, onLocationCl
 
         <div style={{ padding:'12px 16px 36px' }}>
           {ranked.length === 0 ? (
-            <div style={{ textAlign:'center', padding:'40px 0', color:'#6666aa' }}>
+            <div style={{ textAlign:'center', padding:'40px 0', color:'var(--muted)' }}>
               <div style={{ fontSize:36, marginBottom:12 }}>😴</div>
               <div style={{ fontSize:14, fontWeight:700, marginBottom:6 }}>Cidade tranquila agora</div>
               <div style={{ fontSize:12 }}>Seja o primeiro a reportar algo!</div>
@@ -86,7 +86,7 @@ export default function NowPanel({ open, onClose, events, usersMap, onLocationCl
                       width:28, height:28, borderRadius:'50%',
                       background: i===0?'#ffcc00':i===1?'#c0c0c0':'#cd7f32',
                       display:'flex', alignItems:'center', justifyContent:'center',
-                      fontSize:12, fontWeight:800, color:'#0a0a0f', flexShrink:0,
+                      fontSize:12, fontWeight:800, color:'var(--bg)', flexShrink:0,
                     }}>{medals[i]}</div>
                   )}
 
@@ -104,11 +104,11 @@ export default function NowPanel({ open, onClose, events, usersMap, onLocationCl
                       <span style={{ fontSize:16 }}>
                         {topTypes.map(t => EVENT_META[t]?.emoji).join(' ')}
                       </span>
-                      <span style={{ fontSize:11, color:'#6666aa' }}>
+                      <span style={{ fontSize:11, color:'var(--muted)' }}>
                         {actEvts.length} reporte{actEvts.length > 1 ? 's' : ''}
                       </span>
                       {actEvts[0] && (
-                        <span style={{ fontSize:11, color:'#6666aa' }}>
+                        <span style={{ fontSize:11, color:'var(--muted)' }}>
                           · {timeAgo(actEvts[0].ts)}
                         </span>
                       )}
@@ -118,7 +118,7 @@ export default function NowPanel({ open, onClose, events, usersMap, onLocationCl
                   <div style={{ textAlign:'right', flexShrink:0 }}>
                     <div style={{ fontFamily:"'Space Mono',monospace",
                       fontSize:18, fontWeight:700, color }}>{score.toFixed(0)}</div>
-                    <div style={{ fontSize:9, color:'#6666aa', textTransform:'uppercase' }}>score</div>
+                    <div style={{ fontSize:9, color:'var(--muted)', textTransform:'uppercase' }}>score</div>
                   </div>
                 </div>
 

@@ -79,7 +79,7 @@ export default function AddLocationPanel({ open, coords, onClose, onSave }) {
 
       <div style={{
         position:'fixed', bottom:0, left:0, right:0, zIndex:2000,
-        background:'#12121a', borderTop:'1px solid #2a2a3d',
+        background:'var(--surface)', borderTop:'1px solid #2a2a3d',
         borderRadius:'20px 20px 0 0', padding:'0 16px 36px',
         transform: open ? 'translateY(0)' : 'translateY(100%)',
         transition:'transform .35s cubic-bezier(.4,0,.2,1)',
@@ -88,7 +88,7 @@ export default function AddLocationPanel({ open, coords, onClose, onSave }) {
         <div style={{ width:40, height:4, background:'#2a2a3d', borderRadius:2, margin:'12px auto 20px' }}/>
 
         <p style={{ fontSize:16, fontWeight:800, marginBottom:4 }}>📍 Novo local</p>
-        <p style={{ fontSize:12, color:'#6666aa', marginBottom:16 }}>Marque um ponto no mapa da cidade</p>
+        <p style={{ fontSize:12, color:'var(--muted)', marginBottom:16 }}>Marque um ponto no mapa da cidade</p>
 
         {coords && (
           <div style={{
@@ -99,7 +99,7 @@ export default function AddLocationPanel({ open, coords, onClose, onSave }) {
             <span style={{ fontSize:16 }}>✅</span>
             <div>
               <div style={{ fontSize:12, fontWeight:700, color:'#00ff88' }}>Ponto marcado no mapa</div>
-              <div style={{ fontSize:11, color:'#6666aa', fontFamily:"'Space Mono',monospace" }}>
+              <div style={{ fontSize:11, color:'var(--muted)', fontFamily:"'Space Mono',monospace" }}>
                 {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)}
               </div>
             </div>
@@ -107,7 +107,7 @@ export default function AddLocationPanel({ open, coords, onClose, onSave }) {
         )}
 
         {/* ── NOME ── */}
-        <p style={{ fontSize:11, textTransform:'uppercase', letterSpacing:'.1em', color:'#6666aa', marginBottom:8 }}>Nome do local</p>
+        <p style={{ fontSize:11, textTransform:'uppercase', letterSpacing:'.1em', color:'var(--muted)', marginBottom:8 }}>Nome do local</p>
         <input
           value={name}
           onChange={e => setName(e.target.value)}
@@ -115,8 +115,8 @@ export default function AddLocationPanel({ open, coords, onClose, onSave }) {
           placeholder="Ex: Bar do João, Show da Banda X..."
           maxLength={60}
           style={{
-            width:'100%', background:'#1a1a26', border:'1px solid #2a2a3d',
-            borderRadius:12, padding:'12px 14px', color:'#f0f0ff',
+            width:'100%', background:'var(--surface2)', border:'1px solid var(--border)',
+            borderRadius:12, padding:'12px 14px', color:'var(--text)',
             fontFamily:"'Syne',sans-serif", fontSize:14, outline:'none',
             marginBottom:18, transition:'border-color .2s', boxSizing:'border-box',
           }}
@@ -125,8 +125,8 @@ export default function AddLocationPanel({ open, coords, onClose, onSave }) {
         />
 
         {/* ── ÍCONE ── */}
-        <p style={{ fontSize:11, textTransform:'uppercase', letterSpacing:'.1em', color:'#6666aa', marginBottom:10 }}>
-          Ícone no mapa {previewIcon && <span style={{ color:'#f0f0ff', textTransform:'none', letterSpacing:0 }}>— {previewIcon.emoji} {previewIcon.label}</span>}
+        <p style={{ fontSize:11, textTransform:'uppercase', letterSpacing:'.1em', color:'var(--muted)', marginBottom:10 }}>
+          Ícone no mapa {previewIcon && <span style={{ color:'var(--text)', textTransform:'none', letterSpacing:0 }}>— {previewIcon.emoji} {previewIcon.label}</span>}
         </p>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8, marginBottom:20 }}>
           {ICON_OPTIONS.map(opt => (
@@ -144,7 +144,7 @@ export default function AddLocationPanel({ open, coords, onClose, onSave }) {
         </div>
 
         {/* ── TIPO ── */}
-        <p style={{ fontSize:11, textTransform:'uppercase', letterSpacing:'.1em', color:'#6666aa', marginBottom:10 }}>Tipo de local *</p>
+        <p style={{ fontSize:11, textTransform:'uppercase', letterSpacing:'.1em', color:'var(--muted)', marginBottom:10 }}>Tipo de local *</p>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:8, marginBottom:16 }}>
           {PLACE_CATS.map(c => (
             <button key={c.id} onClick={() => { setCat(c.id); setDuration(null) }} style={{
@@ -185,13 +185,13 @@ export default function AddLocationPanel({ open, coords, onClose, onSave }) {
               <span style={{ fontSize:18 }}>⏱️</span>
               <div>
                 <div style={{ fontSize:12, fontWeight:700, color:'#ff2d55', marginBottom:2 }}>Duração obrigatória</div>
-                <div style={{ fontSize:11, color:'#6666aa', lineHeight:1.5 }}>
+                <div style={{ fontSize:11, color:'var(--muted)', lineHeight:1.5 }}>
                   Este local some automaticamente após o tempo escolhido.
                 </div>
               </div>
             </div>
 
-            <p style={{ fontSize:11, textTransform:'uppercase', letterSpacing:'.1em', color:'#6666aa', marginBottom:10 }}>
+            <p style={{ fontSize:11, textTransform:'uppercase', letterSpacing:'.1em', color:'var(--muted)', marginBottom:10 }}>
               Por quanto tempo? *
             </p>
             <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8, marginBottom:14 }}>
@@ -234,7 +234,7 @@ export default function AddLocationPanel({ open, coords, onClose, onSave }) {
             <span style={{ fontSize:16, flexShrink:0 }}>🛡️</span>
             <div>
               <div style={{ fontSize:12, fontWeight:700, color:'#ffcc00', marginBottom:3 }}>Passará por moderação</div>
-              <div style={{ fontSize:11, color:'#6666aa', lineHeight:1.5 }}>
+              <div style={{ fontSize:11, color:'var(--muted)', lineHeight:1.5 }}>
                 Bares, baladas e estabelecimentos são revisados antes de aparecer para todos.
               </div>
             </div>

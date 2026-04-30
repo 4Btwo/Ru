@@ -39,7 +39,7 @@ function buildInactiveSvg(cat) {
     comercio:        { bg: '#92400e', stroke: '#fbbf24' },
     show:            { bg: '#9d174d', stroke: '#f472b6' },
   }
-  const { bg, stroke } = colors[cat] || { bg: '#3a3a5a', stroke: '#6666aa' }
+  const { bg, stroke } = colors[cat] || { bg: '#1a2e20', stroke: '#1db954' }
 
   // Ícone interno por categoria — coordenadas fixas no viewBox 34x44
   const icons = {
@@ -81,7 +81,7 @@ function buildEmojiPin(emoji, cat) {
     comercio:        { bg: '#92400e', stroke: '#fbbf24' },
     show:            { bg: '#9d174d', stroke: '#f472b6' },
   }
-  const { bg, stroke } = colors[cat] || { bg: '#3a3a5a', stroke: '#6666aa' }
+  const { bg, stroke } = colors[cat] || { bg: '#1a2e20', stroke: '#1db954' }
   return `<svg width="34" height="44" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><ellipse cx="17" cy="41" rx="9" ry="3" fill="rgba(0,0,0,.25)"/><path d="M17 39 C17 39 3 24 3 15 A14 14 0 0 1 31 15 C31 24 17 39 17 39Z" fill="${bg}" stroke="${stroke}" stroke-width="1.5"/><text x="17" y="20" font-size="13" text-anchor="middle" dominant-baseline="middle">${emoji}</text></svg>`
 }
 
