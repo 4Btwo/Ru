@@ -9,7 +9,7 @@ import { usePlaces }         from './hooks/usePlaces'
 import { EVENT_META, DEFAULT_LAT, DEFAULT_LNG, ADMIN_UIDS } from './lib/constants'
 import { calcScore, getHeatLevel } from './lib/hotspot'
 import { checkAlerts }       from './lib/alerts'
-import { seedIfEmpty }       from './lib/seed'
+import { uploadToCloudinary } from './lib/cloudinary'
 import LoginScreen           from './components/LoginScreen'
 import MapView               from './components/MapView'
 import ReportPanel           from './components/ReportPanel'
@@ -496,19 +496,16 @@ function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUp
     try {
       let photoUrl = user.photo
       if (editPhoto) {
-        // Upload to Cloudinary
-        const fd = new FormData()
-        fd.append('file', editPhoto)
-        fd.append('upload_preset', 'urbyn_uploads')
-        const res = await fetch('https://api.cloudinary.com/v1_1/demo/image/upload', {method:'POST', body:fd})
-        const data = await res.json()
-        if (data.secure_url) photoUrl = data.secure_url
+        photoUrl = await uploadToCloudinary(editPhoto)
       }
       await onUpdateProfile({name:editName.trim(), photo:photoUrl})
       setEditing(false)
       setEditPhoto(null)
       setEditPhotoPreview(null)
-    } catch(e) { console.error(e) }
+    } catch(e) {
+      console.error(e)
+      alert(e.message)
+    }
     setSaving(false)
   }
 
