@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { ref, update, increment, get } from 'firebase/database'
+import { ref, update, increment, get, set, remove, onValue } from 'firebase/database'
 import { db } from './lib/firebase'
 import { useAuth }           from './hooks/useAuth'
 import { useEvents }         from './hooks/useEvents'
@@ -66,6 +66,9 @@ const FILTERS = [
   {id:'all',           label:'Todos',        emoji:'🗺️'},
   {id:'estabelecimento',label:'Cafeterias',   emoji:'☕'},
   {id:'noturno',       label:'Restaurantes',  emoji:'🍽️'},
+  {id:'bar',           label:'Bares',         emoji:'🍺'},
+  {id:'show',          label:'Arte & Cultura',emoji:'🎭'},
+  {id:'parque',        label:'Parques',        emoji:'🌿'},
   {id:'hot',           label:'Em alta',       emoji:'🔥'},
   {id:'transito',      label:'Trânsito',      emoji:'🚦'},
   {id:'blitz',         label:'Blitz',         emoji:'🚔'},
@@ -85,7 +88,7 @@ function Stars({score}) {
 }
 
 /* ── Home Tab ─────────────────────────────────────────────────────────────────── */
-function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, alertCount, onlineCount, onPlace, onStartAdd, isAdmin, setAdminOpen, pendingCount, logout}) {
+function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, alertCount, onlineCount, onPlace, onStartAdd, isAdmin, setAdminOpen, pendingCount, logout, onCategorySelect}) {
   const now = Date.now()
   const trending = [...allPlaces]
     .map(p=>({...p, _score:calcScore(p.id, events, usersMap)}))
@@ -202,18 +205,23 @@ function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, aler
         <SectionHeader title="Categorias" action="Ver todas"/>
         <div style={{display:'flex', gap:10, marginBottom:24, overflowX:'auto', scrollbarWidth:'none', paddingBottom:2}}>
           {[
-            {emoji:'☕', label:'Cafeterias',   col:'#f97316'},
-            {emoji:'🍽️', label:'Restaurantes', col:'var(--purple)'},
-            {emoji:'🍺', label:'Bares',         col:'var(--yellow)'},
-            {emoji:'🎭', label:'Arte & Cultura',col:'var(--blue)'},
-            {emoji:'🌿', label:'Parques',        col:'var(--green)'},
+            {emoji:'☕', label:'Cafeterias',    filter:'estabelecimento', col:'#f97316'},
+            {emoji:'🍽️', label:'Restaurantes',  filter:'noturno',         col:'var(--purple)'},
+            {emoji:'🍺', label:'Bares',          filter:'bar',             col:'var(--yellow)'},
+            {emoji:'🎭', label:'Arte & Cultura', filter:'show',            col:'var(--blue)'},
+            {emoji:'🌿', label:'Parques',         filter:'parque',          col:'var(--green)'},
           ].map((c,i)=>(
-            <div key={i} style={{
+            <div key={i} onClick={()=>onCategorySelect(c.filter)} style={{
               flexShrink:0, textAlign:'center', cursor:'pointer',
               background:'var(--surface2)', border:'1px solid var(--border)',
               borderRadius:16, padding:'16px 12px', minWidth:74,
-              transition:'border-color .2s',
-            }}>
+              transition:'border-color .2s, transform .15s',
+            }}
+              onMouseDown={e=>e.currentTarget.style.transform='scale(.94)'}
+              onMouseUp={e=>e.currentTarget.style.transform='scale(1)'}
+              onTouchStart={e=>e.currentTarget.style.transform='scale(.94)'}
+              onTouchEnd={e=>e.currentTarget.style.transform='scale(1)'}
+            >
               <div style={{fontSize:26, marginBottom:7}}>{c.emoji}</div>
               <div style={{fontSize:10, color:'var(--muted)', fontWeight:600}}>{c.label}</div>
             </div>
@@ -296,16 +304,40 @@ function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, aler
 }
 
 /* ── Atividades Tab ───────────────────────────────────────────────────────────── */
-function ActivitiesTab({events, usersMap, allPlaces, onPlace}) {
+function ActivitiesTab({events, usersMap, allPlaces, onPlace, user, likes, following}) {
   const now = Date.now()
-  const recent = [...events].sort((a,b)=>b.ts-a.ts).slice(0,30)
   const timeAgo = ts => {
     const d = Math.floor((now-ts)/1000)
     if (d<60) return `${d}s atrás`
     if (d<3600) return `${Math.floor(d/60)} min`
-    return `${Math.floor(d/3600)}h`
+    if (d<86400) return `${Math.floor(d/3600)}h`
+    return `${Math.floor(d/86400)}d`
   }
   const [tab, setTab] = useState('todos')
+
+  // "todos" — all events sorted by recency (social feed of the locality)
+  const feedTodos = [...events].sort((a,b)=>b.ts-a.ts).slice(0,40)
+
+  // "curtidas" — events/places the user has liked
+  const likedPlaceIds = Object.keys(likes||{})
+  const feedCurtidas = likedPlaceIds.map(id=>allPlaces.find(p=>p.id===id)).filter(Boolean)
+
+  // "seguindo" — events from followed users
+  const followingIds = Object.keys(following||{})
+  const feedSeguindo = [...events]
+    .filter(e=>followingIds.includes(e.userId))
+    .sort((a,b)=>b.ts-a.ts)
+    .slice(0,40)
+
+  const TABS = ['todos','curtidas','seguindo']
+
+  const EmptyState = ({msg,sub}) => (
+    <div style={{textAlign:'center', padding:'56px 0', color:'var(--muted)'}}>
+      <div style={{fontSize:40, marginBottom:12}}>📭</div>
+      <div style={{fontSize:14, fontWeight:600, marginBottom:6}}>{msg}</div>
+      <div style={{fontSize:12}}>{sub}</div>
+    </div>
+  )
 
   return (
     <div style={{
@@ -319,21 +351,9 @@ function ActivitiesTab({events, usersMap, allPlaces, onPlace}) {
         padding:'calc(14px + var(--sat)) 16px 12px',
         borderBottom:'1px solid var(--border)',
       }}>
-        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14}}>
-          <div style={{fontSize:20, fontWeight:800}}>Atividades</div>
-          <button style={{
-            width:34, height:34, borderRadius:'50%',
-            background:'var(--surface2)', border:'1px solid var(--border)',
-            display:'flex', alignItems:'center', justifyContent:'center',
-            cursor:'pointer', color:'var(--muted)',
-          }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
-              <circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>
-            </svg>
-          </button>
-        </div>
+        <div style={{fontSize:20, fontWeight:800, marginBottom:14}}>Atividades</div>
         <div style={{display:'flex', gap:8}}>
-          {['todos','curtidas','comentários','seguindo'].map(t=>(
+          {TABS.map(t=>(
             <button key={t} onClick={()=>setTab(t)} style={{
               padding:'7px 13px', borderRadius:100,
               background:tab===t?'rgba(34,197,94,.13)':'var(--surface2)',
@@ -347,51 +367,156 @@ function ActivitiesTab({events, usersMap, allPlaces, onPlace}) {
       </div>
 
       <div style={{padding:'0 16px'}}>
-        {recent.length===0 ? (
-          <div style={{textAlign:'center', padding:'56px 0', color:'var(--muted)'}}>
-            <div style={{fontSize:40, marginBottom:12}}>📭</div>
-            <div style={{fontSize:14, fontWeight:600, marginBottom:6}}>Nenhuma atividade</div>
-            <div style={{fontSize:12}}>Explore a cidade e reporte ocorrências!</div>
-          </div>
-        ) : recent.map(ev=>{
-          const meta  = EVENT_META[ev.type]
-          const place = allPlaces.find(p=>p.id===ev.locationId)
-          return (
-            <div key={ev.id} onClick={()=>place&&onPlace(place)} style={{
-              display:'flex', alignItems:'center', gap:12,
-              padding:'14px 0', borderBottom:'1px solid var(--border)',
-              cursor:place?'pointer':'default',
-            }}>
-              <div style={{
-                width:42, height:42, borderRadius:'50%', flexShrink:0,
-                background:`${meta?.color||'var(--green)'}18`,
-                border:`1px solid ${meta?.color||'var(--green)'}33`,
-                display:'flex', alignItems:'center', justifyContent:'center', fontSize:20,
-              }}>{meta?.emoji||'📍'}</div>
-              <div style={{flex:1, minWidth:0}}>
-                <div style={{fontSize:13, fontWeight:600, lineHeight:1.5, marginBottom:2}}>
-                  <span style={{color:'var(--green)'}}>{ev.userName?.split(' ')[0]||'Alguém'}</span>
-                  {' '}marcou{' '}
-                  <span style={{color:meta?.color||'var(--green)'}}>
-                    {meta?.label||ev.type}
-                  </span>
+        {/* ── TODOS ── */}
+        {tab==='todos' && (
+          feedTodos.length===0
+            ? <EmptyState msg="Nenhuma atividade" sub="Explore a cidade e reporte ocorrências!"/>
+            : feedTodos.map(ev=>{
+                const meta  = EVENT_META[ev.type]
+                const place = allPlaces.find(p=>p.id===ev.locationId)
+                const uInfo = usersMap[ev.userId]
+                return (
+                  <div key={ev.id} onClick={()=>place&&onPlace(place)} style={{
+                    display:'flex', alignItems:'center', gap:12,
+                    padding:'14px 0', borderBottom:'1px solid var(--border)',
+                    cursor:place?'pointer':'default',
+                  }}>
+                    <div style={{
+                      width:42, height:42, borderRadius:'50%', flexShrink:0,
+                      background:`${meta?.color||'var(--green)'}18`,
+                      border:`1px solid ${meta?.color||'var(--green)'}33`,
+                      display:'flex', alignItems:'center', justifyContent:'center', fontSize:20,
+                    }}>{meta?.emoji||'📍'}</div>
+                    <div style={{flex:1, minWidth:0}}>
+                      <div style={{fontSize:13, fontWeight:600, lineHeight:1.5, marginBottom:2}}>
+                        <span style={{color:'var(--green)'}}>{ev.userName?.split(' ')[0]||'Alguém'}</span>
+                        {' '}marcou{' '}
+                        <span style={{color:meta?.color||'var(--green)'}}>{meta?.label||ev.type}</span>
+                      </div>
+                      <div style={{fontSize:12, color:'var(--muted)'}}>
+                        {place?`em ${place.name}`:'local desconhecido'}
+                      </div>
+                    </div>
+                    <div style={{fontSize:11, color:'var(--dim)', flexShrink:0}}>{timeAgo(ev.ts)}</div>
+                  </div>
+                )
+              })
+        )}
+
+        {/* ── CURTIDAS ── */}
+        {tab==='curtidas' && (
+          feedCurtidas.length===0
+            ? <EmptyState msg="Nenhuma curtida ainda" sub="Curta lugares para vê-los aqui!"/>
+            : feedCurtidas.map(p=>(
+                <div key={p.id} onClick={()=>onPlace(p)} style={{
+                  display:'flex', alignItems:'center', gap:12,
+                  padding:'12px 0', borderBottom:'1px solid var(--border)',
+                  cursor:'pointer',
+                }}>
+                  <div style={{
+                    width:44, height:44, borderRadius:12, flexShrink:0,
+                    background:'var(--surface2)',
+                    display:'flex', alignItems:'center', justifyContent:'center', fontSize:22,
+                  }}>{CAT_EMOJI[p.cat]||'📍'}</div>
+                  <div style={{flex:1, minWidth:0}}>
+                    <div style={{fontSize:14, fontWeight:700, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{p.name}</div>
+                    <div style={{fontSize:11, color:'var(--muted)', marginTop:2}}>{CAT_LABEL[p.cat]||'Local'} · Bauru</div>
+                  </div>
+                  <span style={{fontSize:16}}>❤️</span>
                 </div>
-                <div style={{fontSize:12, color:'var(--muted)'}}>
-                  {place?`em ${place.name}`:'local desconhecido'}
-                </div>
-              </div>
-              <div style={{fontSize:11, color:'var(--dim)', flexShrink:0}}>{timeAgo(ev.ts)}</div>
-            </div>
-          )
-        })}
+              ))
+        )}
+
+        {/* ── SEGUINDO ── */}
+        {tab==='seguindo' && (
+          followingIds.length===0
+            ? <EmptyState msg="Você não segue ninguém" sub="Siga urbanos para ver o feed deles!"/>
+            : feedSeguindo.length===0
+              ? <EmptyState msg="Nenhuma atividade recente" sub="Os urbanos que você segue ainda não postaram!"/>
+              : feedSeguindo.map(ev=>{
+                  const meta  = EVENT_META[ev.type]
+                  const place = allPlaces.find(p=>p.id===ev.locationId)
+                  return (
+                    <div key={ev.id} onClick={()=>place&&onPlace(place)} style={{
+                      display:'flex', alignItems:'center', gap:12,
+                      padding:'14px 0', borderBottom:'1px solid var(--border)',
+                      cursor:place?'pointer':'default',
+                    }}>
+                      <div style={{
+                        width:42, height:42, borderRadius:'50%', flexShrink:0,
+                        background:`${meta?.color||'var(--green)'}18`,
+                        border:`1px solid ${meta?.color||'var(--green)'}33`,
+                        display:'flex', alignItems:'center', justifyContent:'center', fontSize:20,
+                      }}>{meta?.emoji||'📍'}</div>
+                      <div style={{flex:1, minWidth:0}}>
+                        <div style={{fontSize:13, fontWeight:600, lineHeight:1.5, marginBottom:2}}>
+                          <span style={{color:'var(--green)'}}>{ev.userName?.split(' ')[0]||'Alguém'}</span>
+                          {' '}marcou{' '}
+                          <span style={{color:meta?.color||'var(--green)'}}>{meta?.label||ev.type}</span>
+                        </div>
+                        <div style={{fontSize:12, color:'var(--muted)'}}>
+                          {place?`em ${place.name}`:'local desconhecido'}
+                        </div>
+                      </div>
+                      <div style={{fontSize:11, color:'var(--dim)', flexShrink:0}}>{timeAgo(ev.ts)}</div>
+                    </div>
+                  )
+                })
+        )}
       </div>
     </div>
   )
 }
 
 /* ── Perfil Tab ───────────────────────────────────────────────────────────────── */
-function ProfileTab({user, onLogout, onlineCount, events}) {
-  const myReports = events.filter(e=>e.userId===user?.uid).length
+function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUpdateProfile}) {
+  const myEvents = events.filter(e=>e.userId===user?.uid)
+  const savedPlaces = Object.values(saved||{})
+  const followingList = Object.entries(following||{}).map(([uid,info])=>({uid,...info}))
+
+  const [profileTab, setProfileTab] = useState('avaliacoes')
+  const [editing, setEditing] = useState(false)
+  const [editName, setEditName] = useState(user?.name||'')
+  const [editPhoto, setEditPhoto] = useState(null)
+  const [editPhotoPreview, setEditPhotoPreview] = useState(null)
+  const [saving, setSaving] = useState(false)
+
+  const handlePhotoChange = e => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setEditPhoto(file)
+    const reader = new FileReader()
+    reader.onload = ev => setEditPhotoPreview(ev.target.result)
+    reader.readAsDataURL(file)
+  }
+
+  const handleSaveProfile = async () => {
+    if (!editName.trim()) return
+    setSaving(true)
+    try {
+      let photoUrl = user.photo
+      if (editPhoto) {
+        // Upload to Cloudinary
+        const fd = new FormData()
+        fd.append('file', editPhoto)
+        fd.append('upload_preset', 'urbyn_uploads')
+        const res = await fetch('https://api.cloudinary.com/v1_1/demo/image/upload', {method:'POST', body:fd})
+        const data = await res.json()
+        if (data.secure_url) photoUrl = data.secure_url
+      }
+      await onUpdateProfile({name:editName.trim(), photo:photoUrl})
+      setEditing(false)
+      setEditPhoto(null)
+      setEditPhotoPreview(null)
+    } catch(e) { console.error(e) }
+    setSaving(false)
+  }
+
+  const PROFILE_TABS = [
+    {id:'avaliacoes', label:'Avaliações'},
+    {id:'salvos',     label:'Salvos'},
+    {id:'seguindo',   label:'Seguindo'},
+  ]
 
   return (
     <div style={{
@@ -406,13 +531,7 @@ function ProfileTab({user, onLogout, onlineCount, events}) {
         <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20}}>
           <div style={{fontSize:20, fontWeight:800}}>Perfil</div>
           <div style={{display:'flex', gap:8}}>
-            <button style={{
-              width:34, height:34, borderRadius:'50%',
-              background:'var(--surface2)', border:'1px solid var(--border)',
-              display:'flex', alignItems:'center', justifyContent:'center',
-              cursor:'pointer', color:'var(--muted)',
-            }}><IC.Settings/></button>
-            <button style={{
+            <button onClick={()=>{setEditing(true);setEditName(user?.name||'')}} style={{
               width:34, height:34, borderRadius:'50%',
               background:'var(--surface2)', border:'1px solid var(--border)',
               display:'flex', alignItems:'center', justifyContent:'center',
@@ -423,17 +542,35 @@ function ProfileTab({user, onLogout, onlineCount, events}) {
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
               </svg>
             </button>
+            <button style={{
+              width:34, height:34, borderRadius:'50%',
+              background:'var(--surface2)', border:'1px solid var(--border)',
+              display:'flex', alignItems:'center', justifyContent:'center',
+              cursor:'pointer', color:'var(--muted)',
+            }}><IC.Settings/></button>
           </div>
         </div>
 
         {/* Avatar + info */}
         <div style={{display:'flex', alignItems:'center', gap:16, marginBottom:20}}>
-          <div style={{
-            width:76, height:76, borderRadius:'50%', flexShrink:0,
-            background:'var(--surface3)', border:'3px solid var(--green)',
-            overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center', fontSize:32,
-          }}>
-            {user.photo?<img src={user.photo} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>:'👤'}
+          <div style={{position:'relative'}}>
+            <div style={{
+              width:76, height:76, borderRadius:'50%', flexShrink:0,
+              background:'var(--surface3)', border:'3px solid var(--green)',
+              overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center', fontSize:32,
+            }}>
+              {user.photo?<img src={user.photo} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>:'👤'}
+            </div>
+            <button onClick={()=>{setEditing(true);setEditName(user?.name||'')}} style={{
+              position:'absolute', bottom:-2, right:-2,
+              width:24, height:24, borderRadius:'50%',
+              background:'var(--green)', border:'2px solid var(--bg)',
+              display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer',
+            }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="#052e16" strokeWidth="2.5" width="11" height="11">
+                <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+              </svg>
+            </button>
           </div>
           <div style={{flex:1}}>
             <div style={{fontSize:18, fontWeight:800, marginBottom:2}}>{user.name||'Urbano'}</div>
@@ -452,9 +589,9 @@ function ProfileTab({user, onLogout, onlineCount, events}) {
         {/* Stats */}
         <div style={{display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:10}}>
           {[
-            {val:myReports||user.reports||0, label:'Avaliações'},
-            {val:32, label:'Seguindo'},
-            {val:156, label:'Seguidores'},
+            {val:myEvents.length||user.reports||0, label:'Avaliações'},
+            {val:Object.keys(following||{}).length, label:'Seguindo'},
+            {val:user.followers||0, label:'Seguidores'},
           ].map((s,i)=>(
             <div key={i} style={{
               background:'var(--surface2)', border:'1px solid var(--border)',
@@ -483,53 +620,192 @@ function ProfileTab({user, onLogout, onlineCount, events}) {
           <div style={{fontSize:40}}>🌟</div>
         </div>
 
-        {/* Tabs Avaliações / Salvos / Selos */}
+        {/* Sub-tabs */}
         <div style={{display:'flex', gap:0, borderBottom:'1px solid var(--border)', marginBottom:16}}>
-          {['Avaliações','Salvos','Selos'].map((t,i)=>(
-            <button key={t} style={{
+          {PROFILE_TABS.map(t=>(
+            <button key={t.id} onClick={()=>setProfileTab(t.id)} style={{
               flex:1, padding:'10px 0',
               background:'none', border:'none',
-              borderBottom:`2px solid ${i===0?'var(--green)':'transparent'}`,
-              color:i===0?'var(--green)':'var(--muted)',
-              fontSize:12, fontWeight:i===0?700:500,
+              borderBottom:`2px solid ${profileTab===t.id?'var(--green)':'transparent'}`,
+              color:profileTab===t.id?'var(--green)':'var(--muted)',
+              fontSize:12, fontWeight:profileTab===t.id?700:500,
               cursor:'pointer', fontFamily:"'Inter',sans-serif",
-            }}>{t}</button>
+            }}>{t.label}</button>
           ))}
         </div>
 
-        {/* Placeholder cards */}
-        {[
-          {emoji:'☕', name:'Café Recanto', cat:'Cafeteria · Vila Madalena', score:4.8, time:'2 dias atrás'},
-          {emoji:'🍔', name:'Beco do Hambúrguer', cat:'Hamburgeria · Pinheiros', score:4.6, time:'1 semana atrás'},
-        ].map((p,i)=>(
-          <div key={i} style={{
-            display:'flex', alignItems:'center', gap:12,
-            background:'var(--surface2)', border:'1px solid var(--border)',
-            borderRadius:14, padding:'12px 14px', marginBottom:10,
-            cursor:'pointer',
-          }}>
-            <div style={{width:48, height:48, borderRadius:10, background:'var(--surface3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:22, flexShrink:0}}>{p.emoji}</div>
-            <div style={{flex:1}}>
-              <div style={{fontSize:14, fontWeight:700}}>{p.name}</div>
-              <div style={{fontSize:11, color:'var(--muted)', marginTop:2}}>{p.cat}</div>
-              <div style={{display:'flex', alignItems:'center', gap:4, marginTop:4}}>
-                <Stars score={p.score}/>
-                <span style={{fontFamily:"'Space Mono',monospace", fontSize:10, color:'var(--green)'}}>{p.score}</span>
+        {/* ── AVALIAÇÕES ── */}
+        {profileTab==='avaliacoes' && (
+          myEvents.length===0
+            ? <div style={{textAlign:'center', padding:'40px 0', color:'var(--muted)'}}>
+                <div style={{fontSize:32, marginBottom:8}}>📝</div>
+                <div style={{fontSize:13}}>Nenhuma avaliação ainda</div>
               </div>
-            </div>
-            <div style={{fontSize:10, color:'var(--dim)'}}>{p.time}</div>
-          </div>
-        ))}
+            : myEvents.slice(0,20).map((ev,i)=>{
+                const meta = EVENT_META[ev.type]
+                return (
+                  <div key={ev.id||i} style={{
+                    display:'flex', alignItems:'center', gap:12,
+                    background:'var(--surface2)', border:'1px solid var(--border)',
+                    borderRadius:14, padding:'12px 14px', marginBottom:10,
+                  }}>
+                    <div style={{width:44, height:44, borderRadius:10, background:`${meta?.color||'var(--green)'}18`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, flexShrink:0}}>{meta?.emoji||'📍'}</div>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:13, fontWeight:700}}>{meta?.label||ev.type}</div>
+                      <div style={{fontSize:11, color:'var(--muted)', marginTop:2}}>{ev.locationName||'Local'}</div>
+                    </div>
+                    <div style={{fontSize:10, color:'var(--dim)'}}>{new Date(ev.ts).toLocaleDateString('pt-BR')}</div>
+                  </div>
+                )
+              })
+        )}
+
+        {/* ── SALVOS ── */}
+        {profileTab==='salvos' && (
+          savedPlaces.length===0
+            ? <div style={{textAlign:'center', padding:'40px 0', color:'var(--muted)'}}>
+                <div style={{fontSize:32, marginBottom:8}}>🔖</div>
+                <div style={{fontSize:13}}>Nenhum lugar salvo</div>
+              </div>
+            : savedPlaces.map((p,i)=>(
+                <div key={p.id||i} style={{
+                  display:'flex', alignItems:'center', gap:12,
+                  background:'var(--surface2)', border:'1px solid var(--border)',
+                  borderRadius:14, padding:'12px 14px', marginBottom:10, cursor:'pointer',
+                }}>
+                  <div style={{width:48, height:48, borderRadius:10, background:'var(--surface3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:22, flexShrink:0}}>{CAT_EMOJI[p.cat]||'📍'}</div>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:14, fontWeight:700}}>{p.name}</div>
+                    <div style={{fontSize:11, color:'var(--muted)', marginTop:2}}>{CAT_LABEL[p.cat]||'Local'}</div>
+                  </div>
+                  <span style={{fontSize:16}}>🔖</span>
+                </div>
+              ))
+        )}
+
+        {/* ── SEGUINDO ── */}
+        {profileTab==='seguindo' && (
+          followingList.length===0
+            ? <div style={{textAlign:'center', padding:'40px 0', color:'var(--muted)'}}>
+                <div style={{fontSize:32, marginBottom:8}}>👥</div>
+                <div style={{fontSize:13}}>Você não segue ninguém ainda</div>
+              </div>
+            : followingList.map(u=>(
+                <div key={u.uid} style={{
+                  display:'flex', alignItems:'center', gap:12,
+                  background:'var(--surface2)', border:'1px solid var(--border)',
+                  borderRadius:14, padding:'12px 14px', marginBottom:10,
+                }}>
+                  <div style={{
+                    width:44, height:44, borderRadius:'50%', flexShrink:0,
+                    background:'var(--surface3)', border:'2px solid rgba(34,197,94,.3)',
+                    overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center', fontSize:20,
+                  }}>
+                    {u.photo?<img src={u.photo} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>:'👤'}
+                  </div>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:14, fontWeight:700}}>{u.name||'Urbano'}</div>
+                    <div style={{fontSize:11, color:'var(--muted)', marginTop:2}}>
+                      @{(u.name||'user').toLowerCase().replace(/\s+/g,'')}
+                    </div>
+                  </div>
+                  <div style={{
+                    background:'rgba(34,197,94,.1)', border:'1px solid rgba(34,197,94,.25)',
+                    borderRadius:100, padding:'4px 10px', fontSize:10, color:'var(--green)', fontWeight:600,
+                  }}>Seguindo</div>
+                </div>
+              ))
+        )}
 
         {/* Logout */}
         <button onClick={onLogout} style={{
-          width:'100%', padding:14, borderRadius:14, marginTop:8,
+          width:'100%', padding:14, borderRadius:14, marginTop:16,
           background:'rgba(239,68,68,.07)', border:'1px solid rgba(239,68,68,.25)',
           color:'var(--red)', fontFamily:"'Inter',sans-serif",
           fontWeight:700, fontSize:14, cursor:'pointer',
         }}>Sair da conta</button>
         <div style={{height:16}}/>
       </div>
+
+      {/* ── Edit Profile Modal ── */}
+      {editing && (
+        <div style={{
+          position:'fixed', inset:0, zIndex:2000,
+          background:'rgba(0,0,0,.7)', backdropFilter:'blur(6px)',
+          display:'flex', alignItems:'flex-end', justifyContent:'center',
+          animation:'fadeUp .2s ease',
+        }} onClick={e=>{if(e.target===e.currentTarget){setEditing(false);setEditPhotoPreview(null)}}}>
+          <div style={{
+            width:'100%', maxWidth:480,
+            background:'var(--bg)', borderTop:'1px solid var(--border)',
+            borderRadius:'24px 24px 0 0', padding:'24px 20px',
+            paddingBottom:'calc(24px + env(safe-area-inset-bottom,0px))',
+          }}>
+            <div style={{fontSize:17, fontWeight:800, marginBottom:20, textAlign:'center'}}>Editar Perfil</div>
+
+            {/* Photo upload */}
+            <div style={{display:'flex', justifyContent:'center', marginBottom:20}}>
+              <label style={{cursor:'pointer', position:'relative'}}>
+                <div style={{
+                  width:80, height:80, borderRadius:'50%',
+                  background:'var(--surface3)', border:'3px solid var(--green)',
+                  overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center', fontSize:32,
+                }}>
+                  {editPhotoPreview
+                    ? <img src={editPhotoPreview} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+                    : user.photo
+                      ? <img src={user.photo} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+                      : '👤'}
+                </div>
+                <div style={{
+                  position:'absolute', bottom:0, right:0,
+                  width:26, height:26, borderRadius:'50%',
+                  background:'var(--green)', border:'2px solid var(--bg)',
+                  display:'flex', alignItems:'center', justifyContent:'center',
+                }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#052e16" strokeWidth="2.5" width="12" height="12">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                  </svg>
+                </div>
+                <input type="file" accept="image/*" onChange={handlePhotoChange} style={{display:'none'}}/>
+              </label>
+            </div>
+
+            {/* Name input */}
+            <div style={{marginBottom:16}}>
+              <div style={{fontSize:11, color:'var(--muted)', fontWeight:600, marginBottom:6, textTransform:'uppercase', letterSpacing:'.06em'}}>Nome</div>
+              <input
+                value={editName}
+                onChange={e=>setEditName(e.target.value)}
+                placeholder="Seu nome"
+                style={{
+                  width:'100%', background:'var(--surface2)', border:'1.5px solid var(--border)',
+                  borderRadius:12, padding:'12px 14px', color:'var(--text)',
+                  fontFamily:"'Inter',sans-serif", fontSize:15, outline:'none',
+                  boxSizing:'border-box',
+                }}
+                onFocus={e=>e.target.style.borderColor='var(--green)'}
+                onBlur={e=>e.target.style.borderColor='var(--border)'}
+              />
+            </div>
+
+            <div style={{display:'flex', gap:10}}>
+              <button onClick={()=>{setEditing(false);setEditPhotoPreview(null)}} style={{
+                flex:1, padding:14, borderRadius:12,
+                background:'var(--surface2)', border:'1px solid var(--border)',
+                color:'var(--muted)', fontFamily:"'Inter',sans-serif", fontWeight:600, fontSize:14, cursor:'pointer',
+              }}>Cancelar</button>
+              <button onClick={handleSaveProfile} disabled={saving||!editName.trim()} style={{
+                flex:2, padding:14, borderRadius:12,
+                background:'var(--green)', border:'none',
+                color:'#052e16', fontFamily:"'Inter',sans-serif", fontWeight:800, fontSize:14, cursor:'pointer',
+                opacity:saving||!editName.trim()?0.6:1,
+              }}>{saving?'Salvando...':'Salvar'}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -622,6 +898,9 @@ export default function App() {
   const [addLocOpen,  setAddLocOpen]  = useState(false)
   const [trafficPrompt,setTrafficPrompt]=useState(null)
   const [activeTab,   setActiveTab]   = useState('home')
+  const [likes,       setLikes]       = useState({})
+  const [saved,       setSaved]       = useState({})
+  const [following,   setFollowing]   = useState({})
 
   const isAdmin = ADMIN_UIDS.includes(user?.uid)
 
@@ -656,6 +935,22 @@ export default function App() {
       return ()=>clearTimeout(t)
     }
   },[user,permission])
+
+  useEffect(()=>{
+    if (!user) return
+    const unsubs = [
+      onValue(ref(db,`users/${user.uid}/likes`),     s=>setLikes(s.val()||{})),
+      onValue(ref(db,`users/${user.uid}/saved`),     s=>setSaved(s.val()||{})),
+      onValue(ref(db,`users/${user.uid}/following`), s=>setFollowing(s.val()||{})),
+    ]
+    return ()=>unsubs.forEach(u=>u())
+  },[user])
+
+  const handleUpdateProfile = useCallback(async({name, photo})=>{
+    if (!user) return
+    await update(ref(db,`users/${user.uid}`), {name, ...(photo?{photo}:{})})
+    showToast('✅ Perfil atualizado!')
+  },[user])
 
   const showToast = useCallback((msg,bg='var(--green)',color='#052e16')=>{
     setToast({msg,bg,color})
@@ -726,6 +1021,9 @@ export default function App() {
     if(activeFilter==='noturno') return loc.cat==='noturno'
     if(activeFilter==='transito') return loc.cat==='transito'
     if(activeFilter==='hot') return getHeatLevel(calcScore(loc.id,events,usersMap))!=='inactive'
+    if(activeFilter==='bar') return loc.cat==='bar'||loc.cat==='noturno'
+    if(activeFilter==='show') return loc.cat==='show'
+    if(activeFilter==='parque') return loc.cat==='parque'
     if(activeFilter==='blitz') return events.some(e=>e.locationId===loc.id&&e.type==='blitz')
     if(activeFilter==='estabelecimento') return loc.cat==='estabelecimento'
     return true
@@ -926,6 +1224,7 @@ export default function App() {
           hotCount={hotCount} totalActive={totalActive} alertCount={alertCount} onlineCount={onlineCount}
           onPlace={loc=>setDetailLoc(loc)} onStartAdd={handleStartPick}
           isAdmin={isAdmin} setAdminOpen={setAdminOpen} pendingCount={pendingCount} logout={logout}
+          onCategorySelect={filterId=>{setActiveFilter(filterId);setActiveTab('map')}}
         />
       )}
 
@@ -934,12 +1233,14 @@ export default function App() {
         <ActivitiesTab
           events={events} usersMap={usersMap} allPlaces={visiblePlaces}
           onPlace={loc=>{setDetailLoc(loc);setActiveTab('map')}}
+          user={user} likes={likes} following={following}
         />
       )}
 
       {/* ── PROFILE ── */}
       {activeTab==='profile'&&(
-        <ProfileTab user={user} onLogout={logout} onlineCount={onlineCount} events={events}/>
+        <ProfileTab user={user} onLogout={logout} onlineCount={onlineCount} events={events}
+          saved={saved} following={following} onUpdateProfile={handleUpdateProfile}/>
       )}
 
       {/* ── BOTTOM NAV ── */}
