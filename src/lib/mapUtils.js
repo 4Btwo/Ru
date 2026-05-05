@@ -38,6 +38,7 @@ function buildInactiveSvg(cat) {
     parque:          { bg: '#15803d', stroke: '#4ade80' },
     comercio:        { bg: '#92400e', stroke: '#fbbf24' },
     show:            { bg: '#9d174d', stroke: '#f472b6' },
+    bar:             { bg: '#7c2d12', stroke: '#fb923c' },
   }
   const { bg, stroke } = colors[cat] || { bg: '#1a2e20', stroke: '#1db954' }
 
@@ -64,6 +65,11 @@ function buildInactiveSvg(cat) {
 
     show:
       `<text x="9" y="26" font-size="14" fill="rgba(255,255,255,.9)" font-family="sans-serif">♪</text>`,
+
+    bar:
+      `<rect x="12" y="9" width="10" height="16" rx="2" fill="rgba(255,255,255,.8)"/>` +
+      `<rect x="14" y="6" width="6" height="4" rx="1" fill="rgba(255,255,255,.6)"/>` +
+      `<ellipse cx="17" cy="9" rx="5" ry="2" fill="rgba(255,255,255,.5)"/>`,
   }
 
   const inner = icons[cat] || `<circle cx="17" cy="17" r="6" fill="rgba(255,255,255,.8)"/>`
@@ -80,6 +86,7 @@ function buildEmojiPin(emoji, cat) {
     parque:          { bg: '#15803d', stroke: '#4ade80' },
     comercio:        { bg: '#92400e', stroke: '#fbbf24' },
     show:            { bg: '#9d174d', stroke: '#f472b6' },
+    bar:             { bg: '#7c2d12', stroke: '#fb923c' },
   }
   const { bg, stroke } = colors[cat] || { bg: '#1a2e20', stroke: '#1db954' }
   return `<svg width="34" height="44" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><ellipse cx="17" cy="41" rx="9" ry="3" fill="rgba(0,0,0,.25)"/><path d="M17 39 C17 39 3 24 3 15 A14 14 0 0 1 31 15 C31 24 17 39 17 39Z" fill="${bg}" stroke="${stroke}" stroke-width="1.5"/><text x="17" y="20" font-size="13" text-anchor="middle" dominant-baseline="middle">${emoji}</text></svg>`

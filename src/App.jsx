@@ -89,7 +89,7 @@ function Stars({score}) {
 }
 
 /* ── Home Tab ─────────────────────────────────────────────────────────────────── */
-function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, alertCount, onlineCount, onPlace, onStartAdd, isAdmin, setAdminOpen, pendingCount, logout, onCategorySelect}) {
+function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, alertCount, onlineCount, onPlace, onStartAdd, isAdmin, setAdminOpen, pendingCount, logout, onCategorySelect, onCityClick}) {
   const now = Date.now()
   const trending = [...allPlaces]
     .map(p=>({...p, _score:calcScore(p.id, events, usersMap)}))
@@ -120,7 +120,7 @@ function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, aler
               background:'var(--surface2)', border:'1px solid var(--border)',
               borderRadius:100, padding:'5px 10px',
               fontSize:11, color:'var(--muted)', cursor:'pointer',
-            }}>
+            }} onClick={onCityClick}>
               <IC.MapPin/> <span style={{fontWeight:600}}>Bauru, SP</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="10" height="10"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
@@ -305,7 +305,7 @@ function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, aler
 }
 
 /* ── Atividades Tab ───────────────────────────────────────────────────────────── */
-function ActivitiesTab({events, usersMap, allPlaces, onPlace, user, likes, following}) {
+function ActivitiesTab({events, usersMap, allPlaces, onPlace, user, saved, following}) {
   const now = Date.now()
   const timeAgo = ts => {
     const d = Math.floor((now-ts)/1000)
@@ -316,21 +316,18 @@ function ActivitiesTab({events, usersMap, allPlaces, onPlace, user, likes, follo
   }
   const [tab, setTab] = useState('todos')
 
-  // "todos" — all events sorted by recency (social feed of the locality)
   const feedTodos = [...events].sort((a,b)=>b.ts-a.ts).slice(0,40)
 
-  // "curtidas" — events/places the user has liked
-  const likedPlaceIds = Object.keys(likes||{})
-  const feedCurtidas = likedPlaceIds.map(id=>allPlaces.find(p=>p.id===id)).filter(Boolean)
+  // "salvos" — lugares salvos pelo usuário
+  const savedPlaceIds = Object.keys(saved||{})
+  const feedSalvos = savedPlaceIds.map(id=>allPlaces.find(p=>p.id===id)).filter(Boolean)
 
-  // "seguindo" — events from followed users
   const followingIds = Object.keys(following||{})
   const feedSeguindo = [...events]
     .filter(e=>followingIds.includes(e.userId))
-    .sort((a,b)=>b.ts-a.ts)
-    .slice(0,40)
+    .sort((a,b)=>b.ts-a.ts).slice(0,40)
 
-  const TABS = ['todos','curtidas','seguindo']
+  const TABS = ['todos','salvos','seguindo']
 
   const EmptyState = ({msg,sub}) => (
     <div style={{textAlign:'center', padding:'56px 0', color:'var(--muted)'}}>
@@ -404,11 +401,11 @@ function ActivitiesTab({events, usersMap, allPlaces, onPlace, user, likes, follo
               })
         )}
 
-        {/* ── CURTIDAS ── */}
-        {tab==='curtidas' && (
-          feedCurtidas.length===0
-            ? <EmptyState msg="Nenhuma curtida ainda" sub="Curta lugares para vê-los aqui!"/>
-            : feedCurtidas.map(p=>(
+        {/* ── SALVOS ── */}
+        {tab==='salvos' && (
+          feedSalvos.length===0
+            ? <EmptyState msg="Nenhum lugar salvo" sub="Salve lugares para vê-los aqui!"/>
+            : feedSalvos.map(p=>(
                 <div key={p.id} onClick={()=>onPlace(p)} style={{
                   display:'flex', alignItems:'center', gap:12,
                   padding:'12px 0', borderBottom:'1px solid var(--border)',
@@ -423,7 +420,7 @@ function ActivitiesTab({events, usersMap, allPlaces, onPlace, user, likes, follo
                     <div style={{fontSize:14, fontWeight:700, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{p.name}</div>
                     <div style={{fontSize:11, color:'var(--muted)', marginTop:2}}>{CAT_LABEL[p.cat]||'Local'} · Bauru</div>
                   </div>
-                  <span style={{fontSize:16}}>❤️</span>
+                  <span style={{fontSize:16}}>🔖</span>
                 </div>
               ))
         )}
@@ -470,7 +467,7 @@ function ActivitiesTab({events, usersMap, allPlaces, onPlace, user, likes, follo
 }
 
 /* ── Perfil Tab ───────────────────────────────────────────────────────────────── */
-function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUpdateProfile}) {
+function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUpdateProfile, onSettings}) {
   const myEvents = events.filter(e=>e.userId===user?.uid)
   const savedPlaces = Object.values(saved||{})
   const followingList = Object.entries(following||{}).map(([uid,info])=>({uid,...info}))
@@ -545,7 +542,7 @@ function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUp
               background:'var(--surface2)', border:'1px solid var(--border)',
               display:'flex', alignItems:'center', justifyContent:'center',
               cursor:'pointer', color:'var(--muted)',
-            }}><IC.Settings/></button>
+            }} onClick={onSettings}><IC.Settings/></button>
           </div>
         </div>
 
@@ -871,6 +868,151 @@ function BottomNav({active, onChange, onAdd}) {
   )
 }
 
+/* ── Settings Panel ──────────────────────────────────────────────────────────── */
+function SettingsPanel({open, user, onClose, onLogout, onUpdateProfile}) {
+  const [tab, setTab]           = useState('conta')
+  const [theme, setTheme]       = useState(localStorage.getItem('urbyn-theme')||'dark')
+  const [editName, setEditName] = useState(user?.name||'')
+  const [saving, setSaving]     = useState(false)
+  const [saved2, setSaved2]     = useState(false)
+
+  useEffect(()=>{
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('urbyn-theme', theme)
+  },[theme])
+
+  const handleSave = async () => {
+    if (!editName.trim()) return
+    setSaving(true)
+    await onUpdateProfile({name:editName.trim()})
+    setSaving(false); setSaved2(true); setTimeout(()=>setSaved2(false),2000)
+  }
+
+  const TABS = [{id:'conta',label:'👤 Conta'},{id:'aparencia',label:'🎨 Aparência'},{id:'privacidade',label:'🔒 Privacidade'}]
+
+  return (
+    <>
+      <div onClick={onClose} style={{position:'fixed',inset:0,zIndex:3000,background:'rgba(0,0,0,.7)',backdropFilter:'blur(4px)',opacity:open?1:0,pointerEvents:open?'all':'none',transition:'opacity .25s'}}/>
+      <div style={{position:'fixed',bottom:0,left:0,right:0,zIndex:3100,background:'var(--bg)',borderRadius:'24px 24px 0 0',maxHeight:'90vh',overflowY:'auto',transform:open?'translateY(0)':'translateY(100%)',transition:'transform .35s cubic-bezier(.4,0,.2,1)'}}>
+        <div style={{width:40,height:4,background:'var(--border)',borderRadius:2,margin:'12px auto 0'}}/>
+        <div style={{padding:'16px 16px 0'}}>
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:20}}>
+            <div style={{fontSize:18,fontWeight:800}}>Configurações</div>
+            <button onClick={onClose} style={{width:32,height:32,borderRadius:'50%',background:'var(--surface2)',border:'1px solid var(--border)',cursor:'pointer',color:'var(--muted)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14}}>✕</button>
+          </div>
+          <div style={{display:'flex',gap:6,marginBottom:20}}>
+            {TABS.map(t=>(
+              <button key={t.id} onClick={()=>setTab(t.id)} style={{flex:1,padding:'9px 4px',borderRadius:10,cursor:'pointer',background:tab===t.id?'rgba(34,197,94,.15)':'var(--surface2)',border:`1px solid ${tab===t.id?'var(--green)':'var(--border)'}`,color:tab===t.id?'var(--green)':'var(--muted)',fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:10}}>{t.label}</button>
+            ))}
+          </div>
+
+          {tab==='conta'&&(
+            <div>
+              <div style={{fontSize:11,color:'var(--muted)',fontWeight:600,marginBottom:6,textTransform:'uppercase',letterSpacing:'.06em'}}>👤 Nome</div>
+              <input value={editName} onChange={e=>setEditName(e.target.value)} placeholder="Seu nome"
+                style={{width:'100%',background:'var(--surface2)',border:'1.5px solid var(--border)',borderRadius:12,padding:'12px 14px',color:'var(--text)',fontFamily:"'Inter',sans-serif",fontSize:14,outline:'none',boxSizing:'border-box',marginBottom:10}}
+                onFocus={e=>e.target.style.borderColor='var(--green)'} onBlur={e=>e.target.style.borderColor='var(--border)'}/>
+              <div style={{fontSize:11,color:'var(--muted)',fontWeight:600,marginBottom:6,textTransform:'uppercase',letterSpacing:'.06em'}}>📧 Email</div>
+              <input value={user?.email||''} disabled
+                style={{width:'100%',background:'var(--surface3)',border:'1px solid var(--border)',borderRadius:12,padding:'12px 14px',color:'var(--dim)',fontFamily:"'Inter',sans-serif",fontSize:14,outline:'none',boxSizing:'border-box',marginBottom:4,cursor:'not-allowed'}}/>
+              <div style={{fontSize:10,color:'var(--dim)',marginBottom:14}}>Email não pode ser alterado</div>
+              <button onClick={handleSave} disabled={saving||!editName.trim()} style={{width:'100%',padding:14,borderRadius:12,border:'none',background:saved2?'rgba(34,197,94,.2)':'var(--green)',color:saved2?'var(--green)':'#052e16',fontFamily:"'Inter',sans-serif",fontWeight:800,fontSize:14,cursor:'pointer',marginBottom:16,transition:'all .2s'}}>{saved2?'✅ Salvo!':saving?'Salvando...':'Salvar alterações'}</button>
+              <div style={{height:1,background:'var(--border)',marginBottom:16}}/>
+              <button onClick={onLogout} style={{width:'100%',padding:14,borderRadius:12,background:'rgba(239,68,68,.07)',border:'1px solid rgba(239,68,68,.25)',color:'var(--red)',fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:14,cursor:'pointer'}}>Sair da conta</button>
+            </div>
+          )}
+
+          {tab==='aparencia'&&(
+            <div>
+              <div style={{fontSize:12,color:'var(--muted)',marginBottom:16}}>Escolha o tema visual do app.</div>
+              {[
+                {id:'dark',label:'🌑 Escuro',desc:'Padrão — fundo preto profundo'},
+                {id:'darker',label:'⚫ Ultra Escuro',desc:'Ainda mais escuro, ideal para OLED'},
+                {id:'forest',label:'🌲 Floresta',desc:'Tons verdes suaves'},
+              ].map(t=>(
+                <div key={t.id} onClick={()=>setTheme(t.id)} style={{display:'flex',alignItems:'center',justifyContent:'space-between',background:'var(--surface2)',border:`1.5px solid ${theme===t.id?'var(--green)':'var(--border)'}`,borderRadius:14,padding:'14px 16px',marginBottom:10,cursor:'pointer',transition:'border-color .2s'}}>
+                  <div>
+                    <div style={{fontWeight:700,fontSize:14,marginBottom:2}}>{t.label}</div>
+                    <div style={{fontSize:12,color:'var(--muted)'}}>{t.desc}</div>
+                  </div>
+                  <div style={{width:22,height:22,borderRadius:'50%',border:`2px solid ${theme===t.id?'var(--green)':'var(--border)'}`,background:theme===t.id?'var(--green)':'transparent',display:'flex',alignItems:'center',justifyContent:'center',transition:'all .2s'}}>
+                    {theme===t.id&&<div style={{width:8,height:8,borderRadius:'50%',background:'#052e16'}}/>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {tab==='privacidade'&&(
+            <div>
+              {[
+                {label:'Perfil público',on:true,desc:'Outros usuários podem ver seu perfil'},
+                {label:'Atividade visível',on:true,desc:'Mostrar suas avaliações e reportes'},
+                {label:'Notificações',on:true,desc:'Receber alertas de locais próximos'},
+              ].map((item,i)=>(
+                <div key={i} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px 0',borderBottom:'1px solid var(--border)'}}>
+                  <div>
+                    <div style={{fontWeight:600,fontSize:14}}>{item.label}</div>
+                    <div style={{fontSize:12,color:'var(--muted)',marginTop:2}}>{item.desc}</div>
+                  </div>
+                  <div style={{width:48,height:26,borderRadius:100,background:item.on?'var(--green)':'var(--surface3)',border:`1px solid ${item.on?'var(--green)':'var(--border)'}`,position:'relative',cursor:'pointer',transition:'all .2s',flexShrink:0}}>
+                    <div style={{position:'absolute',top:3,left:item.on?24:3,width:18,height:18,borderRadius:'50%',background:'#fff',transition:'left .2s',boxShadow:'0 1px 4px rgba(0,0,0,.3)'}}/>
+                  </div>
+                </div>
+              ))}
+              <div style={{fontSize:11,color:'var(--dim)',marginTop:16,lineHeight:1.7}}>Os dados de localização são usados apenas para mostrar locais próximos e nunca são compartilhados com terceiros.</div>
+            </div>
+          )}
+          <div style={{height:'calc(24px + env(safe-area-inset-bottom,0px))'}}/>
+        </div>
+      </div>
+    </>
+  )
+}
+
+/* ── City Selector ────────────────────────────────────────────────────────────── */
+const AVAILABLE_CITIES = [
+  {id:'bauru',    name:'Bauru',    state:'SP', lat:-22.3147, lng:-49.0611},
+  {id:'marilia',  name:'Marília',  state:'SP', lat:-22.2144, lng:-49.9456},
+  {id:'botucatu', name:'Botucatu', state:'SP', lat:-22.8851, lng:-48.4454},
+  {id:'campinas', name:'Campinas', state:'SP', lat:-22.9068, lng:-47.0626},
+  {id:'saopaulo', name:'São Paulo',state:'SP', lat:-23.5505, lng:-46.6333},
+]
+
+function CitySelector({open, currentCity, onSelect, onClose}) {
+  const [search, setSearch] = useState('')
+  const filtered = AVAILABLE_CITIES.filter(c=>c.name.toLowerCase().includes(search.toLowerCase()))
+  return (
+    <>
+      <div onClick={onClose} style={{position:'fixed',inset:0,zIndex:3000,background:'rgba(0,0,0,.7)',backdropFilter:'blur(4px)',opacity:open?1:0,pointerEvents:open?'all':'none',transition:'opacity .25s'}}/>
+      <div style={{position:'fixed',bottom:0,left:0,right:0,zIndex:3100,background:'var(--bg)',borderRadius:'24px 24px 0 0',maxHeight:'75vh',overflowY:'auto',transform:open?'translateY(0)':'translateY(100%)',transition:'transform .35s cubic-bezier(.4,0,.2,1)'}}>
+        <div style={{width:40,height:4,background:'var(--border)',borderRadius:2,margin:'12px auto 0'}}/>
+        <div style={{padding:'16px 16px 0'}}>
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
+            <div style={{fontSize:17,fontWeight:800}}>Escolher cidade</div>
+            <button onClick={onClose} style={{width:32,height:32,borderRadius:'50%',background:'var(--surface2)',border:'1px solid var(--border)',cursor:'pointer',color:'var(--muted)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14}}>✕</button>
+          </div>
+          <div style={{display:'flex',alignItems:'center',gap:10,background:'var(--surface2)',border:'1px solid var(--border)',borderRadius:12,padding:'10px 14px',marginBottom:16}}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16" style={{color:'var(--muted)',flexShrink:0}}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar cidade..." style={{flex:1,background:'none',border:'none',color:'var(--text)',fontFamily:"'Inter',sans-serif",fontSize:14,outline:'none'}}/>
+          </div>
+          <div style={{fontSize:11,color:'var(--muted)',marginBottom:12,fontWeight:600}}>CIDADES DISPONÍVEIS</div>
+          {filtered.map(c=>(
+            <div key={c.id} onClick={()=>{onSelect(c);onClose()}} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px 12px',borderRadius:14,marginBottom:8,cursor:'pointer',background:currentCity===c.id?'rgba(34,197,94,.1)':'var(--surface2)',border:`1px solid ${currentCity===c.id?'var(--green)':'var(--border)'}`,transition:'all .15s'}}>
+              <div>
+                <div style={{fontWeight:700,fontSize:15}}>{c.name}</div>
+                <div style={{fontSize:12,color:'var(--muted)',marginTop:2}}>{c.state} · Estabelecimentos cadastrados</div>
+              </div>
+              {currentCity===c.id&&<span style={{color:'var(--green)',fontSize:18}}>✓</span>}
+            </div>
+          ))}
+          <div style={{height:'calc(24px + env(safe-area-inset-bottom,0px))'}}/>
+        </div>
+      </div>
+    </>
+  )
+}
+
 /* ── Main App ────────────────────────────────────────────────────────────────── */
 export default function App() {
   const networkStatus = useNetworkStatus()
@@ -885,6 +1027,8 @@ export default function App() {
   const [detailLoc,   setDetailLoc]   = useState(null)
   const [nowOpen,     setNowOpen]     = useState(false)
   const [adminOpen,   setAdminOpen]   = useState(false)
+  const [settingsOpen,setSettingsOpen]= useState(false)
+  const [cityModal,   setCityModal]   = useState(false)
   const [activeFilter,setActiveFilter]= useState('all')
   const [toast,       setToast]       = useState(null)
   const [pointsAlert, setPointsAlert] = useState(null)
@@ -943,6 +1087,18 @@ export default function App() {
     ]
     return ()=>unsubs.forEach(u=>u())
   },[user])
+
+  const handleToggleSave = useCallback(async (place) => {
+    if (!user || !place?.id) return
+    const savedRef = ref(db, `users/${user.uid}/saved/${place.id}`)
+    if (saved[place.id]) {
+      await remove(savedRef)
+      showToast('🔖 Removido dos salvos')
+    } else {
+      await set(savedRef, { id:place.id, name:place.name, cat:place.cat, savedAt:Date.now() })
+      showToast('🔖 Salvo!')
+    }
+  }, [user, saved])
 
   const handleUpdateProfile = useCallback(async({name, photo})=>{
     if (!user) return
@@ -1223,6 +1379,7 @@ export default function App() {
           onPlace={loc=>setDetailLoc(loc)} onStartAdd={handleStartPick}
           isAdmin={isAdmin} setAdminOpen={setAdminOpen} pendingCount={pendingCount} logout={logout}
           onCategorySelect={filterId=>{setActiveFilter(filterId);setActiveTab('map')}}
+          onCityClick={()=>setCityModal(true)}
         />
       )}
 
@@ -1231,14 +1388,15 @@ export default function App() {
         <ActivitiesTab
           events={events} usersMap={usersMap} allPlaces={visiblePlaces}
           onPlace={loc=>{setDetailLoc(loc);setActiveTab('map')}}
-          user={user} likes={likes} following={following}
+          user={user} saved={saved} following={following}
         />
       )}
 
       {/* ── PROFILE ── */}
       {activeTab==='profile'&&(
         <ProfileTab user={user} onLogout={logout} onlineCount={onlineCount} events={events}
-          saved={saved} following={following} onUpdateProfile={handleUpdateProfile}/>
+          saved={saved} following={following} onUpdateProfile={handleUpdateProfile}
+          onSettings={()=>setSettingsOpen(true)}/>
       )}
 
       {/* ── BOTTOM NAV ── */}
@@ -1273,7 +1431,8 @@ export default function App() {
 
       {/* Panels */}
       <DetailPanel location={detailLoc} events={events} usersMap={usersMap} user={user}
-        onClose={()=>setDetailLoc(null)} onReport={loc=>{setDetailLoc(null);setReportLoc(loc)}}/>
+        onClose={()=>setDetailLoc(null)} onReport={loc=>{setDetailLoc(null);setReportLoc(loc)}}
+        onSave={handleToggleSave} saved={saved}/>
       <ReportPanel open={!!reportLoc} location={reportLoc}
         onClose={()=>setReportLoc(null)} onConfirm={handleReport}/>
       <NowPanel open={nowOpen} onClose={()=>setNowOpen(false)}
@@ -1281,6 +1440,10 @@ export default function App() {
       <AddLocationPanel open={addLocOpen} coords={pickedCoords}
         onClose={handleCancelAdd} onSave={handleSavePlace}/>
       <AdminPanel open={adminOpen} onClose={()=>setAdminOpen(false)} adminUid={user?.uid}/>
+      <SettingsPanel open={settingsOpen} user={user} onClose={()=>setSettingsOpen(false)}
+        onLogout={logout} onUpdateProfile={handleUpdateProfile}/>
+      <CitySelector open={cityModal} currentCity="bauru" onClose={()=>setCityModal(false)}
+        onSelect={city=>{ /* could flyTo city coords */ }}/>
 
       <style>{`
         @keyframes pulse     {0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.7}}

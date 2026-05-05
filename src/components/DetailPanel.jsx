@@ -93,7 +93,7 @@ function useReviews(locationId) {
   return { reviews, addReview }
 }
 
-export default function DetailPanel({location, events, usersMap, user, onClose, onReport}) {
+export default function DetailPanel({location, events, usersMap, user, onClose, onReport, onSave, saved}) {
   const [sharing,     setSharing]     = useState(false)
   const [ownerOpen,   setOwnerOpen]   = useState(false)
   const [chatOpen,    setChatOpen]    = useState(false)
@@ -129,6 +129,8 @@ export default function DetailPanel({location, events, usersMap, user, onClose, 
     : Math.min(5,Math.max(1,status.score)).toFixed(1)
   const totalReviews = reviews.length + actEvts.length + 42
   const myReview = reviews.find(r=>r.userId===user?.uid)
+
+  const isSaved = !!(saved && location && saved[location.id])
 
   const handleShare = async () => {
     setSharing(true)
@@ -451,16 +453,18 @@ export default function DetailPanel({location, events, usersMap, user, onClose, 
         }}>
           <div style={{display:'flex',gap:8,marginBottom:10}}>
             {[
-              {icon:'🔖',label:'Salvar',      onClick:()=>{}},
-              {icon:'📤',label:'Compartilhar',onClick:handleShare},
-              {icon:'⭐',label:'Avaliar',      onClick:()=>setActiveTab('avaliacoes')},
-              {icon:'📷',label:'Fotos',        onClick:()=>setActiveTab('fotos')},
+              {icon:isSaved?'🔖':'🔖', label:isSaved?'Salvo':'Salvar', onClick:()=>onSave&&onSave(location), active:isSaved},
+              {icon:'📤', label:'Compartilhar', onClick:handleShare},
+              {icon:'⭐', label:'Avaliar',       onClick:()=>setActiveTab('avaliacoes')},
+              {icon:'📷', label:'Fotos',         onClick:()=>setActiveTab('fotos')},
             ].map(a=>(
               <button key={a.label} onClick={a.onClick} style={{
                 flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:4,
-                background:'var(--surface2)',border:'1px solid var(--border)',
+                background:a.active?'rgba(34,197,94,.12)':'var(--surface2)',
+                border:`1px solid ${a.active?'var(--green)':'var(--border)'}`,
                 borderRadius:12,padding:'10px 4px',cursor:'pointer',
-                color:'var(--muted)',fontFamily:"'Inter',sans-serif",fontSize:10,fontWeight:600,
+                color:a.active?'var(--green)':'var(--muted)',
+                fontFamily:"'Inter',sans-serif",fontSize:10,fontWeight:600,
               }}><span style={{fontSize:18}}>{a.icon}</span>{a.label}</button>
             ))}
           </div>
