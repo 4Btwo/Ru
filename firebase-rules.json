@@ -14,7 +14,11 @@
       "$uid": {
         ".read": "auth != null",
         ".write": "auth.uid === $uid",
-        ".validate": "newData.hasChildren(['name']) && newData.child('name').val().length >= 1 && newData.child('name').val().length <= 60"
+        ".validate": "newData.hasChildren(['name']) && newData.child('name').val().length >= 1 && newData.child('name').val().length <= 60",
+        "privacy": {
+          ".read": "auth.uid === $uid",
+          ".write": "auth.uid === $uid"
+        }
       }
     },
 

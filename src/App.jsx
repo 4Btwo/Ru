@@ -572,6 +572,11 @@ function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUp
             <div style={{fontSize:12, color:'var(--muted)', marginBottom:6}}>
               @{(user.name||'user').toLowerCase().replace(/\s+/g,'')}
             </div>
+            {user.bio && (
+              <div style={{fontSize:12, color:'var(--text2)', lineHeight:1.6, marginBottom:6}}>
+                {user.bio}
+              </div>
+            )}
             <div style={{
               display:'inline-flex', alignItems:'center', gap:5,
               background:'rgba(34,197,94,.1)', border:'1px solid rgba(34,197,94,.25)',
@@ -871,99 +876,273 @@ function BottomNav({active, onChange, onAdd}) {
 /* ── Settings Panel ──────────────────────────────────────────────────────────── */
 function SettingsPanel({open, user, onClose, onLogout, onUpdateProfile}) {
   const [tab, setTab]           = useState('conta')
-  const [theme, setTheme]       = useState(localStorage.getItem('urbyn-theme')||'dark')
+  const [theme, setTheme]       = useState(()=>localStorage.getItem('urbyn-theme')||'dark')
   const [editName, setEditName] = useState(user?.name||'')
+  const [editBio,  setEditBio]  = useState(user?.bio||'')
   const [saving, setSaving]     = useState(false)
   const [saved2, setSaved2]     = useState(false)
 
+  // Privacy toggles — loaded from Firebase
+  const [privacy, setPrivacy]   = useState({
+    publicProfile: true,
+    activityVisible: true,
+    notifications: true,
+  })
+  const [savingPrivacy, setSavingPrivacy] = useState(false)
+
+  // Load privacy from Firebase on open
+  useEffect(()=>{
+    if (!user?.uid || !open) return
+    get(ref(db, `users/${user.uid}/privacy`)).then(snap=>{
+      if (snap.exists()) setPrivacy(p=>({...p,...snap.val()}))
+    })
+  },[user?.uid, open])
+
+  // Apply theme to DOM immediately when changed
   useEffect(()=>{
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem('urbyn-theme', theme)
   },[theme])
 
-  const handleSave = async () => {
+  // Apply saved theme on mount
+  useEffect(()=>{
+    const saved = localStorage.getItem('urbyn-theme')
+    if (saved) {
+      document.documentElement.setAttribute('data-theme', saved)
+      setTheme(saved)
+    }
+  },[])
+
+  const handleSaveAccount = async () => {
     if (!editName.trim()) return
     setSaving(true)
-    await onUpdateProfile({name:editName.trim()})
+    await onUpdateProfile({name:editName.trim(), bio:editBio.trim()})
     setSaving(false); setSaved2(true); setTimeout(()=>setSaved2(false),2000)
   }
 
-  const TABS = [{id:'conta',label:'👤 Conta'},{id:'aparencia',label:'🎨 Aparência'},{id:'privacidade',label:'🔒 Privacidade'}]
+  const togglePrivacy = async (key) => {
+    const next = {...privacy, [key]:!privacy[key]}
+    setPrivacy(next)
+    setSavingPrivacy(true)
+    await update(ref(db, `users/${user.uid}/privacy`), {[key]:next[key]})
+    setSavingPrivacy(false)
+  }
+
+  const TABS = [
+    {id:'conta',       label:'👤 Conta'},
+    {id:'aparencia',   label:'🎨 Aparência'},
+    {id:'privacidade', label:'🔒 Privacidade'},
+  ]
+
+  const THEMES = [
+    {id:'dark',    emoji:'🌑', label:'Escuro',      desc:'Padrão — verde sobre preto profundo'},
+    {id:'darker',  emoji:'⚫', label:'Ultra Escuro', desc:'Fundo puro #000, ideal para OLED'},
+    {id:'forest',  emoji:'🌲', label:'Floresta',     desc:'Verde mais vivo, tons naturais'},
+    {id:'light',   emoji:'☀️', label:'Claro',        desc:'Fundo branco, texto escuro'},
+  ]
+
+  const PRIVACY_ITEMS = [
+    {key:'publicProfile',    label:'Perfil público',    desc:'Outros usuários podem ver seu perfil'},
+    {key:'activityVisible',  label:'Atividade visível',  desc:'Mostrar suas avaliações e reportes'},
+    {key:'notifications',    label:'Notificações',       desc:'Receber alertas de locais próximos'},
+  ]
 
   return (
     <>
-      <div onClick={onClose} style={{position:'fixed',inset:0,zIndex:3000,background:'rgba(0,0,0,.7)',backdropFilter:'blur(4px)',opacity:open?1:0,pointerEvents:open?'all':'none',transition:'opacity .25s'}}/>
-      <div style={{position:'fixed',bottom:0,left:0,right:0,zIndex:3100,background:'var(--bg)',borderRadius:'24px 24px 0 0',maxHeight:'90vh',overflowY:'auto',transform:open?'translateY(0)':'translateY(100%)',transition:'transform .35s cubic-bezier(.4,0,.2,1)'}}>
+      <div onClick={onClose} style={{
+        position:'fixed', inset:0, zIndex:3000,
+        background:'rgba(0,0,0,.7)', backdropFilter:'blur(4px)',
+        opacity:open?1:0, pointerEvents:open?'all':'none', transition:'opacity .25s',
+      }}/>
+      <div style={{
+        position:'fixed', bottom:0, left:0, right:0, zIndex:3100,
+        background:'var(--bg)', borderRadius:'24px 24px 0 0',
+        maxHeight:'90vh', overflowY:'auto',
+        transform:open?'translateY(0)':'translateY(100%)',
+        transition:'transform .35s cubic-bezier(.4,0,.2,1)',
+      }}>
         <div style={{width:40,height:4,background:'var(--border)',borderRadius:2,margin:'12px auto 0'}}/>
         <div style={{padding:'16px 16px 0'}}>
+
+          {/* Header */}
           <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:20}}>
             <div style={{fontSize:18,fontWeight:800}}>Configurações</div>
-            <button onClick={onClose} style={{width:32,height:32,borderRadius:'50%',background:'var(--surface2)',border:'1px solid var(--border)',cursor:'pointer',color:'var(--muted)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14}}>✕</button>
+            <button onClick={onClose} style={{
+              width:32,height:32,borderRadius:'50%',
+              background:'var(--surface2)',border:'1px solid var(--border)',
+              cursor:'pointer',color:'var(--muted)',
+              display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,
+            }}>✕</button>
           </div>
+
+          {/* Tabs */}
           <div style={{display:'flex',gap:6,marginBottom:20}}>
             {TABS.map(t=>(
-              <button key={t.id} onClick={()=>setTab(t.id)} style={{flex:1,padding:'9px 4px',borderRadius:10,cursor:'pointer',background:tab===t.id?'rgba(34,197,94,.15)':'var(--surface2)',border:`1px solid ${tab===t.id?'var(--green)':'var(--border)'}`,color:tab===t.id?'var(--green)':'var(--muted)',fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:10}}>{t.label}</button>
+              <button key={t.id} onClick={()=>setTab(t.id)} style={{
+                flex:1, padding:'9px 4px', borderRadius:10, cursor:'pointer',
+                background:tab===t.id?'rgba(34,197,94,.15)':'var(--surface2)',
+                border:`1px solid ${tab===t.id?'var(--green)':'var(--border)'}`,
+                color:tab===t.id?'var(--green)':'var(--muted)',
+                fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:10,
+                transition:'all .15s',
+              }}>{t.label}</button>
             ))}
           </div>
 
+          {/* ── CONTA ── */}
           {tab==='conta'&&(
             <div>
-              <div style={{fontSize:11,color:'var(--muted)',fontWeight:600,marginBottom:6,textTransform:'uppercase',letterSpacing:'.06em'}}>👤 Nome</div>
-              <input value={editName} onChange={e=>setEditName(e.target.value)} placeholder="Seu nome"
-                style={{width:'100%',background:'var(--surface2)',border:'1.5px solid var(--border)',borderRadius:12,padding:'12px 14px',color:'var(--text)',fontFamily:"'Inter',sans-serif",fontSize:14,outline:'none',boxSizing:'border-box',marginBottom:10}}
-                onFocus={e=>e.target.style.borderColor='var(--green)'} onBlur={e=>e.target.style.borderColor='var(--border)'}/>
-              <div style={{fontSize:11,color:'var(--muted)',fontWeight:600,marginBottom:6,textTransform:'uppercase',letterSpacing:'.06em'}}>📧 Email</div>
+              {/* Nome */}
+              <div style={{fontSize:11,color:'var(--muted)',fontWeight:700,marginBottom:6,textTransform:'uppercase',letterSpacing:'.07em'}}>👤 Nome</div>
+              <input value={editName} onChange={e=>setEditName(e.target.value)}
+                placeholder="Seu nome" maxLength={60}
+                style={{
+                  width:'100%', background:'var(--surface2)', border:'1.5px solid var(--border)',
+                  borderRadius:12, padding:'12px 14px', color:'var(--text)',
+                  fontFamily:"'Inter',sans-serif", fontSize:14, outline:'none',
+                  boxSizing:'border-box', marginBottom:14, transition:'border-color .2s',
+                }}
+                onFocus={e=>e.target.style.borderColor='var(--green)'}
+                onBlur={e=>e.target.style.borderColor='var(--border)'}/>
+
+              {/* Bio */}
+              <div style={{fontSize:11,color:'var(--muted)',fontWeight:700,marginBottom:6,textTransform:'uppercase',letterSpacing:'.07em'}}>✍️ Bio</div>
+              <textarea value={editBio} onChange={e=>setEditBio(e.target.value)}
+                placeholder="Conte um pouco sobre você... ex: Explorador de cafés e baladas de Bauru 🌙"
+                maxLength={160} rows={3}
+                style={{
+                  width:'100%', background:'var(--surface2)', border:'1.5px solid var(--border)',
+                  borderRadius:12, padding:'12px 14px', color:'var(--text)',
+                  fontFamily:"'Inter',sans-serif", fontSize:14, outline:'none',
+                  resize:'none', lineHeight:1.6, boxSizing:'border-box', marginBottom:4,
+                  transition:'border-color .2s',
+                }}
+                onFocus={e=>e.target.style.borderColor='var(--green)'}
+                onBlur={e=>e.target.style.borderColor='var(--border)'}/>
+              <div style={{fontSize:10,color:'var(--dim)',textAlign:'right',marginBottom:14}}>{editBio.length}/160</div>
+
+              {/* Email (readonly) */}
+              <div style={{fontSize:11,color:'var(--muted)',fontWeight:700,marginBottom:6,textTransform:'uppercase',letterSpacing:'.07em'}}>📧 Email</div>
               <input value={user?.email||''} disabled
-                style={{width:'100%',background:'var(--surface3)',border:'1px solid var(--border)',borderRadius:12,padding:'12px 14px',color:'var(--dim)',fontFamily:"'Inter',sans-serif",fontSize:14,outline:'none',boxSizing:'border-box',marginBottom:4,cursor:'not-allowed'}}/>
-              <div style={{fontSize:10,color:'var(--dim)',marginBottom:14}}>Email não pode ser alterado</div>
-              <button onClick={handleSave} disabled={saving||!editName.trim()} style={{width:'100%',padding:14,borderRadius:12,border:'none',background:saved2?'rgba(34,197,94,.2)':'var(--green)',color:saved2?'var(--green)':'#052e16',fontFamily:"'Inter',sans-serif",fontWeight:800,fontSize:14,cursor:'pointer',marginBottom:16,transition:'all .2s'}}>{saved2?'✅ Salvo!':saving?'Salvando...':'Salvar alterações'}</button>
+                style={{
+                  width:'100%', background:'var(--surface3)', border:'1px solid var(--border)',
+                  borderRadius:12, padding:'12px 14px', color:'var(--dim)',
+                  fontFamily:"'Inter',sans-serif", fontSize:14, outline:'none',
+                  boxSizing:'border-box', marginBottom:4, cursor:'not-allowed',
+                }}/>
+              <div style={{fontSize:10,color:'var(--dim)',marginBottom:16}}>Email não pode ser alterado</div>
+
+              <button onClick={handleSaveAccount} disabled={saving||!editName.trim()} style={{
+                width:'100%', padding:14, borderRadius:12, border:'none',
+                background:saved2?'rgba(34,197,94,.2)':'var(--green)',
+                color:saved2?'var(--green)':'#052e16',
+                fontFamily:"'Inter',sans-serif", fontWeight:800, fontSize:14,
+                cursor:editName.trim()?'pointer':'not-allowed',
+                marginBottom:16, transition:'all .2s',
+              }}>{saved2?'✅ Salvo!':saving?'Salvando...':'Salvar alterações'}</button>
+
               <div style={{height:1,background:'var(--border)',marginBottom:16}}/>
-              <button onClick={onLogout} style={{width:'100%',padding:14,borderRadius:12,background:'rgba(239,68,68,.07)',border:'1px solid rgba(239,68,68,.25)',color:'var(--red)',fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:14,cursor:'pointer'}}>Sair da conta</button>
+              <button onClick={onLogout} style={{
+                width:'100%', padding:14, borderRadius:12,
+                background:'rgba(239,68,68,.07)', border:'1px solid rgba(239,68,68,.25)',
+                color:'var(--red)', fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer',
+              }}>Sair da conta</button>
             </div>
           )}
 
+          {/* ── APARÊNCIA ── */}
           {tab==='aparencia'&&(
             <div>
-              <div style={{fontSize:12,color:'var(--muted)',marginBottom:16}}>Escolha o tema visual do app.</div>
-              {[
-                {id:'dark',label:'🌑 Escuro',desc:'Padrão — fundo preto profundo'},
-                {id:'darker',label:'⚫ Ultra Escuro',desc:'Ainda mais escuro, ideal para OLED'},
-                {id:'forest',label:'🌲 Floresta',desc:'Tons verdes suaves'},
-              ].map(t=>(
-                <div key={t.id} onClick={()=>setTheme(t.id)} style={{display:'flex',alignItems:'center',justifyContent:'space-between',background:'var(--surface2)',border:`1.5px solid ${theme===t.id?'var(--green)':'var(--border)'}`,borderRadius:14,padding:'14px 16px',marginBottom:10,cursor:'pointer',transition:'border-color .2s'}}>
-                  <div>
-                    <div style={{fontWeight:700,fontSize:14,marginBottom:2}}>{t.label}</div>
-                    <div style={{fontSize:12,color:'var(--muted)'}}>{t.desc}</div>
+              <div style={{fontSize:12,color:'var(--muted)',lineHeight:1.6,marginBottom:16}}>
+                Escolha o tema visual do app. A mudança é instantânea.
+              </div>
+              {THEMES.map(t=>(
+                <div key={t.id} onClick={()=>setTheme(t.id)} style={{
+                  display:'flex', alignItems:'center', justifyContent:'space-between',
+                  background:theme===t.id?'rgba(34,197,94,.1)':'var(--surface2)',
+                  border:`1.5px solid ${theme===t.id?'var(--green)':'var(--border)'}`,
+                  borderRadius:14, padding:'14px 16px', marginBottom:10,
+                  cursor:'pointer', transition:'all .2s',
+                }}>
+                  <div style={{display:'flex',alignItems:'center',gap:12}}>
+                    <div style={{
+                      width:40, height:40, borderRadius:10, flexShrink:0,
+                      background:t.id==='dark'?'#0c1a12':t.id==='darker'?'#000':t.id==='forest'?'#0a2e12':'#f8fafc',
+                      border:`2px solid ${theme===t.id?'var(--green)':'var(--border)'}`,
+                      display:'flex', alignItems:'center', justifyContent:'center', fontSize:18,
+                    }}>{t.emoji}</div>
+                    <div>
+                      <div style={{fontWeight:700,fontSize:14,marginBottom:2}}>{t.label}</div>
+                      <div style={{fontSize:11,color:'var(--muted)'}}>{t.desc}</div>
+                    </div>
                   </div>
-                  <div style={{width:22,height:22,borderRadius:'50%',border:`2px solid ${theme===t.id?'var(--green)':'var(--border)'}`,background:theme===t.id?'var(--green)':'transparent',display:'flex',alignItems:'center',justifyContent:'center',transition:'all .2s'}}>
+                  <div style={{
+                    width:22, height:22, borderRadius:'50%', flexShrink:0,
+                    border:`2px solid ${theme===t.id?'var(--green)':'var(--border)'}`,
+                    background:theme===t.id?'var(--green)':'transparent',
+                    display:'flex', alignItems:'center', justifyContent:'center',
+                    transition:'all .2s',
+                  }}>
                     {theme===t.id&&<div style={{width:8,height:8,borderRadius:'50%',background:'#052e16'}}/>}
                   </div>
                 </div>
               ))}
+              <div style={{
+                marginTop:8, padding:'10px 14px', borderRadius:12,
+                background:'rgba(34,197,94,.06)', border:'1px solid rgba(34,197,94,.15)',
+                fontSize:11, color:'var(--muted)', lineHeight:1.7,
+              }}>
+                💡 O tema é salvo automaticamente e aplicado toda vez que você abrir o app.
+              </div>
             </div>
           )}
 
+          {/* ── PRIVACIDADE ── */}
           {tab==='privacidade'&&(
             <div>
-              {[
-                {label:'Perfil público',on:true,desc:'Outros usuários podem ver seu perfil'},
-                {label:'Atividade visível',on:true,desc:'Mostrar suas avaliações e reportes'},
-                {label:'Notificações',on:true,desc:'Receber alertas de locais próximos'},
-              ].map((item,i)=>(
-                <div key={i} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px 0',borderBottom:'1px solid var(--border)'}}>
-                  <div>
-                    <div style={{fontWeight:600,fontSize:14}}>{item.label}</div>
-                    <div style={{fontSize:12,color:'var(--muted)',marginTop:2}}>{item.desc}</div>
+              {PRIVACY_ITEMS.map(item=>(
+                <div key={item.key} style={{
+                  display:'flex', alignItems:'center', justifyContent:'space-between',
+                  padding:'16px 0', borderBottom:'1px solid var(--border)',
+                }}>
+                  <div style={{flex:1, paddingRight:16}}>
+                    <div style={{fontWeight:700, fontSize:14, marginBottom:3}}>{item.label}</div>
+                    <div style={{fontSize:12, color:'var(--muted)', lineHeight:1.5}}>{item.desc}</div>
                   </div>
-                  <div style={{width:48,height:26,borderRadius:100,background:item.on?'var(--green)':'var(--surface3)',border:`1px solid ${item.on?'var(--green)':'var(--border)'}`,position:'relative',cursor:'pointer',transition:'all .2s',flexShrink:0}}>
-                    <div style={{position:'absolute',top:3,left:item.on?24:3,width:18,height:18,borderRadius:'50%',background:'#fff',transition:'left .2s',boxShadow:'0 1px 4px rgba(0,0,0,.3)'}}/>
+                  {/* Toggle switch */}
+                  <div
+                    onClick={()=>!savingPrivacy&&togglePrivacy(item.key)}
+                    style={{
+                      width:52, height:28, borderRadius:100, flexShrink:0,
+                      background:privacy[item.key]?'var(--green)':'var(--surface3)',
+                      border:`1px solid ${privacy[item.key]?'var(--green)':'var(--border)'}`,
+                      position:'relative', cursor:savingPrivacy?'wait':'pointer',
+                      transition:'background .25s, border-color .25s',
+                    }}
+                  >
+                    <div style={{
+                      position:'absolute',
+                      top:4,
+                      left:privacy[item.key]?26:4,
+                      width:18, height:18, borderRadius:'50%',
+                      background:'#fff',
+                      transition:'left .25s cubic-bezier(.4,0,.2,1)',
+                      boxShadow:'0 1px 4px rgba(0,0,0,.35)',
+                    }}/>
                   </div>
                 </div>
               ))}
-              <div style={{fontSize:11,color:'var(--dim)',marginTop:16,lineHeight:1.7}}>Os dados de localização são usados apenas para mostrar locais próximos e nunca são compartilhados com terceiros.</div>
+              <div style={{
+                fontSize:11, color:'var(--dim)', marginTop:16,
+                lineHeight:1.8, padding:'10px 14px', borderRadius:12,
+                background:'var(--surface2)', border:'1px solid var(--border)',
+              }}>
+                🔒 Os dados de localização são usados apenas para mostrar locais próximos e nunca são compartilhados com terceiros. Você pode alterar essas preferências a qualquer momento.
+              </div>
             </div>
           )}
-          <div style={{height:'calc(24px + env(safe-area-inset-bottom,0px))'}}/>
+
+          <div style={{height:'calc(32px + env(safe-area-inset-bottom,0px))'}}/>
         </div>
       </div>
     </>
@@ -1100,11 +1279,21 @@ export default function App() {
     }
   }, [user, saved])
 
-  const handleUpdateProfile = useCallback(async({name, photo})=>{
+  const handleUpdateProfile = useCallback(async({name, photo, bio})=>{
     if (!user) return
-    await update(ref(db,`users/${user.uid}`), {name, ...(photo?{photo}:{})})
+    await update(ref(db,`users/${user.uid}`), {
+      name,
+      ...(photo ? {photo} : {}),
+      ...(bio !== undefined ? {bio} : {}),
+    })
     showToast('✅ Perfil atualizado!')
   },[user])
+
+  // Apply saved theme on app boot
+  useEffect(()=>{
+    const saved = localStorage.getItem('urbyn-theme')
+    if (saved) document.documentElement.setAttribute('data-theme', saved)
+  },[])
 
   const showToast = useCallback((msg,bg='var(--green)',color='#052e16')=>{
     setToast({msg,bg,color})

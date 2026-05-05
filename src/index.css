@@ -26,6 +26,61 @@
   --sab: env(safe-area-inset-bottom,0px);
 }
 
+/* ── Tema: Ultra Escuro (OLED) ── */
+[data-theme="darker"] {
+  --bg:       #000000;
+  --bg2:      #010101;
+  --surface:  #080808;
+  --surface2: #0f0f0f;
+  --surface3: #141414;
+  --border:   #1a1a1a;
+  --border2:  #222222;
+  --text:     #f0fdf4;
+  --text2:    #bbf7d0;
+  --muted:    #555555;
+  --dim:      #2a2a2a;
+}
+
+/* ── Tema: Floresta ── */
+[data-theme="forest"] {
+  --bg:       #0a1a0e;
+  --bg2:      #071209;
+  --surface:  #0f2414;
+  --surface2: #142c19;
+  --surface3: #1a3620;
+  --border:   #1e3c24;
+  --border2:  #254830;
+  --green:    #4ade80;
+  --green-dark:#22c55e;
+  --green-glow:rgba(74,222,128,.2);
+  --green-dim: rgba(74,222,128,.08);
+  --accent:   #86efac;
+  --text:     #f0fdf4;
+  --text2:    #bbf7d0;
+  --muted:    #5a8060;
+  --dim:      #2a4a30;
+}
+
+/* ── Tema: Claro ── */
+[data-theme="light"] {
+  --bg:       #f8fafc;
+  --bg2:      #f1f5f9;
+  --surface:  #ffffff;
+  --surface2: #f1f5f9;
+  --surface3: #e2e8f0;
+  --border:   #cbd5e1;
+  --border2:  #b0bec5;
+  --green:    #16a34a;
+  --green-dark:#15803d;
+  --green-glow:rgba(22,163,74,.15);
+  --green-dim: rgba(22,163,74,.08);
+  --accent:   #22c55e;
+  --text:     #0f172a;
+  --text2:    #1e293b;
+  --muted:    #64748b;
+  --dim:      #94a3b8;
+}
+
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body,#root{height:100%;overflow:hidden}
 body{
