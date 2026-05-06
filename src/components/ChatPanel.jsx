@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useChat } from '../hooks/useChat'
 import { uploadToCloudinary } from '../lib/cloudinary'
+import UserProfilePanel from './UserProfilePanel'
 
 function timeLabel(ts) {
   const d = new Date(ts)
@@ -10,8 +11,9 @@ function timeLabel(ts) {
 
 export default function ChatPanel({ open, location, user, onClose }) {
   const { messages, sendMessage } = useChat(location?.id, user?.uid)
-  const [text,      setText]      = useState('')
-  const [uploading, setUploading] = useState(false)
+  const [text,        setText]        = useState('')
+  const [uploading,   setUploading]   = useState(false)
+  const [viewingUid,  setViewingUid]  = useState(null)
   const fileRef    = useRef(null)
   const bottomRef  = useRef(null)
 
@@ -96,17 +98,29 @@ export default function ChatPanel({ open, location, user, onClose }) {
                 display:'flex', flexDirection: isMe ? 'row-reverse' : 'row',
                 alignItems:'flex-end', gap:8,
               }}>
-                {/* Avatar */}
+                {/* Avatar — clicável */}
                 {!isMe && (
-                  msg.userPhoto
-                    ? <img src={msg.userPhoto} alt="" style={{ width:28, height:28, borderRadius:'50%', flexShrink:0 }}/>
-                    : <div style={{ width:28, height:28, borderRadius:'50%', background:'#2a2a3d', flexShrink:0 }}/>
+                  <div
+                    onClick={()=>setViewingUid(msg.userId)}
+                    style={{ cursor:'pointer', flexShrink:0 }}
+                    title={`Ver perfil de ${msg.userName?.split(' ')[0]}`}
+                  >
+                    {msg.userPhoto
+                      ? <img src={msg.userPhoto} alt="" style={{ width:32, height:32, borderRadius:'50%', border:'2px solid #2a2a3d', transition:'border-color .2s' }}
+                          onMouseEnter={e=>e.currentTarget.style.borderColor='#22c55e'}
+                          onMouseLeave={e=>e.currentTarget.style.borderColor='#2a2a3d'}/>
+                      : <div style={{ width:32, height:32, borderRadius:'50%', background:'#2a2a3d', display:'flex', alignItems:'center', justifyContent:'center', fontSize:14 }}>👤</div>
+                    }
+                  </div>
                 )}
 
                 <div style={{ maxWidth:'72%' }}>
-                  {/* Nome */}
+                  {/* Nome — clicável */}
                   {!isMe && (
-                    <div style={{ fontSize:10, color:'#6666aa', marginBottom:3, marginLeft:4 }}>
+                    <div
+                      onClick={()=>setViewingUid(msg.userId)}
+                      style={{ fontSize:11, color:'#22c55e', marginBottom:3, marginLeft:4, cursor:'pointer', fontWeight:600 }}
+                    >
                       {msg.userName?.split(' ')[0]}
                     </div>
                   )}
@@ -195,6 +209,14 @@ export default function ChatPanel({ open, location, user, onClose }) {
           }}>↑</button>
         </div>
       </div>
+
+      {/* Perfil do usuário ao clicar no avatar/nome */}
+      <UserProfilePanel
+        open={!!viewingUid}
+        targetUid={viewingUid}
+        currentUser={user}
+        onClose={()=>setViewingUid(null)}
+      />
     </>
   )
 }

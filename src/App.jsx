@@ -18,6 +18,7 @@ import DetailPanel           from './components/DetailPanel'
 import NowPanel              from './components/NowPanel'
 import AddLocationPanel      from './components/AddLocationPanel'
 import AdminPanel            from './components/AdminPanel'
+import UserProfilePanel      from './components/UserProfilePanel'
 import TrafficConfirmBanner  from './components/TrafficConfirmBanner'
 import { useTrafficConfirm } from './hooks/useTrafficConfirm'
 import { useNetworkStatus }  from './hooks/useNetworkStatus'
@@ -305,7 +306,7 @@ function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, aler
 }
 
 /* ── Atividades Tab ───────────────────────────────────────────────────────────── */
-function ActivitiesTab({events, usersMap, allPlaces, onPlace, user, saved, following}) {
+function ActivitiesTab({events, usersMap, allPlaces, onPlace, user, saved, following, onViewUser}) {
   const now = Date.now()
   const timeAgo = ts => {
     const d = Math.floor((now-ts)/1000)
@@ -387,7 +388,12 @@ function ActivitiesTab({events, usersMap, allPlaces, onPlace, user, saved, follo
                     }}>{meta?.emoji||'📍'}</div>
                     <div style={{flex:1, minWidth:0}}>
                       <div style={{fontSize:13, fontWeight:600, lineHeight:1.5, marginBottom:2}}>
-                        <span style={{color:'var(--green)'}}>{ev.userName?.split(' ')[0]||'Alguém'}</span>
+                        <span
+                          onClick={e=>{e.stopPropagation();onViewUser&&onViewUser(ev.userId)}}
+                          style={{color:'var(--green)', cursor:'pointer', textDecoration:'underline', textDecorationColor:'transparent'}}
+                          onMouseEnter={e=>e.currentTarget.style.textDecorationColor='var(--green)'}
+                          onMouseLeave={e=>e.currentTarget.style.textDecorationColor='transparent'}
+                        >{ev.userName?.split(' ')[0]||'Alguém'}</span>
                         {' '}marcou{' '}
                         <span style={{color:meta?.color||'var(--green)'}}>{meta?.label||ev.type}</span>
                       </div>
@@ -467,7 +473,7 @@ function ActivitiesTab({events, usersMap, allPlaces, onPlace, user, saved, follo
 }
 
 /* ── Perfil Tab ───────────────────────────────────────────────────────────────── */
-function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUpdateProfile, onSettings}) {
+function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUpdateProfile, onSettings, onViewUser}) {
   const myEvents = events.filter(e=>e.userId===user?.uid)
   const savedPlaces = Object.values(saved||{})
   const followingList = Object.entries(following||{}).map(([uid,info])=>({uid,...info}))
@@ -691,11 +697,15 @@ function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUp
                 <div style={{fontSize:13}}>Você não segue ninguém ainda</div>
               </div>
             : followingList.map(u=>(
-                <div key={u.uid} style={{
+                <div key={u.uid} onClick={()=>onViewUser&&onViewUser(u.uid)} style={{
                   display:'flex', alignItems:'center', gap:12,
                   background:'var(--surface2)', border:'1px solid var(--border)',
-                  borderRadius:14, padding:'12px 14px', marginBottom:10,
-                }}>
+                  borderRadius:14, padding:'12px 14px', marginBottom:10, cursor:'pointer',
+                  transition:'border-color .15s',
+                }}
+                  onMouseEnter={e=>e.currentTarget.style.borderColor='var(--green)'}
+                  onMouseLeave={e=>e.currentTarget.style.borderColor='var(--border)'}
+                >
                   <div style={{
                     width:44, height:44, borderRadius:'50%', flexShrink:0,
                     background:'var(--surface3)', border:'2px solid rgba(34,197,94,.3)',
@@ -1208,6 +1218,7 @@ export default function App() {
   const [adminOpen,   setAdminOpen]   = useState(false)
   const [settingsOpen,setSettingsOpen]= useState(false)
   const [cityModal,   setCityModal]   = useState(false)
+  const [viewingUid,  setViewingUid]  = useState(null)
   const [activeFilter,setActiveFilter]= useState('all')
   const [toast,       setToast]       = useState(null)
   const [pointsAlert, setPointsAlert] = useState(null)
@@ -1578,6 +1589,7 @@ export default function App() {
           events={events} usersMap={usersMap} allPlaces={visiblePlaces}
           onPlace={loc=>{setDetailLoc(loc);setActiveTab('map')}}
           user={user} saved={saved} following={following}
+          onViewUser={setViewingUid}
         />
       )}
 
@@ -1585,7 +1597,7 @@ export default function App() {
       {activeTab==='profile'&&(
         <ProfileTab user={user} onLogout={logout} onlineCount={onlineCount} events={events}
           saved={saved} following={following} onUpdateProfile={handleUpdateProfile}
-          onSettings={()=>setSettingsOpen(true)}/>
+          onSettings={()=>setSettingsOpen(true)} onViewUser={setViewingUid}/>
       )}
 
       {/* ── BOTTOM NAV ── */}
@@ -1633,6 +1645,8 @@ export default function App() {
         onLogout={logout} onUpdateProfile={handleUpdateProfile}/>
       <CitySelector open={cityModal} currentCity="bauru" onClose={()=>setCityModal(false)}
         onSelect={city=>{ /* could flyTo city coords */ }}/>
+      <UserProfilePanel open={!!viewingUid} targetUid={viewingUid}
+        currentUser={user} onClose={()=>setViewingUid(null)}/>
 
       <style>{`
         @keyframes pulse     {0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.7}}
