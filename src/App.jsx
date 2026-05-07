@@ -23,6 +23,8 @@ import TrafficConfirmBanner  from './components/TrafficConfirmBanner'
 import { useTrafficConfirm } from './hooks/useTrafficConfirm'
 import { useNetworkStatus }  from './hooks/useNetworkStatus'
 import NetworkBanner         from './components/NetworkBanner'
+import NotificationsPanel, { useUserNotifications } from './components/NotificationsPanel'
+import PrivateChatPanel,   { usePrivateChats }       from './components/PrivateChatPanel'
 
 /* ── Icons ──────────────────────────────────────────────────────────────────── */
 const IC = {
@@ -32,7 +34,7 @@ const IC = {
   Activity: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="22" height="22"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
   User: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="22" height="22"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
   Bell: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="20" height="20"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
-  Filter: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>,
+  Chat: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="20" height="20"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
   SearchSm: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="15" height="15"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
   MapPin: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="14" height="14"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>,
   Star: ({filled}) => <svg viewBox="0 0 24 24" fill={filled?'#22c55e':'none'} stroke="#22c55e" strokeWidth="2" width="13" height="13"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>,
@@ -90,7 +92,7 @@ function Stars({score}) {
 }
 
 /* ── Home Tab ─────────────────────────────────────────────────────────────────── */
-function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, alertCount, onlineCount, onPlace, onStartAdd, isAdmin, setAdminOpen, pendingCount, logout, onCategorySelect, onCityClick}) {
+function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, alertCount, onlineCount, onPlace, onStartAdd, isAdmin, setAdminOpen, pendingCount, logout, onCategorySelect, onCityClick, onBell, notifCount, onChat, chatUnread}) {
   const now = Date.now()
   const trending = [...allPlaces]
     .map(p=>({...p, _score:calcScore(p.id, events, usersMap)}))
@@ -154,12 +156,26 @@ function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, aler
                 {pendingCount>0&&<span style={{position:'absolute', top:-4, right:-4, background:'var(--red)', color:'#fff', fontSize:9, fontWeight:800, borderRadius:'50%', width:15, height:15, display:'flex', alignItems:'center', justifyContent:'center'}}>{pendingCount}</span>}
               </button>
             )}
-            <button style={{
+            {/* Chat privado */}
+            <button onClick={onChat} style={{
               width:36, height:36, borderRadius:'50%',
               background:'var(--surface2)', border:'1px solid var(--border)',
               display:'flex', alignItems:'center', justifyContent:'center',
-              cursor:'pointer', color:'var(--muted)',
-            }}><IC.Bell/></button>
+              cursor:'pointer', color:'var(--muted)', position:'relative',
+            }}>
+              <IC.Chat/>
+              {chatUnread>0&&<span style={{position:'absolute', top:-3, right:-3, background:'var(--green)', color:'#052e16', fontSize:9, fontWeight:800, borderRadius:'50%', width:16, height:16, display:'flex', alignItems:'center', justifyContent:'center', border:'2px solid var(--bg)'}}>{chatUnread>9?'9+':chatUnread}</span>}
+            </button>
+            {/* Notificações */}
+            <button onClick={onBell} style={{
+              width:36, height:36, borderRadius:'50%',
+              background:'var(--surface2)', border:'1px solid var(--border)',
+              display:'flex', alignItems:'center', justifyContent:'center',
+              cursor:'pointer', color:'var(--muted)', position:'relative',
+            }}>
+              <IC.Bell/>
+              {notifCount>0&&<span style={{position:'absolute', top:-3, right:-3, background:'var(--red)', color:'#fff', fontSize:9, fontWeight:800, borderRadius:'50%', width:16, height:16, display:'flex', alignItems:'center', justifyContent:'center', border:'2px solid var(--bg)'}}>{notifCount>9?'9+':notifCount}</span>}
+            </button>
             <div style={{
               width:36, height:36, borderRadius:'50%',
               background:'var(--surface2)', border:'2px solid rgba(34,197,94,.4)',
@@ -920,7 +936,7 @@ function SectionHeader({title, action}) {
 }
 
 /* ── Bottom Nav ──────────────────────────────────────────────────────────────── */
-function BottomNav({active, onChange, onAdd}) {
+function BottomNav({active, onChange, onAdd, notifCount, chatCount}) {
   const tabs = [
     {id:'home',       label:'Início',     Icon:IC.Home},
     {id:'map',        label:'Explorar',   Icon:IC.Search},
@@ -961,7 +977,7 @@ function BottomNav({active, onChange, onAdd}) {
             border:'none', background:'none',
             color:isActive?'var(--green)':'var(--muted)',
             fontFamily:"'Inter',sans-serif", fontWeight:600, fontSize:10,
-            transition:'color .2s',
+            transition:'color .2s', position:'relative',
           }}>
             <tab.Icon/>
             {tab.label}
@@ -1299,6 +1315,8 @@ export default function App() {
   const {allPlaces, addPlace} = usePlaces(user?.uid)
   const onlineCount           = useOnline(user?.uid)
   const {permission, requestPermission} = useNotifications(user?.uid)
+  const {notifications: userNotifs, unreadCount: notifCount} = useUserNotifications(user?.uid)
+  const {conversations: dmConversations, totalUnread: chatUnread} = usePrivateChats(user?.uid)
 
   const [userPos,     setUserPos]     = useState(null)
   const [reportLoc,   setReportLoc]   = useState(null)
@@ -1320,6 +1338,9 @@ export default function App() {
   const [addLocOpen,  setAddLocOpen]  = useState(false)
   const [trafficPrompt,setTrafficPrompt]=useState(null)
   const [activeTab,   setActiveTab]   = useState('home')
+  const [notifOpen,   setNotifOpen]   = useState(false)
+  const [chatOpen,    setChatOpen]    = useState(false)
+  const [chatTarget,  setChatTarget]  = useState(null) // {uid, name, photo}
 
   const flyToPlace = useCallback((place) => {
     setDetailLoc(place)
@@ -1680,6 +1701,8 @@ export default function App() {
           isAdmin={isAdmin} setAdminOpen={setAdminOpen} pendingCount={pendingCount} logout={logout}
           onCategorySelect={filterId=>{setActiveFilter(filterId);setActiveTab('map')}}
           onCityClick={()=>setCityModal(true)}
+          onBell={()=>setNotifOpen(true)} notifCount={notifCount}
+          onChat={()=>{setChatTarget(null);setChatOpen(true)}} chatUnread={chatUnread}
         />
       )}
 
@@ -1747,6 +1770,23 @@ export default function App() {
         onSelect={city=>{ /* could flyTo city coords */ }}/>
       <UserProfilePanel open={!!viewingUid} targetUid={viewingUid}
         currentUser={user} onClose={()=>setViewingUid(null)}/>
+
+      {/* ── NOTIFICAÇÕES ── */}
+      <NotificationsPanel
+        open={notifOpen} onClose={()=>setNotifOpen(false)}
+        currentUser={user}
+        onViewUser={uid=>{setViewingUid(uid);setNotifOpen(false)}}
+        onOpenChat={(uid,name,photo)=>{setChatTarget({uid,name,photo});setChatOpen(true);setNotifOpen(false)}}
+      />
+
+      {/* ── CHAT PRIVADO ── */}
+      <PrivateChatPanel
+        open={chatOpen} onClose={()=>{setChatOpen(false);setChatTarget(null)}}
+        currentUser={user}
+        initialTargetUid={chatTarget?.uid||null}
+        initialTargetName={chatTarget?.name||null}
+        initialTargetPhoto={chatTarget?.photo||null}
+      />
 
       <style>{`
         @keyframes pulse     {0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.7}}

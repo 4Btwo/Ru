@@ -89,6 +89,14 @@ export default function UserProfilePanel({ open, targetUid, currentUser, onClose
     Promise.all(loads).finally(() => setLoading(false))
   }, [open, targetUid, currentUser?.uid])
 
+  const [isPendingRequest, setIsPendingRequest] = useState(false)
+
+  // Check if there's a pending follow request
+  useEffect(() => {
+    if (!open || !targetUid || !currentUser?.uid || isOwnProfile) return
+    get(ref(db, `followRequests/${targetUid}/${currentUser.uid}`)).then(s => setIsPendingRequest(s.exists()))
+  }, [open, targetUid, currentUser?.uid, isOwnProfile])
+
   const handleToggleFollow = useCallback(async () => {
     if (!currentUser?.uid || !targetUid || toggling || isOwnProfile) return
     setToggling(true)
@@ -98,16 +106,69 @@ export default function UserProfilePanel({ open, targetUid, currentUser, onClose
     if (isFollowing) {
       await remove(followerRef)
       await remove(followingRef)
+      await update(ref(db, `users/${targetUid}`), { followers: increment(-1) })
       setFollowersCount(c => Math.max(0, c - 1))
       setIsFollowing(false)
+    } else if (isPendingRequest) {
+      // Cancela solicitação pendente
+      await remove(ref(db, `followRequests/${targetUid}/${currentUser.uid}`))
+      // Remove notificação pendente do outro usuário
+      const nSnap = await get(ref(db, `notifications/${targetUid}`))
+      if (nSnap.exists()) {
+        nSnap.forEach(child => {
+          const v = child.val()
+          if (v.type === 'follow_request' && v.fromUid === currentUser.uid) {
+            remove(ref(db, `notifications/${targetUid}/${child.key}`))
+          }
+        })
+      }
+      setIsPendingRequest(false)
     } else {
-      await set(followerRef, { followedAt: Date.now(), name: currentUser.name, photo: currentUser.photo||null })
-      await set(followingRef, { followedAt: Date.now(), name: profile?.name||'', photo: profile?.photo||null })
-      setFollowersCount(c => c + 1)
-      setIsFollowing(true)
+      // Verifica se o perfil alvo é privado
+      const privSnap = await get(ref(db, `users/${targetUid}/privacy/publicProfile`))
+      const isPrivate = privSnap.exists() ? !privSnap.val() : false
+
+      if (isPrivate) {
+        // Envia solicitação de seguir
+        await set(ref(db, `followRequests/${targetUid}/${currentUser.uid}`), {
+          name: currentUser.name, photo: currentUser.photo || null, ts: Date.now()
+        })
+        // Envia notificação para o dono do perfil
+        const nRef = ref(db, `notifications/${targetUid}/${Date.now()}_req`)
+        await set(nRef, {
+          type: 'follow_request',
+          title: `${currentUser.name} quer te seguir`,
+          body: 'Toque para aceitar ou recusar a solicitação',
+          fromUid: currentUser.uid,
+          fromName: currentUser.name,
+          fromPhoto: currentUser.photo || null,
+          ts: Date.now(),
+          read: false,
+        })
+        setIsPendingRequest(true)
+      } else {
+        // Segue diretamente (perfil público)
+        await set(followerRef, { followedAt: Date.now(), name: currentUser.name, photo: currentUser.photo||null })
+        await set(followingRef, { followedAt: Date.now(), name: profile?.name||'', photo: profile?.photo||null })
+        await update(ref(db, `users/${targetUid}`), { followers: increment(1) })
+        // Notifica o usuário que foi seguido
+        const nRef = ref(db, `notifications/${targetUid}/${Date.now()}_flw`)
+        await set(nRef, {
+          type: 'new_follower',
+          title: `${currentUser.name} começou a te seguir`,
+          body: 'Toque para ver o perfil',
+          fromUid: currentUser.uid,
+          fromName: currentUser.name,
+          fromPhoto: currentUser.photo || null,
+          ts: Date.now(),
+          read: false,
+        })
+        setFollowersCount(c => c + 1)
+        setIsFollowing(true)
+      }
     }
     setToggling(false)
-  }, [currentUser, targetUid, isFollowing, toggling, profile, isOwnProfile])
+  }, [currentUser, targetUid, isFollowing, isPendingRequest, toggling, profile, isOwnProfile])
 
   if (!open) return null
 
@@ -219,13 +280,13 @@ export default function UserProfilePanel({ open, targetUid, currentUser, onClose
                 {!isOwnProfile && (
                   <button onClick={handleToggleFollow} disabled={toggling} style={{
                     padding:'9px 20px', borderRadius:100, border:'none',
-                    background: isFollowing ? 'var(--surface2)' : 'var(--green)',
-                    color: isFollowing ? 'var(--muted)' : '#052e16',
+                    background: isFollowing ? 'var(--surface2)' : isPendingRequest ? 'rgba(234,179,8,.1)' : 'var(--green)',
+                    color: isFollowing ? 'var(--muted)' : isPendingRequest ? 'var(--yellow)' : '#052e16',
                     fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:12,
                     cursor:'pointer', transition:'all .2s', flexShrink:0,
-                    border: isFollowing ? '1px solid var(--border)' : 'none',
+                    border: isFollowing ? '1px solid var(--border)' : isPendingRequest ? '1px solid rgba(234,179,8,.4)' : 'none',
                   }}>
-                    {toggling ? '...' : isFollowing ? '✓ Seguindo' : '+ Seguir'}
+                    {toggling ? '...' : isFollowing ? '✓ Seguindo' : isPendingRequest ? '⏳ Solicitado' : '+ Seguir'}
                   </button>
                 )}
               </div>
