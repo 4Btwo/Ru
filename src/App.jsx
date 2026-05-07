@@ -1375,6 +1375,17 @@ export default function App() {
     return ()=>unsubs.forEach(u=>u())
   },[user])
 
+  // Apply saved theme on app boot
+  useEffect(()=>{
+    const t = localStorage.getItem('urbyn-theme')
+    if (t) document.documentElement.setAttribute('data-theme', t)
+  },[])
+
+  const showToast = useCallback((msg,bg='var(--green)',color='#052e16')=>{
+    setToast({msg,bg,color})
+    setTimeout(()=>setToast(null),2800)
+  },[])
+
   const handleToggleSave = useCallback(async (place) => {
     if (!user || !place?.id) return
     const savedRef = ref(db, `users/${user.uid}/saved/${place.id}`)
@@ -1385,7 +1396,7 @@ export default function App() {
       await set(savedRef, { id:place.id, name:place.name, cat:place.cat, savedAt:Date.now() })
       showToast('🔖 Salvo!')
     }
-  }, [user, saved])
+  }, [user, saved, showToast])
 
   const handleUpdateProfile = useCallback(async({name, photo, bio, coverUrl})=>{
     if (!user) return
@@ -1396,18 +1407,7 @@ export default function App() {
       ...(coverUrl!==undefined?{coverUrl}:{}),
     })
     showToast('✅ Perfil atualizado!')
-  },[user])
-
-  // Apply saved theme on app boot
-  useEffect(()=>{
-    const saved = localStorage.getItem('urbyn-theme')
-    if (saved) document.documentElement.setAttribute('data-theme', saved)
-  },[])
-
-  const showToast = useCallback((msg,bg='var(--green)',color='#052e16')=>{
-    setToast({msg,bg,color})
-    setTimeout(()=>setToast(null),2800)
-  },[])
+  },[user, showToast])
 
   const handleReport = useCallback(async(type,loc)=>{
     if(!user||!loc) return
