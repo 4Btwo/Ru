@@ -98,8 +98,8 @@ function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, aler
     .slice(0,8)
 
   const recent = [...allPlaces]
-
-  const [searchQuery, setSearchQuery] = useState('')
+    .sort((a,b)=>(b.createdAt||0)-(a.createdAt||0))
+    .slice(0,8)
   const [searchFocus, setSearchFocus] = useState(false)
 
   const CAT_LABEL2 = { noturno:'Bar/Balada', transito:'Trânsito', estabelecimento:'Estabelecimento', parque:'Parque', comercio:'Comércio', show:'Show', bar:'Bar', evento:'Evento', cafe:'Café' }
@@ -114,8 +114,6 @@ function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, aler
     : []
 
   const showResults = searchFocus && searchQuery.trim().length >= 2
-    .sort(()=>Math.random()-.5)
-    .slice(0,5)
 
   return (
     <div style={{
@@ -540,15 +538,19 @@ function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUp
   const [editName, setEditName] = useState(user?.name||'')
   const [editPhoto, setEditPhoto] = useState(null)
   const [editPhotoPreview, setEditPhotoPreview] = useState(null)
+  const [editCover, setEditCover] = useState(null)
+  const [editCoverPreview, setEditCoverPreview] = useState(null)
   const [saving, setSaving] = useState(false)
 
   const handlePhotoChange = e => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0]; if (!file) return
     setEditPhoto(file)
-    const reader = new FileReader()
-    reader.onload = ev => setEditPhotoPreview(ev.target.result)
-    reader.readAsDataURL(file)
+    const r = new FileReader(); r.onload = ev=>setEditPhotoPreview(ev.target.result); r.readAsDataURL(file)
+  }
+  const handleCoverChange = e => {
+    const file = e.target.files?.[0]; if (!file) return
+    setEditCover(file)
+    const r = new FileReader(); r.onload = ev=>setEditCoverPreview(ev.target.result); r.readAsDataURL(file)
   }
 
   const handleSaveProfile = async () => {
@@ -556,17 +558,13 @@ function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUp
     setSaving(true)
     try {
       let photoUrl = user.photo
-      if (editPhoto) {
-        photoUrl = await uploadToCloudinary(editPhoto)
-      }
-      await onUpdateProfile({name:editName.trim(), photo:photoUrl})
-      setEditing(false)
-      setEditPhoto(null)
-      setEditPhotoPreview(null)
-    } catch(e) {
-      console.error(e)
-      alert(e.message)
-    }
+      let coverUrl = user.coverUrl
+      if (editPhoto) photoUrl = await uploadToCloudinary(editPhoto)
+      if (editCover) coverUrl = await uploadToCloudinary(editCover)
+      await onUpdateProfile({name:editName.trim(), photo:photoUrl, coverUrl})
+      setEditing(false); setEditPhoto(null); setEditPhotoPreview(null)
+      setEditCover(null); setEditCoverPreview(null)
+    } catch(e) { console.error(e); alert(e.message) }
     setSaving(false)
   }
 
@@ -581,12 +579,18 @@ function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUp
       position:'absolute', inset:0, overflowY:'auto',
       paddingBottom:'calc(72px + env(safe-area-inset-bottom,0px))',
     }}>
-      {/* Header */}
+      {/* Cover photo area */}
       <div style={{
-        padding:'calc(14px + var(--sat)) 16px 16px',
-        borderBottom:'1px solid var(--border)',
+        height:110, position:'relative', overflow:'hidden',
+        background:'linear-gradient(135deg, #0f2414, #1a3a20)',
       }}>
-        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20}}>
+        {user.coverUrl&&<img src={user.coverUrl} alt="" style={{width:'100%',height:'100%',objectFit:'cover',opacity:.7}}/>}
+      </div>
+
+      {/* Header */}
+      <div style={{padding:'0 16px 16px', borderBottom:'1px solid var(--border)'}}>
+        {/* Title row */}
+        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14, paddingTop:12}}>
           <div style={{fontSize:20, fontWeight:800}}>Perfil</div>
           <div style={{display:'flex', gap:8}}>
             <button onClick={()=>{setEditing(true);setEditName(user?.name||'')}} style={{
@@ -600,12 +604,12 @@ function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUp
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
               </svg>
             </button>
-            <button style={{
+            <button onClick={onSettings} style={{
               width:34, height:34, borderRadius:'50%',
               background:'var(--surface2)', border:'1px solid var(--border)',
               display:'flex', alignItems:'center', justifyContent:'center',
               cursor:'pointer', color:'var(--muted)',
-            }} onClick={onSettings}><IC.Settings/></button>
+            }}><IC.Settings/></button>
           </div>
         </div>
 
@@ -808,9 +812,36 @@ function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUp
             borderRadius:'24px 24px 0 0', padding:'24px 20px',
             paddingBottom:'calc(24px + env(safe-area-inset-bottom,0px))',
           }}>
-            <div style={{fontSize:17, fontWeight:800, marginBottom:20, textAlign:'center'}}>Editar Perfil</div>
+            <div style={{fontSize:17, fontWeight:800, marginBottom:16, textAlign:'center'}}>Editar Perfil</div>
 
-            {/* Photo upload */}
+            {/* Cover photo */}
+            <div style={{marginBottom:16}}>
+              <div style={{fontSize:11, color:'var(--muted)', fontWeight:700, marginBottom:8, textTransform:'uppercase', letterSpacing:'.06em'}}>🖼️ Foto de capa</div>
+              <label style={{cursor:'pointer', display:'block'}}>
+                <div style={{
+                  height:90, borderRadius:14, overflow:'hidden',
+                  background:'linear-gradient(135deg, #0f2414, #1a3a20)',
+                  display:'flex', alignItems:'center', justifyContent:'center',
+                  border:'2px dashed var(--border)', position:'relative',
+                }}>
+                  {(editCoverPreview||user.coverUrl)
+                    ? <img src={editCoverPreview||user.coverUrl} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+                    : <div style={{textAlign:'center', color:'var(--muted)'}}>
+                        <div style={{fontSize:24, marginBottom:4}}>📷</div>
+                        <div style={{fontSize:11}}>Adicionar capa</div>
+                      </div>
+                  }
+                  <div style={{
+                    position:'absolute', bottom:6, right:8,
+                    background:'rgba(0,0,0,.6)', borderRadius:100,
+                    padding:'3px 10px', fontSize:10, color:'#fff', fontWeight:600,
+                  }}>Alterar</div>
+                </div>
+                <input type="file" accept="image/*" onChange={handleCoverChange} style={{display:'none'}}/>
+              </label>
+            </div>
+
+            {/* Avatar photo */}
             <div style={{display:'flex', justifyContent:'center', marginBottom:20}}>
               <label style={{cursor:'pointer', position:'relative'}}>
                 <div style={{
@@ -1271,6 +1302,15 @@ export default function App() {
   const [userPos,     setUserPos]     = useState(null)
   const [reportLoc,   setReportLoc]   = useState(null)
   const [detailLoc,   setDetailLoc]   = useState(null)
+  const mapViewRef = useRef(null)
+
+  const flyToPlace = useCallback((place) => {
+    setDetailLoc(place)
+    if (place?.lat && place?.lng) {
+      setActiveTab('map')
+      setTimeout(() => mapViewRef.current?.flyTo(place.lat, place.lng, 17), 150)
+    }
+  }, [setActiveTab])
   const [nowOpen,     setNowOpen]     = useState(false)
   const [adminOpen,   setAdminOpen]   = useState(false)
   const [settingsOpen,setSettingsOpen]= useState(false)
@@ -1347,12 +1387,13 @@ export default function App() {
     }
   }, [user, saved])
 
-  const handleUpdateProfile = useCallback(async({name, photo, bio})=>{
+  const handleUpdateProfile = useCallback(async({name, photo, bio, coverUrl})=>{
     if (!user) return
     await update(ref(db,`users/${user.uid}`), {
       name,
-      ...(photo ? {photo} : {}),
-      ...(bio !== undefined ? {bio} : {}),
+      ...(photo!==undefined?{photo}:{}),
+      ...(bio!==undefined?{bio}:{}),
+      ...(coverUrl!==undefined?{coverUrl}:{}),
     })
     showToast('✅ Perfil atualizado!')
   },[user])
@@ -1464,6 +1505,7 @@ export default function App() {
         transition:'opacity .2s',
       }}>
         <MapView
+          ref={mapViewRef}
           allPlaces={visiblePlaces} events={events} usersMap={usersMap}
           filteredIds={filteredIds}
           onLocationClick={loc=>{if(!pickMode)setDetailLoc(loc)}}
@@ -1633,7 +1675,7 @@ export default function App() {
         <HomeTab
           user={user} allPlaces={visiblePlaces} events={events} usersMap={usersMap}
           hotCount={hotCount} totalActive={totalActive} alertCount={alertCount} onlineCount={onlineCount}
-          onPlace={loc=>setDetailLoc(loc)} onStartAdd={handleStartPick}
+          onPlace={loc=>flyToPlace(loc)} onStartAdd={handleStartPick}
           isAdmin={isAdmin} setAdminOpen={setAdminOpen} pendingCount={pendingCount} logout={logout}
           onCategorySelect={filterId=>{setActiveFilter(filterId);setActiveTab('map')}}
           onCityClick={()=>setCityModal(true)}

@@ -10,13 +10,22 @@ export const LOCATIONS = [
 ]
 
 export const EVENT_META = {
+  // Noturno/Bar
   cheio:    { emoji:'🍻', label:'Lotado',          weight:3, cat:'noturno',  color:'#ff2d55' },
   evento:   { emoji:'🎉', label:'Evento ativo',    weight:3, cat:'noturno',  color:'#bf5fff' },
   morto:    { emoji:'😴', label:'Vazio',           weight:1, cat:'noturno',  color:'#6666aa' },
+  fila:     { emoji:'🚶', label:'Tem fila',        weight:2, cat:'noturno',  color:'#f97316' },
+  show:     { emoji:'🎤', label:'Show ao vivo',    weight:3, cat:'noturno',  color:'#ec4899' },
+  promo:    { emoji:'💸', label:'Promoção/Happy',  weight:2, cat:'noturno',  color:'#22c55e' },
+  fechado:  { emoji:'🔒', label:'Fechado',         weight:1, cat:'noturno',  color:'#64748b' },
+  perigo:   { emoji:'⚠️', label:'Área de perigo',  weight:3, cat:'transito', color:'#eab308' },
+  // Trânsito
   pesado:   { emoji:'🚗', label:'Trânsito pesado', weight:2, cat:'transito', color:'#ff6b35' },
   bloqueio: { emoji:'🚧', label:'Bloqueio',        weight:3, cat:'transito', color:'#ffcc00' },
   acidente: { emoji:'💥', label:'Acidente',        weight:4, cat:'transito', color:'#ff2d55' },
   blitz:    { emoji:'🚔', label:'Blitz Policial',  weight:3, cat:'transito', color:'#3b82f6' },
+  obra:     { emoji:'🏗️', label:'Obra na via',     weight:2, cat:'transito', color:'#f59e0b' },
+  alagado:  { emoji:'🌊', label:'Via alagada',     weight:3, cat:'transito', color:'#06b6d4' },
 }
 
 // ── EXPIRAÇÃO POR CATEGORIA ────────────────────────────────────────────────────

@@ -97,32 +97,27 @@ function buildInactiveSvg(cat) {
 
 function buildEmojiPin(emoji, cat) {
   const colors = {
-    noturno:         { bg: '#7c3aed', stroke: '#a78bfa' },
-    transito:        { bg: '#0369a1', stroke: '#38bdf8' },
-    estabelecimento: { bg: '#92400e', stroke: '#fbbf24' },
-    parque:          { bg: '#15803d', stroke: '#4ade80' },
-    comercio:        { bg: '#92400e', stroke: '#fbbf24' },
-    show:            { bg: '#9d174d', stroke: '#f472b6' },
-    bar:             { bg: '#7c2d12', stroke: '#fb923c' },
-    club:            { bg: '#6d28d9', stroke: '#c4b5fd' },
-    music:           { bg: '#9d174d', stroke: '#f472b6' },
-    food:            { bg: '#b45309', stroke: '#fcd34d' },
-    coffee:          { bg: '#78350f', stroke: '#fbbf24' },
-    store:           { bg: '#1e40af', stroke: '#93c5fd' },
-    gas:             { bg: '#374151', stroke: '#9ca3af' },
-    park:            { bg: '#15803d', stroke: '#4ade80' },
-    beach:           { bg: '#0369a1', stroke: '#7dd3fc' },
-    sport:           { bg: '#166534', stroke: '#86efac' },
-    hospital:        { bg: '#991b1b', stroke: '#fca5a5' },
-    school:          { bg: '#1d4ed8', stroke: '#93c5fd' },
-    church:          { bg: '#6b7280', stroke: '#d1d5db' },
-    road:            { bg: '#0369a1', stroke: '#38bdf8' },
-    star:            { bg: '#854d0e', stroke: '#fde047' },
-    fire:            { bg: '#991b1b', stroke: '#f97316' },
-    evento:          { bg: '#be185d', stroke: '#f472b6' },
+    noturno:'#7c3aed', transito:'#0369a1', estabelecimento:'#92400e',
+    parque:'#15803d', comercio:'#92400e', show:'#9d174d', bar:'#7c2d12',
+    club:'#6d28d9', music:'#9d174d', food:'#b45309', coffee:'#78350f',
+    store:'#1e40af', gas:'#374151', park:'#15803d', beach:'#0369a1',
+    sport:'#166534', hospital:'#991b1b', school:'#1d4ed8', church:'#6b7280',
+    road:'#0369a1', star:'#854d0e', fire:'#991b1b', evento:'#be185d',
   }
-  const { bg, stroke } = colors[cat] || { bg: '#1a2e20', stroke: '#1db954' }
-  return `<svg width="34" height="44" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><ellipse cx="17" cy="41" rx="9" ry="3" fill="rgba(0,0,0,.25)"/><path d="M17 39 C17 39 3 24 3 15 A14 14 0 0 1 31 15 C31 24 17 39 17 39Z" fill="${bg}" stroke="${stroke}" stroke-width="1.5"/><text x="17" y="20" font-size="13" text-anchor="middle" dominant-baseline="middle">${emoji}</text></svg>`
+  const bg = colors[cat] || '#1a2e20'
+  // Use HTML divIcon so emoji renders correctly in all browsers
+  return L.divIcon({
+    html: `<div style="
+      width:42px; height:42px; border-radius:50% 50% 50% 4px;
+      background:${bg}; border:2px solid rgba(255,255,255,.35);
+      display:flex; align-items:center; justify-content:center;
+      font-size:20px; box-shadow:0 2px 8px rgba(0,0,0,.5);
+      transform:rotate(-45deg);
+    "><span style="transform:rotate(45deg); display:block">${emoji}</span></div>`,
+    className: '',
+    iconSize: [42, 42],
+    iconAnchor: [21, 42],
+  })
 }
 
 export function buildMarkerIcon(loc, events, usersMap = {}) {
@@ -152,9 +147,11 @@ export function buildMarkerIcon(loc, events, usersMap = {}) {
   // ── INATIVO: pin gota SVG por categoria ──────────────────────────────────────
   if (isInactive) {
     const effectiveCat = loc.cat || loc.icon || 'default'
-    const svgPin = loc.iconEmoji
-      ? buildEmojiPin(loc.iconEmoji, effectiveCat)
-      : buildInactiveSvg(effectiveCat)
+    // If custom emoji icon, use HTML divIcon (renders correctly cross-browser)
+    if (loc.iconEmoji) {
+      return buildEmojiPin(loc.iconEmoji, effectiveCat)
+    }
+    const svgPin = buildInactiveSvg(effectiveCat)
     const nameLabel = loc.name
       ? `<div class="marker-name-label" style="position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);background:rgba(10,10,15,.85);color:#f0f0ff;font-size:10px;font-weight:700;font-family:'Inter',sans-serif;padding:3px 8px;border-radius:20px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.5);pointer-events:none;border:1px solid rgba(255,255,255,.08);">${loc.name}</div>`
       : ''
