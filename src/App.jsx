@@ -1303,14 +1303,6 @@ export default function App() {
   const [reportLoc,   setReportLoc]   = useState(null)
   const [detailLoc,   setDetailLoc]   = useState(null)
   const mapViewRef = useRef(null)
-
-  const flyToPlace = useCallback((place) => {
-    setDetailLoc(place)
-    if (place?.lat && place?.lng) {
-      setActiveTab('map')
-      setTimeout(() => mapViewRef.current?.flyTo(place.lat, place.lng, 17), 150)
-    }
-  }, [setActiveTab])
   const [nowOpen,     setNowOpen]     = useState(false)
   const [adminOpen,   setAdminOpen]   = useState(false)
   const [settingsOpen,setSettingsOpen]= useState(false)
@@ -1327,6 +1319,14 @@ export default function App() {
   const [addLocOpen,  setAddLocOpen]  = useState(false)
   const [trafficPrompt,setTrafficPrompt]=useState(null)
   const [activeTab,   setActiveTab]   = useState('home')
+
+  const flyToPlace = useCallback((place) => {
+    setDetailLoc(place)
+    if (place?.lat && place?.lng) {
+      setActiveTab('map')
+      setTimeout(() => mapViewRef.current?.flyTo(place.lat, place.lng, 17), 150)
+    }
+  }, [])
   const [likes,       setLikes]       = useState({})
   const [saved,       setSaved]       = useState({})
   const [following,   setFollowing]   = useState({})
