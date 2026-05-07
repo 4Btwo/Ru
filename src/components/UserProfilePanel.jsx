@@ -154,9 +154,13 @@ export default function UserProfilePanel({ open, targetUid, currentUser, onClose
           <>
             {/* ── Header com capa ── */}
             <div style={{
-              height:120, background:'linear-gradient(135deg, #0f2414, #1a3a20)',
-              position:'relative', margin:'0 0 0 0',
+              height:130, background:'linear-gradient(135deg, #0f2414, #1a3a20)',
+              position:'relative', margin:'0 0 0 0', overflow:'hidden',
             }}>
+              {profile.coverUrl && (
+                <img src={profile.coverUrl} alt="" style={{width:'100%',height:'100%',objectFit:'cover',opacity:.7}}/>
+              )}
+
               {/* Botão fechar */}
               <button onClick={onClose} style={{
                 position:'absolute', top:12, right:12,
@@ -164,27 +168,37 @@ export default function UserProfilePanel({ open, targetUid, currentUser, onClose
                 background:'rgba(0,0,0,.5)', border:'none',
                 color:'#fff', cursor:'pointer', fontSize:14,
                 display:'flex', alignItems:'center', justifyContent:'center',
-                backdropFilter:'blur(8px)',
+                backdropFilter:'blur(8px)', zIndex:2,
               }}>✕</button>
 
-              {/* Avatar — sobreposto à capa */}
-              <div style={{
-                position:'absolute', bottom:-36, left:20,
-                width:72, height:72, borderRadius:'50%',
-                border:'3px solid var(--bg)',
-                background:'var(--surface2)',
-                overflow:'hidden',
-                display:'flex', alignItems:'center', justifyContent:'center',
-                fontSize:28, boxShadow:'0 4px 16px rgba(0,0,0,.5)',
-              }}>
-                {profile.photo
-                  ? <img src={profile.photo} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
-                  : '👤'}
-              </div>
+              {/* Botão editar capa — só no próprio perfil */}
+              {isOwnProfile && (
+                <label style={{
+                  position:'absolute', top:12, right:50,
+                  width:32, height:32, borderRadius:'50%',
+                  background:'rgba(0,0,0,.5)', border:'none',
+                  color:'#fff', cursor:'pointer', fontSize:14,
+                  display:'flex', alignItems:'center', justifyContent:'center',
+                  backdropFilter:'blur(8px)', zIndex:2,
+                }} title="Alterar foto de capa">
+                  📷
+                  <input type="file" accept="image/*" style={{display:'none'}} onChange={async e=>{
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    try {
+                      const { uploadToCloudinary } = await import('../lib/cloudinary')
+                      const url = await uploadToCloudinary(file)
+                      const { ref: fbRef, update: fbUpdate } = await import('firebase/database')
+                      await fbUpdate(fbRef(db, `users/${targetUid}`), { coverUrl: url })
+                      setProfile(p=>({...p, coverUrl:url}))
+                    } catch(e) { console.error(e) }
+                  }}/>
+                </label>
+              )}
 
               {/* Badge */}
               <div style={{
-                position:'absolute', bottom:-16, right:16,
+                position:'absolute', bottom:-16, right:16, zIndex:2,
                 background:'rgba(34,197,94,.15)', border:'1px solid rgba(34,197,94,.3)',
                 borderRadius:100, padding:'4px 12px',
                 fontSize:11, color:'var(--green)', fontWeight:700,

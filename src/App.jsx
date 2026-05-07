@@ -98,6 +98,22 @@ function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, aler
     .slice(0,8)
 
   const recent = [...allPlaces]
+
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchFocus, setSearchFocus] = useState(false)
+
+  const CAT_LABEL2 = { noturno:'Bar/Balada', transito:'Trânsito', estabelecimento:'Estabelecimento', parque:'Parque', comercio:'Comércio', show:'Show', bar:'Bar', evento:'Evento', cafe:'Café' }
+  const CAT_EMOJI2 = { noturno:'🌙', transito:'🚦', estabelecimento:'🏪', parque:'🌿', comercio:'🏬', show:'🎭', bar:'🍺', evento:'🎉', cafe:'☕' }
+
+  const searchResults = searchQuery.trim().length >= 2
+    ? allPlaces.filter(p =>
+        p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.address?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (CAT_LABEL2[p.cat]||'').toLowerCase().includes(searchQuery.toLowerCase())
+      ).slice(0, 8)
+    : []
+
+  const showResults = searchFocus && searchQuery.trim().length >= 2
     .sort(()=>Math.random()-.5)
     .slice(0,5)
 
@@ -157,28 +173,69 @@ function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, aler
         </div>
         {/* Greeting */}
         <div style={{fontSize:20, fontWeight:800}}>
-          Bom dia, urbano 🤙
+          {(()=>{
+            const h = new Date().getHours()
+            if (h >= 5  && h < 12) return `Bom dia, urbano ☀️`
+            if (h >= 12 && h < 18) return `Boa tarde, urbano 🌤️`
+            if (h >= 18 && h < 23) return `Boa noite, urbano 🌙`
+            return `Madrugada agitada, urbano 🔥`
+          })()}
         </div>
       </div>
 
       <div style={{padding:'16px 16px 0'}}>
 
         {/* Search */}
-        <div style={{
-          display:'flex', alignItems:'center', gap:10,
-          background:'var(--surface2)', border:'1.5px solid var(--border)',
-          borderRadius:14, padding:'12px 14px', marginBottom:20,
-          transition:'border-color .2s',
-        }}
-          onClick={()=>{}}
-          onFocus={e=>e.currentTarget.style.borderColor='var(--green)'}
-          onBlur={e=>e.currentTarget.style.borderColor='var(--border)'}
-        >
-          <IC.SearchSm/>
-          <input placeholder="Buscar lugares, comidas, experiências..."
-            style={{background:'none', border:'none', outline:'none', color:'var(--text)',
-              fontFamily:"'Inter',sans-serif", fontSize:14, flex:1}}/>
-          <IC.Filter/>
+        <div style={{position:'relative', marginBottom:20}}>
+          <div style={{
+            display:'flex', alignItems:'center', gap:10,
+            background:'var(--surface2)', border:`1.5px solid ${searchFocus?'var(--green)':'var(--border)'}`,
+            borderRadius: showResults ? '14px 14px 0 0' : 14,
+            padding:'12px 14px', transition:'border-color .2s',
+          }}>
+            <IC.SearchSm/>
+            <input
+              value={searchQuery}
+              onChange={e=>setSearchQuery(e.target.value)}
+              onFocus={()=>setSearchFocus(true)}
+              onBlur={()=>setTimeout(()=>setSearchFocus(false),150)}
+              placeholder="Buscar lugares, comidas, experiências..."
+              style={{background:'none', border:'none', outline:'none', color:'var(--text)',
+                fontFamily:"'Inter',sans-serif", fontSize:14, flex:1}}/>
+            {searchQuery
+              ? <span onClick={()=>setSearchQuery('')} style={{cursor:'pointer', fontSize:16, color:'var(--muted)'}}>✕</span>
+              : <IC.Filter/>}
+          </div>
+          {showResults && (
+            <div style={{
+              position:'absolute', left:0, right:0, zIndex:500,
+              background:'var(--surface2)', border:'1.5px solid var(--green)',
+              borderTop:'1px solid var(--border)', borderRadius:'0 0 14px 14px',
+              overflow:'hidden', boxShadow:'0 8px 24px rgba(0,0,0,.4)',
+            }}>
+              {searchResults.length===0 ? (
+                <div style={{padding:'16px', textAlign:'center', color:'var(--muted)', fontSize:13}}>
+                  Nenhum resultado para "{searchQuery}"
+                </div>
+              ) : searchResults.map(p=>(
+                <div key={p.id}
+                  onMouseDown={()=>{onPlace(p); setSearchQuery(''); setSearchFocus(false)}}
+                  style={{display:'flex', alignItems:'center', gap:12, padding:'12px 14px', borderBottom:'1px solid var(--border)', cursor:'pointer'}}
+                  onMouseEnter={e=>e.currentTarget.style.background='var(--surface3)'}
+                  onMouseLeave={e=>e.currentTarget.style.background='transparent'}
+                >
+                  <div style={{width:36, height:36, borderRadius:10, flexShrink:0, background:'var(--surface3)', border:'1px solid var(--border)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18}}>
+                    {p.iconEmoji||CAT_EMOJI2[p.cat]||'📍'}
+                  </div>
+                  <div style={{flex:1, minWidth:0}}>
+                    <div style={{fontWeight:700, fontSize:13, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{p.name}</div>
+                    <div style={{fontSize:11, color:'var(--muted)', marginTop:1}}>{CAT_LABEL2[p.cat]||'Local'}{p.address?` · ${p.address}`:''}</div>
+                  </div>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14" style={{color:'var(--dim)', flexShrink:0}}><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Stats strip */}

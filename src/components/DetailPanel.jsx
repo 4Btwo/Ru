@@ -194,11 +194,6 @@ export default function DetailPanel({location, events, usersMap, user, onClose, 
             background:'rgba(12,26,18,.7)',border:'none',cursor:'pointer',color:'var(--text)',
             fontSize:14,display:'flex',alignItems:'center',justifyContent:'center',backdropFilter:'blur(8px)',
           }}>✕</button>
-          <button style={{
-            position:'absolute',top:10,right:50,width:32,height:32,borderRadius:'50%',
-            background:'rgba(12,26,18,.7)',border:'none',cursor:'pointer',color:'var(--text)',
-            fontSize:14,display:'flex',alignItems:'center',justifyContent:'center',backdropFilter:'blur(8px)',
-          }}>🔖</button>
           {status.heat!=='inactive'&&(
             <div style={{position:'absolute',bottom:10,left:10,background:status.color,borderRadius:20,padding:'4px 10px',fontSize:11,fontWeight:700,color:'#fff'}}>
               {status.emoji} {status.label}
@@ -453,7 +448,7 @@ export default function DetailPanel({location, events, usersMap, user, onClose, 
         }}>
           <div style={{display:'flex',gap:8,marginBottom:10}}>
             {[
-              {icon:isSaved?'🔖':'🔖', label:isSaved?'Salvo':'Salvar', onClick:()=>onSave&&onSave(location), active:isSaved},
+              {icon:'💬', label:'Chat',         onClick:()=>setChatOpen(true)},
               {icon:'📤', label:'Compartilhar', onClick:handleShare},
               {icon:'⭐', label:'Avaliar',       onClick:()=>setActiveTab('avaliacoes')},
               {icon:'📷', label:'Fotos',         onClick:()=>setActiveTab('fotos')},
@@ -477,6 +472,14 @@ export default function DetailPanel({location, events, usersMap, user, onClose, 
           )}
 
           <div style={{display:'flex',gap:8}}>
+            <button onClick={()=>onSave&&onSave(location)} style={{
+              width:48, padding:'14px 0', borderRadius:14,
+              background: isSaved?'rgba(34,197,94,.15)':'var(--surface2)',
+              border:`1px solid ${isSaved?'var(--green)':'var(--border)'}`,
+              color: isSaved?'var(--green)':'var(--muted)',
+              fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:18, cursor:'pointer',
+              display:'flex', alignItems:'center', justifyContent:'center',
+            }}>🔖</button>
             <button onClick={()=>{onClose();onReport(location)}} style={{
               flex:1,padding:'14px',borderRadius:14,
               background:'var(--surface2)',border:'1px solid var(--border)',

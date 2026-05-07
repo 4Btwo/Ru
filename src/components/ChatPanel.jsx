@@ -1,221 +1,300 @@
-// ── CHAT DO LOCAL + FOTOS ─────────────────────────────────────────────────────
+// ── CHAT DO LOCAL ─────────────────────────────────────────────────────────────
 import React, { useState, useRef, useEffect } from 'react'
 import { useChat } from '../hooks/useChat'
 import { uploadToCloudinary } from '../lib/cloudinary'
 import UserProfilePanel from './UserProfilePanel'
 
-function timeLabel(ts) {
+function dateSep(ts) {
   const d = new Date(ts)
-  return d.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' })
+  const today    = new Date(); today.setHours(0,0,0,0)
+  const yesterday = new Date(today); yesterday.setDate(today.getDate()-1)
+  if (d >= today) return 'Hoje'
+  if (d >= yesterday) return 'Ontem'
+  return d.toLocaleDateString('pt-BR', {day:'2-digit', month:'short'})
+}
+function timeLabel(ts) {
+  return new Date(ts).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' })
+}
+function isSameDay(a, b) {
+  const da = new Date(a), db = new Date(b)
+  return da.getFullYear()===db.getFullYear() && da.getMonth()===db.getMonth() && da.getDate()===db.getDate()
 }
 
 export default function ChatPanel({ open, location, user, onClose }) {
   const { messages, sendMessage } = useChat(location?.id, user?.uid)
-  const [text,        setText]        = useState('')
-  const [uploading,   setUploading]   = useState(false)
-  const [viewingUid,  setViewingUid]  = useState(null)
-  const fileRef    = useRef(null)
-  const bottomRef  = useRef(null)
+  const [text,       setText]       = useState('')
+  const [uploading,  setUploading]  = useState(false)
+  const [viewingUid, setViewingUid] = useState(null)
+  const [lightbox,   setLightbox]   = useState(null)
+  const fileRef   = useRef(null)
+  const bottomRef = useRef(null)
 
-  // Scroll para o final quando chegam mensagens
-  useEffect(() => {
-    if (open) bottomRef.current?.scrollIntoView({ behavior:'smooth' })
-  }, [messages, open])
+  useEffect(()=>{ bottomRef.current?.scrollIntoView({behavior:'smooth'}) }, [messages.length])
 
   const handleSend = async () => {
-    if (!text.trim()) return
-    await sendMessage({ text, userName: user.name, userPhoto: user.photo })
+    const t = text.trim()
+    if (!t || !user) return
     setText('')
+    await sendMessage({ text:t, userName:user.name, userPhoto:user.photo||null })
   }
-
-  const handlePhoto = async (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+  const handleKey = e => { if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }
+  const handleFile = async e => {
+    const file = e.target.files?.[0]; if (!file || !user) return
     setUploading(true)
     try {
-      const imageUrl = await uploadToCloudinary(file)
-      await sendMessage({ imageUrl, userName: user.name, userPhoto: user.photo })
-    } catch (err) {
-      // Mostra a mensagem real do erro (inclui instrução de configuração do .env)
-      alert(`Erro ao enviar foto:\n${err.message}`)
-      console.error('[ChatPanel] upload error:', err)
-    } finally {
-      setUploading(false)
-      e.target.value = ''
-    }
+      const url = await uploadToCloudinary(file)
+      await sendMessage({ imageUrl:url, text:'', userName:user.name, userPhoto:user.photo||null })
+    } catch(err) { console.error(err) }
+    setUploading(false)
+    e.target.value = ''
   }
 
-  if (!location) return null
+  const filtered = messages.filter(m => m.text || m.imageUrl)
+  const count = filtered.length
+
+  if (!open) return null
 
   return (
     <>
+      {/* Lightbox */}
+      {lightbox && (
+        <div onClick={()=>setLightbox(null)} style={{
+          position:'fixed', inset:0, zIndex:9000,
+          background:'rgba(0,0,0,.94)', display:'flex',
+          alignItems:'center', justifyContent:'center', cursor:'zoom-out',
+        }}>
+          <img src={lightbox} alt="" style={{maxWidth:'95vw', maxHeight:'90vh', borderRadius:12, objectFit:'contain'}}/>
+          <button onClick={()=>setLightbox(null)} style={{
+            position:'absolute', top:16, right:16, width:36, height:36,
+            borderRadius:'50%', background:'rgba(255,255,255,.15)', border:'none',
+            color:'#fff', fontSize:18, cursor:'pointer',
+          }}>✕</button>
+        </div>
+      )}
+
+      {/* Backdrop */}
       <div onClick={onClose} style={{
-        position:'fixed', inset:0, zIndex:2500,
-        background:'rgba(0,0,0,.7)', backdropFilter:'blur(4px)',
-        opacity: open ? 1 : 0, pointerEvents: open ? 'all' : 'none',
-        transition:'opacity .25s',
+        position:'fixed', inset:0, zIndex:3500,
+        background:'rgba(0,0,0,.6)', backdropFilter:'blur(4px)',
       }}/>
 
+      {/* Panel */}
       <div style={{
-        position:'fixed', inset:0, zIndex:2600,
-        background:'#0a0a0f',
-        transform: open ? 'translateY(0)' : 'translateY(100%)',
-        transition:'transform .35s cubic-bezier(.4,0,.2,1)',
+        position:'fixed', bottom:0, left:0, right:0, zIndex:3600,
+        background:'var(--bg)', borderRadius:'22px 22px 0 0',
         display:'flex', flexDirection:'column',
+        height:'88vh', overflow:'hidden',
+        boxShadow:'0 -8px 40px rgba(0,0,0,.6)',
       }}>
-        {/* Header */}
+
+        {/* ── Header ── */}
         <div style={{
-          padding:'16px', background:'#12121a',
-          borderBottom:'1px solid #2a2a3d',
-          display:'flex', alignItems:'center', gap:12, flexShrink:0,
+          display:'flex', alignItems:'center', gap:12,
+          padding:'14px 16px',
+          background:'var(--surface)',
+          borderBottom:'1px solid var(--border)',
+          flexShrink:0,
         }}>
           <button onClick={onClose} style={{
-            background:'none', border:'none', color:'#6666aa',
-            fontSize:22, cursor:'pointer', padding:'0 4px',
+            width:32, height:32, borderRadius:'50%',
+            background:'var(--surface2)', border:'1px solid var(--border)',
+            color:'var(--muted)', cursor:'pointer', fontSize:16,
+            display:'flex', alignItems:'center', justifyContent:'center',
           }}>←</button>
-          <div style={{ flex:1 }}>
-            <div style={{ fontWeight:800, fontSize:15 }}>{location.name}</div>
-            <div style={{ fontSize:11, color:'#6666aa', marginTop:1 }}>
-              💬 Chat ao vivo · {messages.length} mensagens
+          <div style={{flex:1, minWidth:0}}>
+            <div style={{fontWeight:800, fontSize:15, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>
+              {location?.name}
+            </div>
+            <div style={{fontSize:11, color:'var(--green)', display:'flex', alignItems:'center', gap:5, marginTop:1}}>
+              <div style={{width:6, height:6, borderRadius:'50%', background:'var(--green)', flexShrink:0}}/>
+              Chat ao vivo · {count} mensagem{count!==1?'s':''}
             </div>
           </div>
+          <button onClick={()=>fileRef.current?.click()} style={{
+            width:32, height:32, borderRadius:'50%',
+            background:'var(--surface2)', border:'1px solid var(--border)',
+            color:'var(--muted)', cursor:'pointer', fontSize:16,
+            display:'flex', alignItems:'center', justifyContent:'center',
+          }}>📷</button>
+          <input ref={fileRef} type="file" accept="image/*" style={{display:'none'}} onChange={handleFile}/>
         </div>
 
-        {/* Mensagens */}
-        <div style={{ flex:1, overflowY:'auto', padding:'12px 16px', display:'flex', flexDirection:'column', gap:12 }}>
-          {messages.length === 0 && (
-            <div style={{ textAlign:'center', color:'#6666aa', padding:'40px 0' }}>
-              <div style={{ fontSize:32, marginBottom:12 }}>💬</div>
-              <div style={{ fontSize:14, fontWeight:700, marginBottom:6 }}>Sem mensagens ainda</div>
-              <div style={{ fontSize:12 }}>Seja o primeiro a comentar!</div>
+        {/* ── Messages ── */}
+        <div style={{
+          flex:1, overflowY:'auto', padding:'16px',
+          display:'flex', flexDirection:'column', gap:2,
+          scrollbarWidth:'thin', scrollbarColor:'var(--border) transparent',
+        }}>
+          {count===0 && (
+            <div style={{textAlign:'center', padding:'40px 0', color:'var(--muted)'}}>
+              <div style={{fontSize:40, marginBottom:12}}>💬</div>
+              <div style={{fontSize:14, fontWeight:700, marginBottom:4}}>Nenhuma mensagem ainda</div>
+              <div style={{fontSize:12}}>Seja o primeiro a comentar!</div>
             </div>
           )}
 
-          {messages.filter(msg => msg.text || msg.imageUrl).map(msg => {
-            const isMe = msg.userId === user.uid
+          {filtered.map((msg, idx) => {
+            const isMe = msg.userId === user?.uid
+            const prev = filtered[idx-1]
+            const showSep = !prev || !isSameDay(prev.ts, msg.ts)
+            const showAvatar = !isMe && (!prev || prev.userId !== msg.userId || showSep)
+            const showName   = !isMe && showAvatar
+
             return (
-              <div key={msg.id} style={{
-                display:'flex', flexDirection: isMe ? 'row-reverse' : 'row',
-                alignItems:'flex-end', gap:8,
-              }}>
-                {/* Avatar — clicável */}
-                {!isMe && (
-                  <div
-                    onClick={()=>setViewingUid(msg.userId)}
-                    style={{ cursor:'pointer', flexShrink:0 }}
-                    title={`Ver perfil de ${msg.userName?.split(' ')[0]}`}
-                  >
-                    {msg.userPhoto
-                      ? <img src={msg.userPhoto} alt="" style={{ width:32, height:32, borderRadius:'50%', border:'2px solid #2a2a3d', transition:'border-color .2s' }}
-                          onMouseEnter={e=>e.currentTarget.style.borderColor='#22c55e'}
-                          onMouseLeave={e=>e.currentTarget.style.borderColor='#2a2a3d'}/>
-                      : <div style={{ width:32, height:32, borderRadius:'50%', background:'#2a2a3d', display:'flex', alignItems:'center', justifyContent:'center', fontSize:14 }}>👤</div>
-                    }
+              <React.Fragment key={msg.id||idx}>
+                {/* Date separator */}
+                {showSep && (
+                  <div style={{
+                    textAlign:'center', margin:'16px 0 8px',
+                    display:'flex', alignItems:'center', gap:10,
+                  }}>
+                    <div style={{flex:1, height:1, background:'var(--border)'}}/>
+                    <span style={{
+                      fontSize:10, fontWeight:700, color:'var(--muted)',
+                      textTransform:'uppercase', letterSpacing:'.08em',
+                      background:'var(--surface2)', borderRadius:100,
+                      padding:'3px 10px', border:'1px solid var(--border)',
+                    }}>{dateSep(msg.ts)}</span>
+                    <div style={{flex:1, height:1, background:'var(--border)'}}/>
                   </div>
                 )}
 
-                <div style={{ maxWidth:'72%' }}>
-                  {/* Nome — clicável */}
+                <div style={{
+                  display:'flex',
+                  flexDirection: isMe ? 'row-reverse' : 'row',
+                  alignItems:'flex-end', gap:8,
+                  marginBottom: 2,
+                }}>
+                  {/* Avatar */}
                   {!isMe && (
-                    <div
-                      onClick={()=>setViewingUid(msg.userId)}
-                      style={{ fontSize:11, color:'#22c55e', marginBottom:3, marginLeft:4, cursor:'pointer', fontWeight:600 }}
-                    >
-                      {msg.userName?.split(' ')[0]}
+                    <div onClick={()=>setViewingUid(msg.userId)}
+                      style={{cursor:'pointer', flexShrink:0, width:32, height:32, marginBottom:2}}>
+                      {showAvatar ? (
+                        msg.userPhoto
+                          ? <img src={msg.userPhoto} alt="" style={{
+                              width:32, height:32, borderRadius:'50%',
+                              border:'2px solid var(--border)', objectFit:'cover',
+                              transition:'border-color .2s',
+                            }}
+                              onMouseEnter={e=>e.currentTarget.style.borderColor='var(--green)'}
+                              onMouseLeave={e=>e.currentTarget.style.borderColor='var(--border)'}/>
+                          : <div style={{
+                              width:32, height:32, borderRadius:'50%',
+                              background:'var(--surface3)', border:'2px solid var(--border)',
+                              display:'flex', alignItems:'center', justifyContent:'center', fontSize:14,
+                            }}>👤</div>
+                      ) : <div style={{width:32, height:32}}/>}
                     </div>
                   )}
 
-                  {/* Foto */}
-                  {msg.imageUrl && (
-                    <div style={{ borderRadius:12, overflow:'hidden', marginBottom: msg.text ? 4 : 0 }}>
-                      <img
-                        src={msg.imageUrl} alt="foto"
-                        style={{ width:'100%', maxWidth:240, display:'block', cursor:'pointer' }}
-                        onClick={() => window.open(msg.imageUrl, '_blank')}
-                      />
-                    </div>
-                  )}
+                  <div style={{maxWidth:'72%', display:'flex', flexDirection:'column', alignItems: isMe?'flex-end':'flex-start'}}>
+                    {/* Name */}
+                    {showName && (
+                      <div onClick={()=>setViewingUid(msg.userId)} style={{
+                        fontSize:11, fontWeight:700, color:'var(--green)',
+                        marginBottom:4, marginLeft:2, cursor:'pointer',
+                      }}>{msg.userName?.split(' ')[0]||'Urbano'}</div>
+                    )}
 
-                  {/* Texto */}
-                  {msg.text && (
+                    {/* Image */}
+                    {msg.imageUrl && (
+                      <div style={{
+                        borderRadius: isMe ? '16px 4px 16px 16px' : '4px 16px 16px 16px',
+                        overflow:'hidden', marginBottom:msg.text?4:0,
+                        border:'1px solid var(--border)',
+                        cursor:'zoom-in', maxWidth:220,
+                      }} onClick={()=>setLightbox(msg.imageUrl)}>
+                        <img src={msg.imageUrl} alt="" style={{width:'100%', display:'block'}}/>
+                      </div>
+                    )}
+
+                    {/* Text bubble */}
+                    {msg.text && (
+                      <div style={{
+                        background: isMe
+                          ? 'linear-gradient(135deg, var(--green), #16a34a)'
+                          : 'var(--surface2)',
+                        color: isMe ? '#052e16' : 'var(--text)',
+                        borderRadius: isMe ? '18px 18px 4px 18px' : '4px 18px 18px 18px',
+                        padding:'10px 14px',
+                        fontSize:14, lineHeight:1.5, fontWeight:isMe?600:400,
+                        border: isMe ? 'none' : '1px solid var(--border)',
+                        boxShadow: isMe ? '0 2px 8px rgba(34,197,94,.2)' : 'none',
+                        wordBreak:'break-word',
+                      }}>
+                        {msg.text}
+                      </div>
+                    )}
+
+                    {/* Timestamp */}
                     <div style={{
-                      background: isMe ? '#ff2d55' : '#1a1a26',
-                      color:'#f0f0ff', borderRadius: isMe ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                      padding:'10px 14px', fontSize:13, lineHeight:1.5,
-                      border: isMe ? 'none' : '1px solid #2a2a3d',
+                      fontSize:10, color:'var(--dim)', marginTop:3,
+                      marginRight: isMe ? 2 : 0, marginLeft: isMe ? 0 : 2,
                     }}>
-                      {msg.text}
+                      {timeLabel(msg.ts)}{isMe && ' ✓✓'}
                     </div>
-                  )}
-
-                  {/* Hora */}
-                  <div style={{ fontSize:10, color:'#6666aa', marginTop:3,
-                    textAlign: isMe ? 'right' : 'left', marginRight:4, marginLeft:4 }}>
-                    {timeLabel(msg.ts)}
                   </div>
                 </div>
-              </div>
+              </React.Fragment>
             )
           })}
           <div ref={bottomRef}/>
         </div>
 
-        {/* Input */}
+        {/* ── Input ── */}
         <div style={{
-          padding:'12px 16px 28px', background:'#12121a',
-          borderTop:'1px solid #2a2a3d', flexShrink:0,
-          display:'flex', alignItems:'center', gap:8,
+          display:'flex', alignItems:'flex-end', gap:8, padding:'12px 16px',
+          paddingBottom:'calc(12px + env(safe-area-inset-bottom,0px))',
+          background:'var(--surface)', borderTop:'1px solid var(--border)', flexShrink:0,
         }}>
-          {/* Botão foto */}
-          <input ref={fileRef} type="file" accept="image/*" style={{ display:'none' }}
-            onChange={handlePhoto}/>
-          <button
-            onClick={() => fileRef.current?.click()}
-            disabled={uploading}
-            style={{
-              width:44, height:44, borderRadius:12,
-              background:'#1a1a26', border:'1px solid #2a2a3d',
-              cursor:'pointer', fontSize:20, flexShrink:0,
-              display:'flex', alignItems:'center', justifyContent:'center',
-              opacity: uploading ? .5 : 1,
-            }}>
-            {uploading ? '⏳' : '📷'}
-          </button>
-
-          {/* Input texto */}
-          <input
-            value={text}
-            onChange={e => setText(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
-            placeholder="Mensagem..."
-            maxLength={300}
-            style={{
-              flex:1, background:'#1a1a26', border:'1px solid #2a2a3d',
-              borderRadius:22, padding:'11px 16px', color:'#f0f0ff',
-              fontFamily:"'Inter',sans-serif", fontSize:14, outline:'none',
-            }}
-            onFocus={e => e.target.style.borderColor='#ff2d55'}
-            onBlur={e  => e.target.style.borderColor='#2a2a3d'}
-          />
-
-          {/* Enviar */}
-          <button onClick={handleSend} disabled={!text.trim()} style={{
-            width:44, height:44, borderRadius:12,
-            background: text.trim() ? '#ff2d55' : '#1a1a26',
-            border:'none', cursor: text.trim() ? 'pointer' : 'default',
-            fontSize:20, flexShrink:0,
+          <button onClick={()=>fileRef.current?.click()} disabled={uploading} style={{
+            width:40, height:40, borderRadius:'50%', flexShrink:0,
+            background:'var(--surface2)', border:'1px solid var(--border)',
+            color: uploading ? 'var(--green)' : 'var(--muted)',
+            cursor:'pointer', fontSize:18,
             display:'flex', alignItems:'center', justifyContent:'center',
-            transition:'background .2s',
-          }}>↑</button>
+            transition:'all .2s',
+          }}>{uploading ? '⏳' : '📎'}</button>
+
+          <div style={{
+            flex:1, display:'flex', alignItems:'flex-end',
+            background:'var(--surface2)', border:'1.5px solid var(--border)',
+            borderRadius:22, padding:'8px 14px', gap:8,
+            transition:'border-color .2s',
+          }}
+            onFocus={e=>e.currentTarget.style.borderColor='var(--green)'}
+            onBlur={e=>e.currentTarget.style.borderColor='var(--border)'}
+          >
+            <textarea
+              value={text}
+              onChange={e=>{setText(e.target.value); e.target.style.height='auto'; e.target.style.height=Math.min(e.target.scrollHeight,100)+'px'}}
+              onKeyDown={handleKey}
+              placeholder="Mensagem..."
+              rows={1}
+              style={{
+                flex:1, background:'none', border:'none', outline:'none',
+                color:'var(--text)', fontFamily:"'Inter',sans-serif", fontSize:14,
+                resize:'none', lineHeight:1.5, maxHeight:100, overflowY:'auto',
+                scrollbarWidth:'none',
+              }}/>
+          </div>
+
+          <button onClick={handleSend} disabled={!text.trim()} style={{
+            width:40, height:40, borderRadius:'50%', flexShrink:0, border:'none',
+            background: text.trim() ? 'var(--green)' : 'var(--surface2)',
+            color: text.trim() ? '#052e16' : 'var(--dim)',
+            cursor: text.trim() ? 'pointer' : 'default',
+            display:'flex', alignItems:'center', justifyContent:'center',
+            fontSize:18, transition:'all .2s',
+            boxShadow: text.trim() ? '0 2px 12px rgba(34,197,94,.3)' : 'none',
+          }}>➤</button>
         </div>
       </div>
 
-      {/* Perfil do usuário ao clicar no avatar/nome */}
+      {/* User profile panel */}
       <UserProfilePanel
-        open={!!viewingUid}
-        targetUid={viewingUid}
-        currentUser={user}
-        onClose={()=>setViewingUid(null)}
+        open={!!viewingUid} targetUid={viewingUid}
+        currentUser={user} onClose={()=>setViewingUid(null)}
       />
     </>
   )
