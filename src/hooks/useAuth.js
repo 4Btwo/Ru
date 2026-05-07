@@ -52,6 +52,8 @@ export function useAuth() {
             email:    fireUser.email,
             score:    d.score   || 0,
             reports:  d.reports || 0,
+            coverUrl: d.coverUrl || null,
+            bio:      d.bio      || null,
           })
         }
       })
