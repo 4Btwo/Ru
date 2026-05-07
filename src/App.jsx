@@ -100,6 +100,7 @@ function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, aler
   const recent = [...allPlaces]
     .sort((a,b)=>(b.createdAt||0)-(a.createdAt||0))
     .slice(0,8)
+  const [searchQuery, setSearchQuery] = useState('')
   const [searchFocus, setSearchFocus] = useState(false)
 
   const CAT_LABEL2 = { noturno:'Bar/Balada', transito:'Trânsito', estabelecimento:'Estabelecimento', parque:'Parque', comercio:'Comércio', show:'Show', bar:'Bar', evento:'Evento', cafe:'Café' }
