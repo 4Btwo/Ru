@@ -82,19 +82,26 @@ export default function PrivateChatPanel({ open, onClose, currentUser, initialTa
 
   /* Carrega mensagens da conversa ativa */
   useEffect(() => {
-    if (!activeChat || !currentUser?.uid) return
+    if (!activeChat?.uid || !currentUser?.uid) return
+    setMessages([]) // limpa ao trocar de conversa
     const cId   = chatId(currentUser.uid, activeChat.uid)
     const msgsRef = query(ref(db, `privateChats/messages/${cId}`), orderByChild('ts'), limitToLast(80))
     // Marca como lido uma única vez ao abrir
     update(ref(db, `privateChats/index/${currentUser.uid}/${activeChat.uid}`), { unread: 0 })
+    let firstLoad = true
     const unsub = onValue(msgsRef, snap => {
-      if (!snap.exists()) { setMessages([]); return }
+      if (!snap.exists()) {
+        if (firstLoad) setMessages([])
+        firstLoad = false
+        return
+      }
+      firstLoad = false
       const list = []
       snap.forEach(child => list.push({ id: child.key, ...child.val() }))
       setMessages(list)
     })
     return unsub
-  }, [activeChat, currentUser?.uid])
+  }, [activeChat?.uid, currentUser?.uid])
 
   /* Auto scroll */
   useEffect(() => {
