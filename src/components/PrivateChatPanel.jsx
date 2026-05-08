@@ -1,6 +1,6 @@
 // ── CHAT PRIVADO B2B (Direto entre usuários) ──────────────────────────────────
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { ref, onValue, push, set, update, get, serverTimestamp, query, orderByChild, limitToLast } from 'firebase/database'
+import { ref, onValue, push, set, update, get, query, orderByChild, limitToLast } from 'firebase/database'
 import { db } from '../lib/firebase'
 
 const timeAgo = ts => {
@@ -84,12 +84,15 @@ export default function PrivateChatPanel({ open, onClose, currentUser, initialTa
   useEffect(() => {
     if (!activeChat || !currentUser?.uid) return
     const cId   = chatId(currentUser.uid, activeChat.uid)
-    const msgsRef = query(ref(db, `privateChats/messages/${cId}`), orderByChild('ts'), limitToLast(80))
+    const msgsRef = ref(db, `privateChats/messages/${cId}`)
     const unsub = onValue(msgsRef, snap => {
       if (!snap.exists()) { setMessages([]); return }
       const list = []
       snap.forEach(child => list.push({ id: child.key, ...child.val() }))
-      setMessages(list)
+      // Ordena por timestamp no cliente (evita necessidade de índice)
+      list.sort((a, b) => (a.ts || 0) - (b.ts || 0))
+      // Mantém só as últimas 80 mensagens
+      setMessages(list.slice(-80))
       // Marca como lido
       update(ref(db, `privateChats/index/${currentUser.uid}/${activeChat.uid}`), { unread: 0 })
     })

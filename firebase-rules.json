@@ -22,6 +22,56 @@
       }
     },
 
+    "followers": {
+      "$targetUid": {
+        ".read": "auth != null",
+        "$followerUid": {
+          ".write": "auth != null && (auth.uid === $followerUid || auth.uid === $targetUid)"
+        }
+      }
+    },
+
+    "followRequests": {
+      "$targetUid": {
+        ".read": "auth != null && auth.uid === $targetUid",
+        "$requesterUid": {
+          ".read": "auth != null && (auth.uid === $targetUid || auth.uid === $requesterUid)",
+          ".write": "auth != null && (auth.uid === $requesterUid || auth.uid === $targetUid)"
+        }
+      }
+    },
+
+    "notifications": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$notifId": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null"
+        }
+      }
+    },
+
+    "privateChats": {
+      "messages": {
+        "$chatId": {
+          ".read": "auth != null && ($chatId.contains(auth.uid))",
+          "$msgId": {
+            ".write": "auth != null && ($chatId.contains(auth.uid))",
+            ".validate": "newData.hasChildren(['senderId','text','ts']) && newData.child('senderId').val() === auth.uid && newData.child('text').val().length >= 1 && newData.child('text').val().length <= 2000 && newData.child('ts').val() <= now + 5000"
+          },
+          ".indexOn": ["ts"]
+        }
+      },
+      "index": {
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          "$otherId": {
+            ".write": "auth != null && (auth.uid === $uid || auth.uid === $otherId)"
+          }
+        }
+      }
+    },
+
     "comments": {
       "$locId": {
         ".read": "auth != null",
