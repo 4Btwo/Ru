@@ -85,15 +85,13 @@ export default function PrivateChatPanel({ open, onClose, currentUser, initialTa
     if (!activeChat || !currentUser?.uid) return
     const cId   = chatId(currentUser.uid, activeChat.uid)
     const msgsRef = query(ref(db, `privateChats/messages/${cId}`), orderByChild('ts'), limitToLast(80))
+    // Marca como lido uma única vez ao abrir
+    update(ref(db, `privateChats/index/${currentUser.uid}/${activeChat.uid}`), { unread: 0 })
     const unsub = onValue(msgsRef, snap => {
-      console.log('[Chat] snap exists:', snap.exists(), 'val:', snap.val())
       if (!snap.exists()) { setMessages([]); return }
       const list = []
       snap.forEach(child => list.push({ id: child.key, ...child.val() }))
-      console.log('[Chat] messages loaded:', list)
       setMessages(list)
-      // Marca como lido
-      update(ref(db, `privateChats/index/${currentUser.uid}/${activeChat.uid}`), { unread: 0 })
     })
     return unsub
   }, [activeChat, currentUser?.uid])
