@@ -1770,7 +1770,12 @@ export default function App() {
       <CitySelector open={cityModal} currentCity="bauru" onClose={()=>setCityModal(false)}
         onSelect={city=>{ /* could flyTo city coords */ }}/>
       <UserProfilePanel open={!!viewingUid} targetUid={viewingUid}
-        currentUser={user} onClose={()=>setViewingUid(null)}/>
+        currentUser={user} onClose={()=>setViewingUid(null)}
+        onOpenChat={(uid,name,photo)=>{
+          setChatTarget({uid,name,photo})
+          setChatOpen(true)
+          setViewingUid(null)
+        }}/>
 
       {/* ── NOTIFICAÇÕES ── */}
       <NotificationsPanel
