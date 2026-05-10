@@ -1,8 +1,7 @@
 // ── CHAT PRIVADO ENTRE USUÁRIOS ───────────────────────────────────────────────
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import {
-  ref, onValue, push, update, get,
-  query, orderByChild, limitToLast, serverTimestamp,
+  ref, onValue, push, update, get, serverTimestamp,
 } from 'firebase/database'
 import { db } from '../lib/firebase'
 import { uploadToCloudinary } from '../lib/cloudinary'
@@ -120,17 +119,13 @@ export default function PrivateChatPanel({
   useEffect(() => {
     if (!activeChat || !currentUser?.uid) return
     const cId = chatId(currentUser.uid, activeChat.uid)
-    const q = query(
-      ref(db, `privateChats/messages/${cId}`),
-      orderByChild('ts'),
-      limitToLast(60),
-    )
-    const unsub = onValue(q, snap => {
+    const msgsRef = ref(db, `privateChats/messages/${cId}`)
+    const unsub = onValue(msgsRef, snap => {
       if (!snap.exists()) { setMessages([]); return }
       const list = []
       snap.forEach(child => list.push({ id: child.key, ...child.val() }))
       list.sort((a, b) => (a.ts || 0) - (b.ts || 0))
-      setMessages(list)
+      setMessages(list.slice(-80))
       // marca como lido
       update(ref(db, `privateChats/index/${currentUser.uid}/${activeChat.uid}`), { unread: 0 })
     }, err => console.warn('[PrivateChat]', err.message))
@@ -212,7 +207,6 @@ export default function PrivateChatPanel({
         senderId:    currentUser.uid,
         senderName:  currentUser.name,
         senderPhoto: currentUser.photo || null,
-        text:        '',
         imageUrl,
         ts:          serverTimestamp(),
       })
