@@ -126,8 +126,8 @@ export default function PrivateChatPanel({
       snap.forEach(child => list.push({ id: child.key, ...child.val() }))
       list.sort((a, b) => (a.ts || 0) - (b.ts || 0))
       setMessages(list.slice(-80))
-      // marca como lido
-      update(ref(db, `privateChats/index/${currentUser.uid}/${activeChat.uid}`), { unread: 0 })
+      // marca como lido (sem await, silencia erro)
+      update(ref(db, `privateChats/index/${currentUser.uid}/${activeChat.uid}`), { unread: 0 }).catch(() => {})
     }, err => console.warn('[PrivateChat]', err.message))
     return unsub
   }, [activeChat, currentUser?.uid])
@@ -207,6 +207,7 @@ export default function PrivateChatPanel({
         senderId:    currentUser.uid,
         senderName:  currentUser.name,
         senderPhoto: currentUser.photo || null,
+        text:        '📷',
         imageUrl,
         ts:          serverTimestamp(),
       })
@@ -556,8 +557,8 @@ export default function PrivateChatPanel({
                         </div>
                       )}
 
-                      {/* Bolha de texto */}
-                      {msg.text && (
+                      {/* Bolha de texto — não exibe se for só placeholder de imagem */}
+                      {msg.text && !(msg.imageUrl && msg.text === '📷') && (
                         <div style={{
                           background: isMe
                             ? 'linear-gradient(135deg, var(--green), #16a34a)'
