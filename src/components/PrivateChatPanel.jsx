@@ -8,6 +8,7 @@ import { uploadToCloudinary } from '../lib/cloudinary'
 
 /* ── helpers de data/hora ──────────────────────────────────────────────────── */
 function dateSep(ts) {
+  if (!ts) return 'Hoje'
   const d = new Date(ts)
   const today     = new Date(); today.setHours(0,0,0,0)
   const yesterday = new Date(today); yesterday.setDate(today.getDate()-1)
@@ -16,9 +17,11 @@ function dateSep(ts) {
   return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
 }
 function timeLabel(ts) {
+  if (!ts) return '...'
   return new Date(ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
 }
 function isSameDay(a, b) {
+  if (!a || !b) return true
   const da = new Date(a), db = new Date(b)
   return da.getFullYear()===db.getFullYear() && da.getMonth()===db.getMonth() && da.getDate()===db.getDate()
 }
@@ -123,8 +126,17 @@ export default function PrivateChatPanel({
     const unsub = onValue(msgsRef, snap => {
       if (!snap.exists()) { setMessages([]); return }
       const list = []
-      snap.forEach(child => list.push({ id: child.key, ...child.val() }))
-      list.sort((a, b) => (a.ts || 0) - (b.ts || 0))
+      snap.forEach(child => {
+        const val = child.val()
+        const ts = typeof val.ts === 'number' ? val.ts : null
+        list.push({ id: child.key, ...val, ts })
+      })
+      list.sort((a, b) => {
+        if (a.ts !== null && b.ts !== null) return a.ts - b.ts
+        if (a.ts !== null) return -1
+        if (b.ts !== null) return 1
+        return a.id < b.id ? -1 : 1
+      })
       setMessages(list.slice(-80))
       // marca como lido (sem await, silencia erro)
       update(ref(db, `privateChats/index/${currentUser.uid}/${activeChat.uid}`), { unread: 0 }).catch(() => {})
