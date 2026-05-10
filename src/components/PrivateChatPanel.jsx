@@ -1,7 +1,7 @@
 // ── CHAT PRIVADO ENTRE USUÁRIOS ───────────────────────────────────────────────
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import {
-  ref, onValue, push, update, get, serverTimestamp,
+  ref, onValue, push, update, get, serverTimestamp, increment,
 } from 'firebase/database'
 import { db } from '../lib/firebase'
 import { uploadToCloudinary } from '../lib/cloudinary'
@@ -183,11 +183,9 @@ export default function PrivateChatPanel({
       name: activeChat.name, photo: activeChat.photo || null,
       lastMsg: msg, lastTs: ts, unread: 0,
     })
-    const otherSnap = await get(ref(db, `privateChats/index/${activeChat.uid}/${currentUser.uid}/unread`))
-    const prevUnread = otherSnap.exists() ? (otherSnap.val() || 0) : 0
     await update(ref(db, `privateChats/index/${activeChat.uid}/${currentUser.uid}`), {
       name: currentUser.name, photo: currentUser.photo || null,
-      lastMsg: msg, lastTs: ts, unread: prevUnread + 1,
+      lastMsg: msg, lastTs: ts, unread: increment(1),
     })
 
     setSending(false)
@@ -217,11 +215,9 @@ export default function PrivateChatPanel({
         name: activeChat.name, photo: activeChat.photo || null,
         lastMsg: preview, lastTs: ts, unread: 0,
       })
-      const otherSnap = await get(ref(db, `privateChats/index/${activeChat.uid}/${currentUser.uid}/unread`))
-      const prevUnread = otherSnap.exists() ? (otherSnap.val() || 0) : 0
       await update(ref(db, `privateChats/index/${activeChat.uid}/${currentUser.uid}`), {
         name: currentUser.name, photo: currentUser.photo || null,
-        lastMsg: preview, lastTs: ts, unread: prevUnread + 1,
+        lastMsg: preview, lastTs: ts, unread: increment(1),
       })
     } catch (err) { console.error('[PrivateChat upload]', err) }
     setUploading(false)
