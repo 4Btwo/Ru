@@ -15,6 +15,16 @@
         ".read": "auth != null",
         ".write": "auth.uid === $uid",
         ".validate": "newData.hasChildren(['name']) && newData.child('name').val().length >= 1 && newData.child('name').val().length <= 60",
+
+        "fcmToken": {
+          ".read": "auth.uid === $uid",
+          ".write": "auth.uid === $uid"
+        },
+
+        "isAdmin": {
+          ".write": "false"
+        },
+
         "privacy": {
           ".read": "auth.uid === $uid",
           ".write": "auth.uid === $uid"
@@ -46,7 +56,8 @@
         ".read": "auth != null && auth.uid === $uid",
         "$notifId": {
           ".read": "auth != null && auth.uid === $uid",
-          ".write": "auth != null"
+          ".write": "auth != null && (auth.uid === $uid || !data.exists())",
+          ".validate": "!newData.exists() || (newData.hasChildren(['type','fromUid','ts']) && newData.child('ts').val() <= now + 5000)"
         }
       }
     },
@@ -57,7 +68,7 @@
           ".read": "auth != null && ($chatId.contains(auth.uid))",
           "$msgId": {
             ".write": "auth != null && ($chatId.contains(auth.uid))",
-            ".validate": "newData.hasChildren(['senderId','text','ts']) && newData.child('senderId').val() === auth.uid && newData.child('text').val().length >= 1 && newData.child('text').val().length <= 2000 && newData.child('ts').val() <= now + 5000"
+            ".validate": "!newData.exists() || (newData.hasChildren(['senderId','text','ts']) && newData.child('senderId').val() === auth.uid && newData.child('text').val().length >= 1 && newData.child('text').val().length <= 2000 && newData.child('ts').val() <= now + 5000)"
           },
           ".indexOn": ["ts"]
         }

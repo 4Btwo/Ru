@@ -330,7 +330,7 @@ export default function PrivateChatPanel({
                 placeholder="Buscar usuário para conversar..."
                 style={{
                   background:'none', border:'none', outline:'none',
-                  color:'var(--text)', fontFamily:"'Inter',sans-serif",
+                  color:'var(--text)', fontFamily:"'Plus Jakarta Sans',sans-serif",
                   fontSize:13, flex:1,
                 }}
               />
@@ -633,7 +633,7 @@ export default function PrivateChatPanel({
                 rows={1}
                 style={{
                   flex:1, background:'none', border:'none', outline:'none',
-                  color:'var(--text)', fontFamily:"'Inter',sans-serif",
+                  color:'var(--text)', fontFamily:"'Plus Jakarta Sans',sans-serif",
                   fontSize:14, resize:'none', lineHeight:1.5,
                   maxHeight:100, overflowY:'auto', scrollbarWidth:'none',
                 }}

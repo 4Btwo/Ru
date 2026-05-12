@@ -71,7 +71,7 @@ export default function TrafficConfirmBanner({ prompt, onConfirm, onResolve, onD
           <button onClick={handleConfirm} style={{
             flex:1, padding:'10px 8px', borderRadius:10, border:`1px solid ${color}44`,
             background:`${color}15`, color,
-            fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer',
+            fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer',
             transition:'all .15s',
           }}>
             ✅ Ainda acontecendo
@@ -79,7 +79,7 @@ export default function TrafficConfirmBanner({ prompt, onConfirm, onResolve, onD
           <button onClick={handleResolve} style={{
             flex:1, padding:'10px 8px', borderRadius:10, border:'1px solid rgba(0,255,136,.3)',
             background:'rgba(0,255,136,.1)', color:'#00ff88',
-            fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer',
+            fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer',
             transition:'all .15s',
           }}>
             ✅ Já resolveu

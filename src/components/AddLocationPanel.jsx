@@ -84,7 +84,7 @@ export default function AddLocationPanel({open, coords, onClose, onSave}) {
             <span style={{fontSize:16}}>✅</span>
             <div>
               <div style={{fontSize:12, fontWeight:700, color:'var(--green)'}}>Ponto marcado no mapa</div>
-              <div style={{fontSize:11, color:'var(--muted)', fontFamily:"'Space Mono',monospace"}}>
+              <div style={{fontSize:11, color:'var(--muted)', fontFamily:"'Syne',monospace"}}>
                 {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)}
               </div>
             </div>
@@ -101,7 +101,7 @@ export default function AddLocationPanel({open, coords, onClose, onSave}) {
           style={{
             width:'100%', background:'var(--surface2)', border:'1.5px solid var(--border)',
             borderRadius:12, padding:'12px 14px', color:'var(--text)',
-            fontFamily:"'Inter',sans-serif", fontSize:14, outline:'none',
+            fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:14, outline:'none',
             marginBottom:18, boxSizing:'border-box', transition:'border-color .2s',
           }}
           onFocus={e=>e.target.style.borderColor='var(--green)'}
@@ -134,7 +134,7 @@ export default function AddLocationPanel({open, coords, onClose, onSave}) {
               border:`1px solid ${cat===c.id?c.color:'var(--border)'}`,
               borderRadius:14, padding:'13px 12px', cursor:'pointer',
               color:cat===c.id?c.color:'var(--text)',
-              fontFamily:"'Inter',sans-serif", textAlign:'left',
+              fontFamily:"'Plus Jakarta Sans',sans-serif", textAlign:'left',
               transition:'all .15s', position:'relative',
             }}>
               <div style={{display:'flex', alignItems:'center', gap:8, marginBottom:4}}>
@@ -164,7 +164,7 @@ export default function AddLocationPanel({open, coords, onClose, onSave}) {
                   border:`1px solid ${duration===opt.value?'var(--green)':'var(--border)'}`,
                   borderRadius:12, cursor:'pointer',
                   color:duration===opt.value?'var(--green)':'var(--text)',
-                  fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:12,
+                  fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:700, fontSize:12,
                   transition:'all .15s',
                 }}>{opt.label}</button>
               ))}
@@ -189,7 +189,7 @@ export default function AddLocationPanel({open, coords, onClose, onSave}) {
           background:canSave?'var(--green)':'var(--surface2)',
           color:canSave?'#052e16':'var(--muted)',
           border:`1px solid ${canSave?'var(--green)':'var(--border)'}`,
-          fontFamily:"'Inter',sans-serif", fontWeight:800, fontSize:15,
+          fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:800, fontSize:15,
           cursor:canSave?'pointer':'not-allowed',
           transition:'all .2s', opacity:saving?.7:1,
         }}>

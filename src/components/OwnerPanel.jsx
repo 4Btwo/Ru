@@ -129,7 +129,7 @@ export default function OwnerPanel({ open, place, uid, onClose }) {
               flex:1, padding:'10px 0', borderRadius:10, border:'none', cursor:'pointer',
               background:tab===t.id?'#ffcc00':'#1a1a26',
               color:tab===t.id?'#000':'#6666aa',
-              fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:12,
+              fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:700, fontSize:12,
               transition:'all .15s',
             }}>{t.label}</button>
           ))}
@@ -142,7 +142,7 @@ export default function OwnerPanel({ open, place, uid, onClose }) {
               Atualize a lotação do seu estabelecimento em tempo real.
             </p>
             <div style={{background:'#1a1a26', border:`1px solid ${oColor}44`, borderRadius:16, padding:'20px', textAlign:'center', marginBottom:20}}>
-              <div style={{fontFamily:"'Space Mono',monospace", fontSize:48, fontWeight:700, color:oColor}}>
+              <div style={{fontFamily:"'Syne',monospace", fontSize:48, fontWeight:700, color:oColor}}>
                 {occupancy===null?'—':`${occupancy}%`}
               </div>
               <div style={{fontSize:13, color:'#6666aa', marginTop:4}}>
@@ -162,19 +162,19 @@ export default function OwnerPanel({ open, place, uid, onClose }) {
                   background:occupancy===p?`${OccupancyColor(p)}22`:'#1a1a26',
                   border:`1px solid ${occupancy===p?OccupancyColor(p):'#2a2a3d'}`,
                   color:occupancy===p?OccupancyColor(p):'#f0f0ff',
-                  fontFamily:"'Space Mono',monospace", fontWeight:700, fontSize:14, transition:'all .15s',
+                  fontFamily:"'Syne',monospace", fontWeight:700, fontSize:14, transition:'all .15s',
                 }}>{p===0?'Vazio':p===100?'Lotado':`${p}%`}</button>
               ))}
             </div>
             <button onClick={()=>setOcc(null)} style={{
               width:'100%', padding:'10px', borderRadius:10,
               border:'1px solid #2a2a3d', background:'transparent',
-              color:'#6666aa', fontFamily:"'Inter',sans-serif", fontSize:12, cursor:'pointer', marginBottom:20,
+              color:'#6666aa', fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:12, cursor:'pointer', marginBottom:20,
             }}>✕ Não informar lotação</button>
             <button onClick={handleSaveOccupancy} disabled={saving} style={{
               width:'100%', padding:15, borderRadius:14, border:'none',
               background:saved?'#00ff88':'#ffcc00', color:'#000',
-              fontFamily:"'Inter',sans-serif", fontWeight:800, fontSize:15, cursor:'pointer', transition:'all .2s',
+              fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:800, fontSize:15, cursor:'pointer', transition:'all .2s',
             }}>{saved?'✅ Salvo!':saving?'⏳ Salvando...':'💾 Atualizar lotação'}</button>
           </div>
         )}
@@ -220,7 +220,7 @@ export default function OwnerPanel({ open, place, uid, onClose }) {
             <label style={{
               display:'block', width:'100%', padding:14, borderRadius:14,
               background:'#1a1a26', border:'1px dashed #ffcc0066',
-              color:'#ffcc00', fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:14,
+              color:'#ffcc00', fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:700, fontSize:14,
               cursor:'pointer', textAlign:'center', marginBottom:12, boxSizing:'border-box',
             }}>
               📸 {coverPreview?'Trocar foto':'Escolher foto da galeria'}
@@ -231,7 +231,7 @@ export default function OwnerPanel({ open, place, uid, onClose }) {
               <button onClick={handleSaveCover} disabled={uploadingCover} style={{
                 width:'100%', padding:15, borderRadius:14, border:'none',
                 background:coverSaved?'#00ff88':'#ffcc00', color:'#000',
-                fontFamily:"'Inter',sans-serif", fontWeight:800, fontSize:15, cursor:'pointer', transition:'all .2s',
+                fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:800, fontSize:15, cursor:'pointer', transition:'all .2s',
               }}>
                 {coverSaved?'✅ Capa salva!':uploadingCover?'⏳ Enviando...':'💾 Salvar capa'}
               </button>
@@ -244,7 +244,7 @@ export default function OwnerPanel({ open, place, uid, onClose }) {
               }} style={{
                 width:'100%', padding:12, borderRadius:12, marginTop:8,
                 border:'1px solid rgba(239,68,68,.3)', background:'rgba(239,68,68,.07)',
-                color:'#f87171', fontFamily:"'Inter',sans-serif", fontWeight:600, fontSize:13, cursor:'pointer',
+                color:'#f87171', fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:600, fontSize:13, cursor:'pointer',
               }}>🗑️ Remover capa atual</button>
             )}
           </div>
@@ -267,13 +267,13 @@ export default function OwnerPanel({ open, place, uid, onClose }) {
                 {f.multi?(
                   <textarea value={f.value} onChange={e=>f.set(e.target.value)}
                     placeholder={f.placeholder} maxLength={300} rows={3}
-                    style={{width:'100%', background:'#1a1a26', border:'1px solid #2a2a3d', borderRadius:12, padding:'12px 14px', color:'#f0f0ff', fontFamily:"'Inter',sans-serif", fontSize:13, outline:'none', resize:'none', lineHeight:1.5}}
+                    style={{width:'100%', background:'#1a1a26', border:'1px solid #2a2a3d', borderRadius:12, padding:'12px 14px', color:'#f0f0ff', fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:13, outline:'none', resize:'none', lineHeight:1.5}}
                     onFocus={e=>e.target.style.borderColor='#ffcc00'}
                     onBlur={e=>e.target.style.borderColor='#2a2a3d'}/>
                 ):(
                   <input value={f.value} onChange={e=>f.set(e.target.value)}
                     placeholder={f.placeholder} maxLength={100}
-                    style={{width:'100%', background:'#1a1a26', border:'1px solid #2a2a3d', borderRadius:12, padding:'12px 14px', color:'#f0f0ff', fontFamily:"'Inter',sans-serif", fontSize:13, outline:'none'}}
+                    style={{width:'100%', background:'#1a1a26', border:'1px solid #2a2a3d', borderRadius:12, padding:'12px 14px', color:'#f0f0ff', fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:13, outline:'none'}}
                     onFocus={e=>e.target.style.borderColor='#ffcc00'}
                     onBlur={e=>e.target.style.borderColor='#2a2a3d'}/>
                 )}
@@ -282,7 +282,7 @@ export default function OwnerPanel({ open, place, uid, onClose }) {
             <button onClick={handleSaveInfo} disabled={saving} style={{
               width:'100%', padding:15, borderRadius:14, border:'none',
               background:saved?'#00ff88':'#ffcc00', color:'#000',
-              fontFamily:"'Inter',sans-serif", fontWeight:800, fontSize:15, cursor:'pointer', transition:'all .2s',
+              fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:800, fontSize:15, cursor:'pointer', transition:'all .2s',
             }}>{saved?'✅ Salvo!':saving?'⏳ Salvando...':'💾 Salvar informações'}</button>
           </div>
         )}

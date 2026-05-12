@@ -177,7 +177,7 @@ export default function NotificationsPanel({ open, onClose, currentUser, onOpenC
                 <button onClick={markAllRead} style={{
                   background: 'none', border: '1px solid var(--border)',
                   borderRadius: 8, padding: '5px 10px', cursor: 'pointer',
-                  color: 'var(--muted)', fontFamily: "'Inter',sans-serif",
+                  color: 'var(--muted)', fontFamily: "'Plus Jakarta Sans',sans-serif",
                   fontSize: 11, fontWeight: 600,
                 }}>Marcar lidas</button>
               )}
@@ -202,7 +202,7 @@ export default function NotificationsPanel({ open, onClose, currentUser, onOpenC
                 background: tab === t.id ? 'rgba(34,197,94,.13)' : 'var(--surface2)',
                 border: `1px solid ${tab === t.id ? 'var(--green)' : 'var(--border)'}`,
                 color: tab === t.id ? 'var(--green)' : 'var(--muted)',
-                fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 11,
+                fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 600, fontSize: 11,
                 cursor: 'pointer',
               }}>{t.label}</button>
             ))}
@@ -272,14 +272,14 @@ export default function NotificationsPanel({ open, onClose, currentUser, onOpenC
                     <button onClick={() => handleAcceptFollow(notif)} style={{
                       flex: 1, padding: '8px 0', borderRadius: 10, border: 'none',
                       background: 'var(--green)', color: '#052e16',
-                      fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 12,
+                      fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 700, fontSize: 12,
                       cursor: 'pointer',
                     }}>Aceitar</button>
                     <button onClick={() => handleRejectFollow(notif)} style={{
                       flex: 1, padding: '8px 0', borderRadius: 10,
                       background: 'var(--surface2)', border: '1px solid var(--border)',
                       color: 'var(--muted)',
-                      fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 12,
+                      fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 600, fontSize: 12,
                       cursor: 'pointer',
                     }}>Recusar</button>
                   </div>
@@ -290,7 +290,7 @@ export default function NotificationsPanel({ open, onClose, currentUser, onOpenC
                   <button onClick={() => { onViewUser && onViewUser(notif.fromUid); onClose() }} style={{
                     marginTop: 8, padding: '6px 12px', borderRadius: 8,
                     background: 'var(--surface2)', border: '1px solid var(--border)',
-                    color: 'var(--muted)', fontFamily: "'Inter',sans-serif",
+                    color: 'var(--muted)', fontFamily: "'Plus Jakarta Sans',sans-serif",
                     fontWeight: 600, fontSize: 11, cursor: 'pointer',
                   }}>Ver perfil</button>
                 )}

@@ -47,7 +47,7 @@ export default function Leaderboard({ open, onClose, currentUid }) {
               <div style={{ fontWeight:700, fontSize:13 }}>{u.name || 'Anônimo'}</div>
               <div style={{ fontSize:11, color:'var(--muted)' }}>{u.reports || 0} reportes</div>
             </div>
-            <div style={{ fontFamily:"'Space Mono',monospace", fontSize:16, fontWeight:700, color:'var(--yellow)' }}>
+            <div style={{ fontFamily:"'Syne',monospace", fontSize:16, fontWeight:700, color:'var(--yellow)' }}>
               {u.score || 0}
             </div>
           </div>

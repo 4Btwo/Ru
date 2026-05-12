@@ -1,67 +1,71 @@
 import React, { useState } from 'react'
 
-/* ── Design tokens ─────────────────────────────────────────────────────────── */
 const T = {
-  bg:'#0c1a12', surface:'#111e16', surf2:'#162018',
-  border:'#1f2e23', green:'#22c55e', red:'#ef4444',
-  text:'#f0fdf4', muted:'#6b7f70', dim:'#374d3c',
+  bg:'#0d0d14', surface:'#13131f', surf2:'#191927',
+  border:'#252538', primary:'#ff5c35', red:'#ff4757',
+  text:'#f5f4ff', muted:'#6b6990', dim:'#3a3a5c',
+  accent:'#a855f7',
 }
 
-/* ── Logo Urbyn ────────────────────────────────────────────────────────────── */
 function Logo() {
   return (
     <div style={{textAlign:'center'}}>
-      <div style={{
-        display:'inline-flex', alignItems:'center', gap:6, marginBottom:16,
-      }}>
+      <div style={{display:'inline-flex',flexDirection:'column',alignItems:'center',gap:12,marginBottom:8}}>
+        {/* Ícone com gradiente hero */}
         <div style={{
-          width:48, height:48, borderRadius:14,
-          background:`linear-gradient(135deg, ${T.green}, #16a34a)`,
+          width:72, height:72, borderRadius:22,
+          background:'linear-gradient(135deg,#ff5c35,#d946a8,#a855f7)',
           display:'flex', alignItems:'center', justifyContent:'center',
-          boxShadow:`0 8px 32px rgba(34,197,94,.35)`,
+          boxShadow:'0 12px 40px rgba(255,92,53,.35), 0 4px 16px rgba(168,85,247,.2)',
+          position:'relative',
         }}>
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="white" opacity=".9"/>
+          <svg width="38" height="38" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="white" opacity=".95"/>
             <circle cx="12" cy="9" r="2.5" fill="white"/>
           </svg>
+          {/* Reflexo */}
+          <div style={{position:'absolute',top:6,left:10,width:20,height:8,borderRadius:10,background:'rgba(255,255,255,.2)',filter:'blur(2px)'}}/>
         </div>
-        <span style={{
-          fontSize:30, fontWeight:900, color:T.text,
-          fontFamily:"'Inter',sans-serif", letterSpacing:'-.02em',
-        }}>Urbyn</span>
+        <div>
+          <span style={{
+            fontSize:34, fontWeight:900, color:T.text,
+            fontFamily:"'Syne','Plus Jakarta Sans',sans-serif",
+            letterSpacing:'-.04em', lineHeight:1,
+          }}>Urbyn</span>
+          <p style={{fontSize:13, color:T.muted, marginTop:5, lineHeight:1.5}}>
+            Sua cidade. <span style={{color:T.primary, fontWeight:700}}>Do seu jeito.</span>
+          </p>
+        </div>
       </div>
-      <p style={{fontSize:13, color:T.muted, lineHeight:1.6}}>
-        Sua cidade. <span style={{color:T.green, fontWeight:600}}>Do seu jeito.</span>
-      </p>
     </div>
   )
 }
 
-/* ── Input ─────────────────────────────────────────────────────────────────── */
 function Input({label, type='text', value, onChange, placeholder, extra}) {
   const [focused, setFocused] = useState(false)
   const [show, setShow]       = useState(false)
   return (
     <div>
-      {label && <label style={{display:'block', fontSize:11, color:T.muted, marginBottom:5, letterSpacing:'.06em', textTransform:'uppercase'}}>{label}</label>}
+      {label && <label style={{display:'block',fontSize:11,color:T.muted,marginBottom:6,letterSpacing:'.07em',textTransform:'uppercase',fontWeight:700}}>{label}</label>}
       <div style={{position:'relative'}}>
         <input
-          type={type==='password' && show ? 'text' : type}
+          type={type==='password'&&show?'text':type}
           value={value} onChange={onChange} placeholder={placeholder}
-          onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+          onFocus={()=>setFocused(true)} onBlur={()=>setFocused(false)}
           style={{
-            width:'100%', background:T.surf2,
-            border:`1.5px solid ${focused ? T.green : T.border}`,
-            borderRadius:12, padding:'13px 14px', color:T.text,
-            fontFamily:"'Inter',sans-serif", fontSize:14, outline:'none',
-            boxSizing:'border-box', paddingRight: type==='password' ? 46 : 14,
-            transition:'border-color .2s',
+            width:'100%', background:focused?'rgba(255,92,53,.05)':T.surf2,
+            border:`1.5px solid ${focused?T.primary:T.border}`,
+            borderRadius:14, padding:'14px 15px', color:T.text,
+            fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:14, outline:'none',
+            boxSizing:'border-box', paddingRight:type==='password'?46:15,
+            transition:'border-color .2s, background .2s',
+            boxShadow:focused?`0 0 0 3px rgba(255,92,53,.1)`:none,
           }}
         />
-        {type==='password' && (
+        {type==='password'&&(
           <button onClick={()=>setShow(s=>!s)} type="button" style={{
-            position:'absolute', right:13, top:'50%', transform:'translateY(-50%)',
-            background:'none', border:'none', cursor:'pointer', color:T.muted, fontSize:17, padding:0,
+            position:'absolute',right:13,top:'50%',transform:'translateY(-50%)',
+            background:'none',border:'none',cursor:'pointer',color:T.muted,fontSize:17,padding:0,
           }}>{show?'🙈':'👁️'}</button>
         )}
       </div>
@@ -70,21 +74,27 @@ function Input({label, type='text', value, onChange, placeholder, extra}) {
   )
 }
 
-/* ── Button ────────────────────────────────────────────────────────────────── */
 function Btn({children, onClick, type='button', variant='primary', disabled, busy}) {
-  const v = {
-    primary:  {background:T.green,   color:'#052e16', border:'none'},
-    google:   {background:T.surf2,   color:T.text,    border:`1.5px solid ${T.border}`},
-    ghost:    {background:'transparent', color:T.muted, border:'none'},
+  const styles = {
+    primary: {
+      background:'linear-gradient(135deg,#ff5c35,#d946a8)',
+      color:'#fff', border:'none',
+      boxShadow:'0 4px 20px rgba(255,92,53,.4)',
+    },
+    google: {
+      background:T.surf2, color:T.text,
+      border:`1.5px solid ${T.border}`,
+    },
+    ghost: {background:'transparent', color:T.muted, border:'none'},
   }
   return (
     <button type={type} onClick={onClick} disabled={disabled||busy} style={{
-      width:'100%', padding:'14px', borderRadius:12, cursor:(disabled||busy)?'not-allowed':'pointer',
-      fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:14,
-      transition:'opacity .15s, transform .1s',
-      opacity:(disabled||busy)?0.5:1, ...v[variant],
+      width:'100%', padding:'15px', borderRadius:14, cursor:(disabled||busy)?'not-allowed':'pointer',
+      fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:700, fontSize:14,
+      transition:'opacity .15s, transform .12s, box-shadow .2s',
+      opacity:(disabled||busy)?0.5:1, ...styles[variant],
     }}
-      onMouseEnter={e=>!disabled&&!busy&&(e.currentTarget.style.opacity='.88')}
+      onMouseEnter={e=>!disabled&&!busy&&(e.currentTarget.style.opacity='.9')}
       onMouseLeave={e=>e.currentTarget.style.opacity=(disabled||busy)?'.5':'1'}
       onMouseDown={e=>!disabled&&!busy&&(e.currentTarget.style.transform='scale(.98)')}
       onMouseUp={e=>e.currentTarget.style.transform='scale(1)'}
@@ -92,69 +102,74 @@ function Btn({children, onClick, type='button', variant='primary', disabled, bus
   )
 }
 
-/* ── Helpers ───────────────────────────────────────────────────────────────── */
 const ErrBox = ({msg}) => msg ? (
-  <div style={{background:'rgba(239,68,68,.08)', border:'1px solid rgba(239,68,68,.3)',
-    borderRadius:10, padding:'10px 14px', fontSize:12, color:T.red, lineHeight:1.6}}>{msg}</div>
+  <div style={{background:'rgba(255,71,87,.08)',border:'1px solid rgba(255,71,87,.3)',
+    borderRadius:12,padding:'11px 14px',fontSize:12,color:T.red,lineHeight:1.6}}>{msg}</div>
 ) : null
 
 const OkBox = ({msg}) => msg ? (
-  <div style={{background:'rgba(34,197,94,.08)', border:'1px solid rgba(34,197,94,.3)',
-    borderRadius:10, padding:'10px 14px', fontSize:12, color:T.green, lineHeight:1.6}}>{msg}</div>
+  <div style={{background:'rgba(52,211,153,.08)',border:'1px solid rgba(52,211,153,.3)',
+    borderRadius:12,padding:'11px 14px',fontSize:12,color:'#34d399',lineHeight:1.6}}>{msg}</div>
 ) : null
 
 const Divider = () => (
-  <div style={{display:'flex', alignItems:'center', gap:10}}>
-    <div style={{flex:1, height:1, background:T.border}}/>
-    <span style={{fontSize:11, color:T.muted}}>ou</span>
-    <div style={{flex:1, height:1, background:T.border}}/>
+  <div style={{display:'flex',alignItems:'center',gap:10}}>
+    <div style={{flex:1,height:1,background:T.border}}/>
+    <span style={{fontSize:11,color:T.muted,fontWeight:600}}>ou</span>
+    <div style={{flex:1,height:1,background:T.border}}/>
   </div>
 )
 
 const Back = ({onClick}) => (
   <button onClick={onClick} type="button" style={{
-    background:'none', border:'none', color:T.muted, cursor:'pointer',
-    fontSize:13, padding:'2px 0', fontFamily:"'Inter',sans-serif", display:'flex', alignItems:'center', gap:4,
+    background:'none',border:'none',color:T.muted,cursor:'pointer',
+    fontSize:13,padding:'2px 0',fontFamily:"'Plus Jakarta Sans',sans-serif",
+    display:'flex',alignItems:'center',gap:4,fontWeight:600,
   }}>← Voltar</button>
 )
 
 const TextLink = ({onClick, children}) => (
   <button onClick={onClick} type="button" style={{
-    background:'none', border:'none', color:T.muted, cursor:'pointer',
-    fontSize:12, fontFamily:"'Inter',sans-serif", textDecoration:'underline', padding:'2px 0',
+    background:'none',border:'none',color:T.primary,cursor:'pointer',
+    fontSize:12,fontFamily:"'Plus Jakarta Sans',sans-serif",
+    textDecoration:'none',padding:'2px 0',fontWeight:700,
   }}>{children}</button>
 )
 
-/* ── Card wrapper ──────────────────────────────────────────────────────────── */
 const Card = ({children}) => (
   <div style={{
-    width:'100%', maxWidth:380,
-    background:T.surface, border:`1px solid ${T.border}`,
-    borderRadius:20, padding:'24px 22px',
-    display:'flex', flexDirection:'column', gap:14,
+    width:'100%',maxWidth:390,
+    background:T.surface,border:`1px solid ${T.border}`,
+    borderRadius:24,padding:'26px 22px',
+    display:'flex',flexDirection:'column',gap:15,
+    boxShadow:'0 24px 60px rgba(0,0,0,.5)',
   }}>{children}</div>
 )
 
 const Wrap = ({children}) => (
   <div style={{
-    position:'fixed', inset:0, background:T.bg,
-    display:'flex', flexDirection:'column', alignItems:'center',
-    justifyContent:'center', gap:20, padding:'24px 20px',
-    overflowY:'auto', fontFamily:"'Inter',sans-serif",
+    position:'fixed',inset:0,background:T.bg,
+    display:'flex',flexDirection:'column',alignItems:'center',
+    justifyContent:'center',gap:22,padding:'24px 20px',
+    overflowY:'auto',fontFamily:"'Plus Jakarta Sans',sans-serif",
   }}>
-    {/* Glow decorativo */}
-    <div style={{
-      position:'absolute', top:0, left:'50%', transform:'translateX(-50%)',
-      width:340, height:340, borderRadius:'50%',
-      background:'radial-gradient(circle, rgba(34,197,94,.1) 0%, transparent 65%)',
-      pointerEvents:'none',
-    }}/>
+    {/* Orbes decorativos — padrão visual de apps modernos */}
+    <div style={{position:'absolute',top:-60,left:'50%',transform:'translateX(-50%)',
+      width:400,height:400,borderRadius:'50%',
+      background:'radial-gradient(circle,rgba(255,92,53,.12) 0%,transparent 65%)',
+      pointerEvents:'none'}}/>
+    <div style={{position:'absolute',top:80,right:-100,
+      width:260,height:260,borderRadius:'50%',
+      background:'radial-gradient(circle,rgba(168,85,247,.1) 0%,transparent 65%)',
+      pointerEvents:'none'}}/>
+    <div style={{position:'absolute',bottom:60,left:-80,
+      width:220,height:220,borderRadius:'50%',
+      background:'radial-gradient(circle,rgba(217,70,168,.1) 0%,transparent 65%)',
+      pointerEvents:'none'}}/>
     {children}
-    <style>{`@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.7}}`}</style>
   </div>
 )
 
-/* ── Tela principal ────────────────────────────────────────────────────────── */
 export default function LoginScreen({onLogin, loginWithEmail, registerWithEmail, resetPassword, authError, setAuthError}) {
   const [tab,  setTab]  = useState('main')
   const [name, setName] = useState('')
@@ -203,75 +218,75 @@ export default function LoginScreen({onLogin, loginWithEmail, registerWithEmail,
     else setErr(r?.error)
   }
 
-  /* ── main ── */
+  const features = ['🔍 Descubra lugares','👥 Conecte-se','⭐ Avalie e compartilhe']
+
   if (tab==='main') return (
     <Wrap>
       <Logo/>
-      <div style={{display:'flex', flexWrap:'wrap', justifyContent:'center', gap:8, maxWidth:320}}>
-        {['🔍 Descubra lugares','👥 Conecte-se','⭐ Avalie e compartilhe'].map(f=>(
+      <div style={{display:'flex',flexWrap:'wrap',justifyContent:'center',gap:7,maxWidth:340}}>
+        {features.map(f=>(
           <span key={f} style={{
-            background:'rgba(34,197,94,.08)', border:'1px solid rgba(34,197,94,.2)',
-            borderRadius:100, padding:'5px 12px', fontSize:11, color:'#22c55e', fontWeight:600,
+            background:'rgba(255,92,53,.08)',border:'1px solid rgba(255,92,53,.2)',
+            borderRadius:100,padding:'5px 13px',fontSize:11,color:T.primary,fontWeight:700,
           }}>{f}</span>
         ))}
       </div>
-
-      {authError==='unauthorized-domain' && (
-        <div style={{width:'100%', maxWidth:380, background:'rgba(239,68,68,.08)', border:'1px solid rgba(239,68,68,.3)', borderRadius:14, padding:14}}>
-          <div style={{fontSize:12, fontWeight:700, color:T.red, marginBottom:6}}>⚠️ Domínio não autorizado no Firebase</div>
-          <div style={{fontFamily:"'Space Mono',monospace", fontSize:11, color:'#22c55e', background:T.bg, borderRadius:8, padding:'6px 10px'}}>{window.location.hostname}</div>
+      {authError==='unauthorized-domain'&&(
+        <div style={{width:'100%',maxWidth:390,background:'rgba(255,71,87,.08)',border:'1px solid rgba(255,71,87,.3)',borderRadius:16,padding:14}}>
+          <div style={{fontSize:12,fontWeight:800,color:T.red,marginBottom:6}}>⚠️ Domínio não autorizado no Firebase</div>
+          <div style={{fontFamily:"'Syne',monospace",fontSize:11,color:T.primary,background:T.bg,borderRadius:8,padding:'6px 10px'}}>{window.location.hostname}</div>
         </div>
       )}
-
       <Card>
         <Btn onClick={google} variant="google" busy={busy}>
-          <span style={{display:'flex', alignItems:'center', justifyContent:'center', gap:9}}>
+          <span style={{display:'flex',alignItems:'center',justifyContent:'center',gap:9}}>
             <GoogleSVG/> Continuar com Google
           </span>
         </Btn>
         <Divider/>
-        <Btn onClick={()=>go('login')} variant="google">✉️  Entrar com E-mail</Btn>
-        <TextLink onClick={()=>go('register')}>Não tem conta? Criar conta grátis</TextLink>
+        <Btn onClick={()=>go('login')} variant="primary">✉️  Entrar com E-mail</Btn>
+        <div style={{textAlign:'center'}}>
+          <TextLink onClick={()=>go('register')}>Não tem conta? Criar conta grátis →</TextLink>
+        </div>
       </Card>
-
-      <p style={{fontSize:11, color:T.dim, textAlign:'center'}}>
-        <a href="/privacy" style={{color:T.muted}}>Política de Privacidade</a>
+      <p style={{fontSize:11,color:T.dim,textAlign:'center',display:'flex',gap:8,justifyContent:'center',flexWrap:'wrap'}}>
+        <a href="/privacidade" style={{color:T.muted}}>Política de Privacidade</a>
+        <span style={{color:T.dim}}>·</span>
+        <a href="/termos" style={{color:T.muted}}>Termos de Uso</a>
       </p>
     </Wrap>
   )
 
-  /* ── login ── */
   if (tab==='login') return (
     <Wrap>
       <Logo/>
       <Card>
         <Back onClick={()=>go('main')}/>
-        <p style={{fontSize:17, fontWeight:800}}>Bem-vindo de volta! 👋</p>
+        <p style={{fontSize:18,fontWeight:800}}>Bem-vindo de volta! 👋</p>
         <ErrBox msg={e}/><OkBox msg={ok}/>
-        <form onSubmit={emailLogin} style={{display:'flex', flexDirection:'column', gap:12}}>
+        <form onSubmit={emailLogin} style={{display:'flex',flexDirection:'column',gap:13}}>
           <Input label="E-mail" type="email" value={em} onChange={ev=>{setEm(ev.target.value);clear()}} placeholder="seu@email.com"/>
           <Input label="Senha" type="password" value={pw} onChange={ev=>{setPw(ev.target.value);clear()}} placeholder="••••••••"
-            extra={<button onClick={()=>go('reset')} type="button" style={{background:'none', border:'none', color:T.muted, cursor:'pointer', fontSize:11, padding:'4px 0', textAlign:'right', width:'100%', fontFamily:"'Inter',sans-serif", textDecoration:'underline', marginTop:3}}>Esqueci minha senha</button>}
+            extra={<button onClick={()=>go('reset')} type="button" style={{background:'none',border:'none',color:T.muted,cursor:'pointer',fontSize:11,padding:'5px 0',textAlign:'right',width:'100%',fontFamily:"'Plus Jakarta Sans',sans-serif",textDecoration:'underline',marginTop:3}}>Esqueci minha senha</button>}
           />
           <Btn type="submit" variant="primary" busy={busy}>Entrar</Btn>
         </form>
         <Divider/>
-        <Btn onClick={google} variant="google" busy={busy}><span style={{display:'flex', alignItems:'center', justifyContent:'center', gap:9}}><GoogleSVG/> Continuar com Google</span></Btn>
-        <TextLink onClick={()=>go('register')}>Não tem conta? Criar conta</TextLink>
+        <Btn onClick={google} variant="google" busy={busy}><span style={{display:'flex',alignItems:'center',justifyContent:'center',gap:9}}><GoogleSVG/> Continuar com Google</span></Btn>
+        <div style={{textAlign:'center'}}><TextLink onClick={()=>go('register')}>Não tem conta? Criar conta →</TextLink></div>
       </Card>
     </Wrap>
   )
 
-  /* ── register ── */
   if (tab==='register') return (
     <Wrap>
       <Logo/>
       <Card>
         <Back onClick={()=>go('main')}/>
-        <p style={{fontSize:17, fontWeight:800}}>Criar conta</p>
+        <p style={{fontSize:18,fontWeight:800}}>Criar conta</p>
         <ErrBox msg={e}/><OkBox msg={ok}/>
-        {!ok && (
-          <form onSubmit={register} style={{display:'flex', flexDirection:'column', gap:12}}>
+        {!ok&&(
+          <form onSubmit={register} style={{display:'flex',flexDirection:'column',gap:13}}>
             <Input label="Seu nome" value={name} onChange={ev=>{setName(ev.target.value);clear()}} placeholder="Como quer ser chamado?"/>
             <Input label="E-mail" type="email" value={em} onChange={ev=>{setEm(ev.target.value);clear()}} placeholder="seu@email.com"/>
             <Input label="Senha" type="password" value={pw} onChange={ev=>{setPw(ev.target.value);clear()}} placeholder="Mínimo 6 caracteres"/>
@@ -279,28 +294,27 @@ export default function LoginScreen({onLogin, loginWithEmail, registerWithEmail,
             <Btn type="submit" variant="primary" busy={busy}>Criar conta</Btn>
           </form>
         )}
-        {ok && <Btn onClick={()=>go('login')} variant="google">Ir para o login</Btn>}
-        <TextLink onClick={()=>go('login')}>Já tem conta? Entrar</TextLink>
+        {ok&&<Btn onClick={()=>go('login')} variant="google">Ir para o login</Btn>}
+        <div style={{textAlign:'center'}}><TextLink onClick={()=>go('login')}>Já tem conta? Entrar →</TextLink></div>
       </Card>
     </Wrap>
   )
 
-  /* ── reset ── */
   if (tab==='reset') return (
     <Wrap>
       <Logo/>
       <Card>
         <Back onClick={()=>go('login')}/>
-        <p style={{fontSize:17, fontWeight:800}}>Recuperar senha</p>
-        <p style={{fontSize:13, color:T.muted, lineHeight:1.7}}>Enviaremos um link para redefinir sua senha.</p>
+        <p style={{fontSize:18,fontWeight:800}}>Recuperar senha</p>
+        <p style={{fontSize:13,color:T.muted,lineHeight:1.7}}>Enviaremos um link para redefinir sua senha.</p>
         <ErrBox msg={e}/><OkBox msg={ok}/>
-        {!ok && (
-          <form onSubmit={reset} style={{display:'flex', flexDirection:'column', gap:12}}>
+        {!ok&&(
+          <form onSubmit={reset} style={{display:'flex',flexDirection:'column',gap:13}}>
             <Input label="E-mail" type="email" value={em} onChange={ev=>{setEm(ev.target.value);clear()}} placeholder="seu@email.com"/>
             <Btn type="submit" variant="primary" busy={busy}>Enviar link</Btn>
           </form>
         )}
-        {ok && <Btn onClick={()=>go('login')} variant="google">Voltar para o login</Btn>}
+        {ok&&<Btn onClick={()=>go('login')} variant="google">Voltar para o login</Btn>}
       </Card>
     </Wrap>
   )

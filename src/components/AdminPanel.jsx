@@ -187,7 +187,7 @@ export default function AdminPanel({ open, onClose, adminUid }) {
         transform: open ? 'translateY(0)' : 'translateY(100%)',
         transition:'transform .35s cubic-bezier(.4,0,.2,1)',
         display:'flex', flexDirection:'column',
-        fontFamily:"'Inter',sans-serif",
+        fontFamily:"'Plus Jakarta Sans',sans-serif",
       }}>
         {/* Header */}
         <div style={{
@@ -225,7 +225,7 @@ export default function AdminPanel({ open, onClose, adminUid }) {
                 flex:1, padding:'10px 4px', border:'none', minWidth:0,
                 borderBottom: mainTab===t.id ? `2px solid ${t.color}` : '2px solid transparent',
                 background:'transparent', cursor:'pointer',
-                fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:12,
+                fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:700, fontSize:12,
                 color: mainTab===t.id ? t.color : '#4a4a6a',
                 transition:'all .2s', whiteSpace:'nowrap',
               }}>
@@ -260,7 +260,7 @@ export default function AdminPanel({ open, onClose, adminUid }) {
                     background: reportFilter===f.id ? 'rgba(255,45,85,.15)' : C.s2,
                     border:`1px solid ${reportFilter===f.id ? C.red : C.border2}`,
                     color: reportFilter===f.id ? C.red : C.muted,
-                    fontFamily:"'Inter',sans-serif", fontWeight:600, fontSize:11, cursor:'pointer',
+                    fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:600, fontSize:11, cursor:'pointer',
                   }}>{f.label}</button>
                 ))}
                 <div style={{ marginLeft:'auto', fontSize:11, color: C.dim, alignSelf:'center' }}>
@@ -332,7 +332,7 @@ export default function AdminPanel({ open, onClose, adminUid }) {
                     background: modTab===t.id ? `${t.color}18` : C.s2,
                     border:`1px solid ${modTab===t.id ? t.color : C.border2}`,
                     color: modTab===t.id ? t.color : '#4a4a6a',
-                    fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer',
+                    fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:700, fontSize:11, cursor:'pointer',
                     transition:'all .2s',
                   }}>
                     {t.label}{t.count > 0 && <span style={{ marginLeft:4, fontSize:10, opacity:.8 }}>({t.count})</span>}
@@ -545,7 +545,7 @@ function ResetCard({ icon, title, desc, color, busy, onClick, danger }) {
           flexShrink:0, padding:'8px 14px', borderRadius:10,
           background:`${color}18`, border:`1px solid ${color}44`,
           color, cursor: busy ? 'wait' : 'pointer',
-          fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:12,
+          fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:700, fontSize:12,
           opacity: busy ? .5 : 1, transition:'all .15s',
         }}
       >
@@ -600,7 +600,7 @@ function Tag({ icon, label, mono }) {
       background:'var(--surface2)', border:'1px solid var(--border)',
       borderRadius:20, padding:'3px 10px',
       fontSize:11, color:'var(--muted)',
-      fontFamily: mono ? "'Space Mono',monospace" : "'Inter',sans-serif",
+      fontFamily: mono ? "'Syne',monospace" : "'Plus Jakarta Sans',sans-serif",
     }}>
       {icon} {label}
     </span>
@@ -612,7 +612,7 @@ function ActionBtn({ color, bg, label, onClick, disabled }) {
     <button onClick={onClick} disabled={disabled} style={{
       flex:1, padding:'10px 8px', borderRadius:10, border:`1px solid ${color}44`,
       background:bg, color, cursor:disabled ? 'wait' : 'pointer',
-      fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:12,
+      fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:700, fontSize:12,
       transition:'all .15s', opacity:disabled ? .5 : 1,
     }}
       onMouseDown={e  => !disabled && (e.currentTarget.style.transform='scale(.97)')}

@@ -130,7 +130,9 @@ export const DURATION_OPTIONS = [
 
 export const DEFAULT_LAT = -22.3154
 export const DEFAULT_LNG = -49.0608
-export const VAPID_KEY   = 'BG6lEkaP-n5PRPH5kX5YsBvrMCQgM7hvbNLAFFFSTAD64w83CJ5z4dWD-I1le1JzOvz070Ysih4hBQWbv9vP81s'
+// Chave VAPID via variável de ambiente — nunca hardcode aqui
+// Configure em: Firebase Console → Project Settings → Cloud Messaging
+export const VAPID_KEY = import.meta.env.VITE_VAPID_KEY
 
-// UID do admin — substitua pelo seu UID do Firebase Auth
-export const ADMIN_UIDS = ['nDg7v4RL91NqGkr16Gei9DrInWv1']
+// Admin é controlado pelo campo isAdmin no RTDB (users/$uid/isAdmin: true)
+// Use scripts/set-admin.js para promover um usuário. Sem lista hardcoded aqui.

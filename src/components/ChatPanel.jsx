@@ -273,7 +273,7 @@ export default function ChatPanel({ open, location, user, onClose }) {
               rows={1}
               style={{
                 flex:1, background:'none', border:'none', outline:'none',
-                color:'var(--text)', fontFamily:"'Inter',sans-serif", fontSize:14,
+                color:'var(--text)', fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:14,
                 resize:'none', lineHeight:1.5, maxHeight:100, overflowY:'auto',
                 scrollbarWidth:'none',
               }}/>

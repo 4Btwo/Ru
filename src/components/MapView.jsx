@@ -139,11 +139,11 @@ function buildClusterIcon(cluster) {
           background:radial-gradient(circle,${color}cc,${color}66);
           box-shadow:0 0 18px ${color}88;border:2px solid rgba(255,255,255,.2);
           display:flex;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;">
-          <div style="font-size:11px;font-weight:800;color:#fff;font-family:'Space Mono',monospace;">${cluster.locations.length}</div>
+          <div style="font-size:11px;font-weight:800;color:#fff;font-family:'Syne',monospace;">${cluster.locations.length}</div>
           <div style="font-size:8px;color:rgba(255,255,255,.7);">locais</div>
         </div>
         <div style="position:absolute;top:-7px;right:-7px;background:#f0f0ff;color:#0a0a0f;
-          font-size:9px;font-weight:800;font-family:'Space Mono',monospace;
+          font-size:9px;font-weight:800;font-family:'Syne',monospace;
           border-radius:20px;padding:1px 6px;min-width:17px;text-align:center;">
           ${cluster.count}
         </div>

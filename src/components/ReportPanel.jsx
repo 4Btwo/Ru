@@ -144,7 +144,7 @@ export default function ReportPanel({ open, location, onClose, onConfirm }) {
                   border:`1px solid ${selected===b.type?b.accent:'var(--border)'}`,
                   borderRadius:12, padding:'14px 6px', cursor:'pointer',
                   color:selected===b.type?b.accent:'var(--text)',
-                  fontFamily:"'Inter',sans-serif", fontSize:11, fontWeight:600,
+                  fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:11, fontWeight:600,
                   display:'flex', flexDirection:'column', alignItems:'center', gap:6,
                   transition:'all .15s',
                 }}
@@ -166,7 +166,7 @@ export default function ReportPanel({ open, location, onClose, onConfirm }) {
           background:selected?'var(--green)':'var(--surface2)',
           color:selected?'#052e16':'var(--muted)',
           border:`1px solid ${selected?'var(--green)':'var(--border)'}`,
-          fontFamily:"'Inter',sans-serif", fontWeight:800, fontSize:15,
+          fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:800, fontSize:15,
           cursor:selected?'pointer':'not-allowed', transition:'all .2s',
         }}>
           {selected?'✅ Confirmar reporte':'Selecione uma ocorrência'}

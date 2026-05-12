@@ -100,7 +100,7 @@ export default function NowPanel({ open, onClose, events, usersMap, onLocationCl
                     </div>
                   </div>
                   <div style={{textAlign:'right', flexShrink:0}}>
-                    <div style={{fontFamily:"'Space Mono',monospace", fontSize:18, fontWeight:700, color}}>{score.toFixed(0)}</div>
+                    <div style={{fontFamily:"'Syne',monospace", fontSize:18, fontWeight:700, color}}>{score.toFixed(0)}</div>
                     <div style={{fontSize:9, color:'var(--muted)', textTransform:'uppercase'}}>score</div>
                   </div>
                 </div>
@@ -109,12 +109,12 @@ export default function NowPanel({ open, onClose, events, usersMap, onLocationCl
                   <button onClick={e=>{e.stopPropagation();onClose();onLocationClick(loc)}} style={{
                     flex:1, padding:'9px 0', borderRadius:10,
                     border:`1px solid ${color}44`, background:'transparent',
-                    color, fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer',
+                    color, fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer',
                   }}>📍 Ver no mapa</button>
                   <button onClick={e=>{e.stopPropagation();handleShare(loc)}} style={{
                     flex:1, padding:'9px 0', borderRadius:10, border:'none',
                     background:color, color:'#fff',
-                    fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer',
+                    fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:700, fontSize:12, cursor:'pointer',
                   }}>📤 Compartilhar</button>
                 </div>
               </div>

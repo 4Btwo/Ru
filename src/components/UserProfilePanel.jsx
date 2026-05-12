@@ -333,7 +333,7 @@ export default function UserProfilePanel({ open, targetUid, currentUser, onClose
                           display:'flex', alignItems:'center', justifyContent:'center',
                           cursor:'pointer', fontSize:16, transition:'border-color .2s',
                         }}
-                        onMouseEnter={e=>e.currentTarget.style.borderColor='var(--green)'}
+                        onMouseEnter={e=>e.currentTarget.style.borderColor='var(--primary)'}
                         onMouseLeave={e=>e.currentTarget.style.borderColor='var(--border)'}
                         title="Enviar mensagem"
                       >💬</button>
@@ -346,7 +346,7 @@ export default function UserProfilePanel({ open, targetUid, currentUser, onClose
                         ? 'rgba(245,158,11,.12)'
                         : 'linear-gradient(135deg, #22c55e, #16a34a)',
                       color: isFollowing ? 'var(--muted)' : isPendingRequest ? '#f59e0b' : '#052e16',
-                      fontFamily:"'Inter',sans-serif", fontWeight:800, fontSize:12,
+                      fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:800, fontSize:12,
                       cursor: toggling ? 'wait' : 'pointer',
                       border: isFollowing
                         ? '1px solid var(--border)'
@@ -400,7 +400,7 @@ export default function UserProfilePanel({ open, targetUid, currentUser, onClose
                     <div style={{position:'relative'}}>
                       <div style={{fontSize:16, marginBottom:5}}>{s.icon}</div>
                       <div style={{
-                        fontFamily:s.mono?"'Space Mono',monospace":'inherit',
+                        fontFamily:s.mono?"'Syne',monospace":'inherit',
                         fontSize:s.val>9999?14:20, fontWeight:900,
                         color:s.accent, lineHeight:1, marginBottom:5,
                       }}>{s.val.toLocaleString('pt-BR')}</div>
@@ -423,7 +423,7 @@ export default function UserProfilePanel({ open, targetUid, currentUser, onClose
                     borderBottom:`2.5px solid ${tab===t.id?accentColor:'transparent'}`,
                     color:tab===t.id?accentColor:'var(--muted)',
                     fontSize:13, fontWeight:tab===t.id?700:500,
-                    cursor:'pointer', fontFamily:"'Inter',sans-serif",
+                    cursor:'pointer', fontFamily:"'Plus Jakarta Sans',sans-serif",
                     transition:'all .2s', display:'flex', alignItems:'center', gap:6,
                   }}>
                     {t.label}
@@ -510,7 +510,7 @@ export default function UserProfilePanel({ open, targetUid, currentUser, onClose
                         </div>
                         <div style={{display:'flex',alignItems:'center',gap:6,flexShrink:0}}>
                           <StarBar score={r.stars}/>
-                          <span style={{fontFamily:"'Space Mono',monospace",fontSize:12,color:'#22c55e',fontWeight:800}}>
+                          <span style={{fontFamily:"'Syne',monospace",fontSize:12,color:'#22c55e',fontWeight:800}}>
                             {r.stars}.0
                           </span>
                         </div>

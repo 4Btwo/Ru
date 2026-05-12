@@ -8,16 +8,16 @@ import React from 'react'
 const S = {
   page: {
     minHeight: '100dvh',
-    background: '#0a0a0f',
-    color: '#f0f0ff',
-    fontFamily: "'Syne', sans-serif",
+    background: '#0d0d14',
+    color: '#f5f4ff',
+    fontFamily: "'Plus Jakarta Sans', sans-serif",
     padding: '40px 20px 80px',
   },
   inner: { maxWidth: 680, margin: '0 auto' },
   back: {
     display: 'inline-flex', alignItems: 'center', gap: 6,
-    background: 'none', border: 'none', color: '#6666aa',
-    cursor: 'pointer', fontFamily: "'Inter',sans-serif",
+    background: 'none', border: 'none', color: '#6b6990',
+    cursor: 'pointer', fontFamily: "'Plus Jakarta Sans', sans-serif",
     fontSize: 13, marginBottom: 32, padding: 0,
   },
   logo: {
@@ -25,21 +25,21 @@ const S = {
   },
   dot: {
     width: 10, height: 10, borderRadius: '50%',
-    background: '#ff2d55', boxShadow: '0 0 10px #ff2d55',
+    background: '#ff5c35', boxShadow: '0 0 10px #ff5c35',
   },
   appName: { fontSize: 14, fontWeight: 800, letterSpacing: '.12em', textTransform: 'uppercase' },
   h1: { fontSize: 26, fontWeight: 800, marginBottom: 8 },
-  updated: { fontSize: 12, color: '#6666aa', marginBottom: 40 },
-  h2: { fontSize: 16, fontWeight: 700, marginTop: 36, marginBottom: 12, color: '#f0f0ff' },
-  p: { fontSize: 14, lineHeight: 1.8, color: '#c0c0e0', marginBottom: 12 },
+  updated: { fontSize: 12, color: '#6b6990', marginBottom: 40 },
+  h2: { fontSize: 16, fontWeight: 700, marginTop: 36, marginBottom: 12, color: '#f5f4ff' },
+  p: { fontSize: 14, lineHeight: 1.8, color: '#c4c2e8', marginBottom: 12 },
   ul: { paddingLeft: 20, marginBottom: 12 },
-  li: { fontSize: 14, lineHeight: 1.8, color: '#c0c0e0', marginBottom: 4 },
-  divider: { border: 'none', borderTop: '1px solid #2a2a3d', margin: '40px 0' },
+  li: { fontSize: 14, lineHeight: 1.8, color: '#c4c2e8', marginBottom: 4 },
+  divider: { border: 'none', borderTop: '1px solid #252538', margin: '40px 0' },
   contact: {
-    background: '#12121a', border: '1px solid #2a2a3d',
+    background: '#13131f', border: '1px solid #252538',
     borderRadius: 12, padding: '16px 20px', marginTop: 32,
   },
-  email: { color: '#ff2d55', textDecoration: 'none' },
+  email: { color: '#ff5c35', textDecoration: 'none' },
 }
 
 export default function PrivacyPolicy() {
@@ -141,7 +141,7 @@ export default function PrivacyPolicy() {
         <hr style={S.divider} />
 
         <div style={S.contact}>
-          <p style={{ ...S.p, marginBottom: 4, fontWeight: 700, color: '#f0f0ff' }}>Contato</p>
+          <p style={{ ...S.p, marginBottom: 4, fontWeight: 700, color: '#f5f4ff' }}>Contato</p>
           <p style={{ ...S.p, marginBottom: 0 }}>
             Para dúvidas, solicitações de exclusão de dados ou qualquer questão relacionada
             à privacidade, entre em contato pelo e-mail:{' '}

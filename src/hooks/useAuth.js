@@ -54,6 +54,7 @@ export function useAuth() {
             reports:  d.reports || 0,
             coverUrl: d.coverUrl || null,
             bio:      d.bio      || null,
+            isAdmin:  d.isAdmin  === true,
           })
         }
       })

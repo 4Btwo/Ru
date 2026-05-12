@@ -27,7 +27,7 @@ function StarBar({score}) {
     <div style={{display:'flex', alignItems:'center', gap:3}}>
       {[1,2,3,4,5].map(i=>(
         <svg key={i} width="14" height="14" viewBox="0 0 24 24"
-          fill={i<=stars?'#22c55e':'none'} stroke={i<=stars?'#22c55e':'#374d3c'} strokeWidth="2">
+          fill={i<=stars?'#ff5c35':'none'} stroke={i<=stars?'#ff5c35':'#3a3a5c'} strokeWidth="2">
           <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
         </svg>
       ))}
@@ -41,7 +41,7 @@ function InteractiveStar({value, onChange}) {
       {[1,2,3,4,5].map(i=>(
         <svg key={i} onClick={()=>onChange(i)}
           width="28" height="28" viewBox="0 0 24 24"
-          fill={i<=value?'#22c55e':'none'} stroke={i<=value?'#22c55e':'#374d3c'}
+          fill={i<=value?'#ff5c35':'none'} stroke={i<=value?'#ff5c35':'#3a3a5c'}
           strokeWidth="2" style={{cursor:'pointer', transition:'transform .1s'}}
           onMouseEnter={e=>e.currentTarget.style.transform='scale(1.2)'}
           onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}>
@@ -212,7 +212,7 @@ export default function DetailPanel({location, events, usersMap, user, onClose, 
               <h2 style={{fontSize:20,fontWeight:800,marginBottom:6}}>{location.name}</h2>
               <div style={{display:'flex',alignItems:'center',gap:8}}>
                 <StarBar score={parseFloat(avgStars)}/>
-                <span style={{fontFamily:"'Space Mono',monospace",fontSize:13,fontWeight:700,color:'var(--green)'}}>{avgStars}</span>
+                <span style={{fontFamily:"'Syne',monospace",fontSize:13,fontWeight:700,color:'var(--green)'}}>{avgStars}</span>
                 <span style={{fontSize:12,color:'var(--muted)'}}>({totalReviews} avaliações)</span>
                 {isOwner(location)&&<span style={{fontSize:14}}>👑</span>}
               </div>
@@ -241,7 +241,7 @@ export default function DetailPanel({location, events, usersMap, user, onClose, 
                   <div style={{height:'100%',borderRadius:10,width:`${occ}%`,background:occ>=90?'var(--red)':occ>=60?'var(--yellow)':'var(--green)',transition:'width .4s'}}/>
                 </div>
               </div>
-              <span style={{fontFamily:"'Space Mono',monospace",fontSize:18,fontWeight:700,color:occ>=90?'var(--red)':occ>=60?'var(--yellow)':'var(--green)'}}>{occ}%</span>
+              <span style={{fontFamily:"'Syne',monospace",fontSize:18,fontWeight:700,color:occ>=90?'var(--red)':occ>=60?'var(--yellow)':'var(--green)'}}>{occ}%</span>
             </div>
           )}
 
@@ -253,7 +253,7 @@ export default function DetailPanel({location, events, usersMap, user, onClose, 
                 borderBottom:`2px solid ${activeTab===t.id?'var(--green)':'transparent'}`,
                 color:activeTab===t.id?'var(--green)':'var(--muted)',
                 fontSize:12,fontWeight:activeTab===t.id?700:500,cursor:'pointer',
-                fontFamily:"'Inter',sans-serif",transition:'all .2s',
+                fontFamily:"'Plus Jakarta Sans',sans-serif",transition:'all .2s',
               }}>{t.label}</button>
             ))}
           </div>
@@ -303,7 +303,7 @@ export default function DetailPanel({location, events, usersMap, user, onClose, 
                     </div>
                     <div style={{display:'flex',gap:4}}>
                       {['day','hour'].map(t=>(
-                        <button key={t} onClick={()=>setHistTab(t)} style={{padding:'3px 9px',borderRadius:7,border:'none',cursor:'pointer',background:histTab===t?HIST_COLOR:'var(--border)',color:histTab===t?'#fff':'var(--muted)',fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:10}}>{t==='day'?'Dia':'Hora'}</button>
+                        <button key={t} onClick={()=>setHistTab(t)} style={{padding:'3px 9px',borderRadius:7,border:'none',cursor:'pointer',background:histTab===t?HIST_COLOR:'var(--border)',color:histTab===t?'#fff':'var(--muted)',fontFamily:"'Plus Jakarta Sans',sans-serif",fontWeight:700,fontSize:10}}>{t==='day'?'Dia':'Hora'}</button>
                       ))}
                     </div>
                   </div>
@@ -329,7 +329,7 @@ export default function DetailPanel({location, events, usersMap, user, onClose, 
               {/* Resumo */}
               <div style={{background:'var(--surface2)',border:'1px solid var(--border)',borderRadius:14,padding:16,marginBottom:16,display:'flex',alignItems:'center',gap:16}}>
                 <div style={{textAlign:'center'}}>
-                  <div style={{fontFamily:"'Space Mono',monospace",fontSize:36,fontWeight:700,color:'var(--green)'}}>{avgStars}</div>
+                  <div style={{fontFamily:"'Syne',monospace",fontSize:36,fontWeight:700,color:'var(--green)'}}>{avgStars}</div>
                   <StarBar score={parseFloat(avgStars)}/>
                   <div style={{fontSize:11,color:'var(--muted)',marginTop:4}}>{totalReviews} avaliações</div>
                 </div>
@@ -358,14 +358,14 @@ export default function DetailPanel({location, events, usersMap, user, onClose, 
                   </div>
                   <textarea value={reviewText} onChange={e=>setReviewText(e.target.value)}
                     placeholder="Conte sua experiência... (opcional)" rows={2} maxLength={300}
-                    style={{width:'100%',background:'var(--bg)',border:'1px solid var(--border)',borderRadius:10,padding:'10px 12px',color:'var(--text)',fontFamily:"'Inter',sans-serif",fontSize:13,outline:'none',resize:'none',lineHeight:1.5,boxSizing:'border-box',marginBottom:10}}
+                    style={{width:'100%',background:'var(--bg)',border:'1px solid var(--border)',borderRadius:10,padding:'10px 12px',color:'var(--text)',fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:13,outline:'none',resize:'none',lineHeight:1.5,boxSizing:'border-box',marginBottom:10}}
                     onFocus={e=>e.target.style.borderColor='var(--green)'}
                     onBlur={e=>e.target.style.borderColor='var(--border)'}/>
                   <button onClick={handleSubmitReview} disabled={!reviewStars||submitting} style={{
                     width:'100%',padding:'11px',borderRadius:10,border:'none',
                     background:submitted?'rgba(34,197,94,.2)':reviewStars?'var(--green)':'var(--surface3)',
                     color:submitted?'var(--green)':reviewStars?'#052e16':'var(--dim)',
-                    fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:13,
+                    fontFamily:"'Plus Jakarta Sans',sans-serif",fontWeight:700,fontSize:13,
                     cursor:reviewStars?'pointer':'not-allowed',transition:'all .2s',
                   }}>{submitted?'✅ Avaliação enviada!':submitting?'Enviando...':'Enviar avaliação'}</button>
                 </div>
@@ -404,7 +404,7 @@ export default function DetailPanel({location, events, usersMap, user, onClose, 
                   <div style={{fontSize:36,marginBottom:8}}>📷</div>
                   <div style={{fontSize:13,fontWeight:600,marginBottom:4}}>Nenhuma foto ainda</div>
                   <div style={{fontSize:12}}>Seja o primeiro a postar!</div>
-                  <button onClick={()=>setChatOpen(true)} style={{marginTop:14,background:'var(--green)',border:'none',borderRadius:10,padding:'10px 20px',color:'#052e16',fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:13,cursor:'pointer'}}>Abrir chat e enviar foto</button>
+                  <button onClick={()=>setChatOpen(true)} style={{marginTop:14,background:'var(--green)',border:'none',borderRadius:10,padding:'10px 20px',color:'#052e16',fontFamily:"'Plus Jakarta Sans',sans-serif",fontWeight:700,fontSize:13,cursor:'pointer'}}>Abrir chat e enviar foto</button>
                 </div>
               ):(
                 <>
@@ -415,7 +415,7 @@ export default function DetailPanel({location, events, usersMap, user, onClose, 
                       </div>
                     ))}
                   </div>
-                  <button onClick={()=>setChatOpen(true)} style={{width:'100%',padding:'11px',borderRadius:10,background:'var(--surface2)',border:'1px solid var(--border)',color:'var(--muted)',fontFamily:"'Inter',sans-serif",fontWeight:600,fontSize:12,cursor:'pointer'}}>💬 Abrir chat para enviar foto</button>
+                  <button onClick={()=>setChatOpen(true)} style={{width:'100%',padding:'11px',borderRadius:10,background:'var(--surface2)',border:'1px solid var(--border)',color:'var(--muted)',fontFamily:"'Plus Jakarta Sans',sans-serif",fontWeight:600,fontSize:12,cursor:'pointer'}}>💬 Abrir chat para enviar foto</button>
                 </>
               )}
             </div>
@@ -459,7 +459,7 @@ export default function DetailPanel({location, events, usersMap, user, onClose, 
                 border:`1px solid ${a.active?'var(--green)':'var(--border)'}`,
                 borderRadius:12,padding:'10px 4px',cursor:'pointer',
                 color:a.active?'var(--green)':'var(--muted)',
-                fontFamily:"'Inter',sans-serif",fontSize:10,fontWeight:600,
+                fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:10,fontWeight:600,
               }}><span style={{fontSize:18}}>{a.icon}</span>{a.label}</button>
             ))}
           </div>
@@ -477,18 +477,18 @@ export default function DetailPanel({location, events, usersMap, user, onClose, 
               background: isSaved?'rgba(34,197,94,.15)':'var(--surface2)',
               border:`1px solid ${isSaved?'var(--green)':'var(--border)'}`,
               color: isSaved?'var(--green)':'var(--muted)',
-              fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:18, cursor:'pointer',
+              fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:700, fontSize:18, cursor:'pointer',
               display:'flex', alignItems:'center', justifyContent:'center',
             }}>🔖</button>
             <button onClick={()=>{onClose();onReport(location)}} style={{
               flex:1,padding:'14px',borderRadius:14,
               background:'var(--surface2)',border:'1px solid var(--border)',
-              color:'var(--text)',fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:14,cursor:'pointer',
+              color:'var(--text)',fontFamily:"'Plus Jakarta Sans',sans-serif",fontWeight:700,fontSize:14,cursor:'pointer',
             }}>📡 Reportar</button>
             <button onClick={handleComoChegar} style={{
               flex:2,padding:'14px',borderRadius:14,border:'none',
               background:'var(--green)',color:'#052e16',
-              fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:14,cursor:'pointer',
+              fontFamily:"'Plus Jakarta Sans',sans-serif",fontWeight:700,fontSize:14,cursor:'pointer',
             }}
               onMouseDown={e=>e.currentTarget.style.transform='scale(.98)'}
               onMouseUp={e=>e.currentTarget.style.transform='scale(1)'}
@@ -501,7 +501,7 @@ export default function DetailPanel({location, events, usersMap, user, onClose, 
             <button onClick={()=>setOwnerOpen(true)} style={{
               width:'100%',padding:12,borderRadius:14,marginTop:8,
               border:'1px solid rgba(234,179,8,.35)',background:'rgba(234,179,8,.07)',
-              color:'var(--yellow)',fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:13,cursor:'pointer',
+              color:'var(--yellow)',fontFamily:"'Plus Jakarta Sans',sans-serif",fontWeight:700,fontSize:13,cursor:'pointer',
             }}>👑 Gerenciar estabelecimento</button>
           )}
         </div>

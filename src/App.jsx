@@ -6,7 +6,7 @@ import { useEvents }         from './hooks/useEvents'
 import { useOnline }         from './hooks/useOnline'
 import { useNotifications }  from './hooks/useNotifications'
 import { usePlaces }         from './hooks/usePlaces'
-import { EVENT_META, DEFAULT_LAT, DEFAULT_LNG, ADMIN_UIDS } from './lib/constants'
+import { EVENT_META, DEFAULT_LAT, DEFAULT_LNG } from './lib/constants'
 import { calcScore, getHeatLevel } from './lib/hotspot'
 import { checkAlerts }       from './lib/alerts'
 import { seedIfEmpty }       from './lib/seed'
@@ -38,7 +38,7 @@ const IC = {
   Filter: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>,
   SearchSm: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="15" height="15"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
   MapPin: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="14" height="14"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>,
-  Star: ({filled}) => <svg viewBox="0 0 24 24" fill={filled?'#22c55e':'none'} stroke="#22c55e" strokeWidth="2" width="13" height="13"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>,
+  Star: ({filled}) => <svg viewBox="0 0 24 24" fill={filled?'var(--primary)':'none'} stroke="var(--primary)" strokeWidth="2" width="13" height="13"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>,
   ChevronRight: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><polyline points="9 18 15 12 9 6"/></svg>,
   Settings: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
 }
@@ -49,7 +49,7 @@ function UrbynLogo({ size=28 }) {
     <div style={{display:'flex', alignItems:'center', gap:7}}>
       <div style={{
         width:size, height:size, borderRadius:size*.28,
-        background:'linear-gradient(135deg,#22c55e,#16a34a)',
+        background:'linear-gradient(135deg,#ff5c35,#d946a8,#a855f7)',
         display:'flex', alignItems:'center', justifyContent:'center',
         boxShadow:'0 4px 14px rgba(34,197,94,.4)', flexShrink:0,
       }}>
@@ -60,7 +60,7 @@ function UrbynLogo({ size=28 }) {
       </div>
       <span style={{
         fontSize:size*.85, fontWeight:900, color:'var(--text)',
-        fontFamily:"'Inter',sans-serif", letterSpacing:'-.03em', lineHeight:1,
+        fontFamily:"'Plus Jakarta Sans',sans-serif", letterSpacing:'-.03em', lineHeight:1,
       }}>Urbyn</span>
     </div>
   )
@@ -165,7 +165,7 @@ function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, aler
               cursor:'pointer', color:'var(--muted)', position:'relative',
             }}>
               <IC.Chat/>
-              {chatUnread>0&&<span style={{position:'absolute', top:-3, right:-3, background:'var(--green)', color:'#052e16', fontSize:9, fontWeight:800, borderRadius:'50%', width:16, height:16, display:'flex', alignItems:'center', justifyContent:'center', border:'2px solid var(--bg)'}}>{chatUnread>9?'9+':chatUnread}</span>}
+              {chatUnread>0&&<span style={{position:'absolute', top:-3, right:-3, background:'linear-gradient(135deg,var(--primary),var(--accent))', color:'#052e16', fontSize:9, fontWeight:800, borderRadius:'50%', width:16, height:16, display:'flex', alignItems:'center', justifyContent:'center', border:'2px solid var(--bg)'}}>{chatUnread>9?'9+':chatUnread}</span>}
             </button>
             {/* Notificações */}
             <button onClick={onBell} style={{
@@ -179,7 +179,7 @@ function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, aler
             </button>
             <div style={{
               width:36, height:36, borderRadius:'50%',
-              background:'var(--surface2)', border:'2px solid rgba(34,197,94,.4)',
+              background:'var(--surface2)', border:'2px solid rgba(255,92,53,.4)',
               overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center',
               fontSize:16, cursor:'pointer',
             }} onClick={()=>{}}>
@@ -205,7 +205,7 @@ function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, aler
         <div style={{position:'relative', marginBottom:20}}>
           <div style={{
             display:'flex', alignItems:'center', gap:10,
-            background:'var(--surface2)', border:`1.5px solid ${searchFocus?'var(--green)':'var(--border)'}`,
+            background:'var(--surface2)', border:`1.5px solid ${searchFocus?'var(--primary)':'var(--border)'}`,
             borderRadius: showResults ? '14px 14px 0 0' : 14,
             padding:'12px 14px', transition:'border-color .2s',
           }}>
@@ -217,7 +217,7 @@ function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, aler
               onBlur={()=>setTimeout(()=>setSearchFocus(false),150)}
               placeholder="Buscar lugares, comidas, experiências..."
               style={{background:'none', border:'none', outline:'none', color:'var(--text)',
-                fontFamily:"'Inter',sans-serif", fontSize:14, flex:1}}/>
+                fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:14, flex:1}}/>
             {searchQuery
               ? <span onClick={()=>setSearchQuery('')} style={{cursor:'pointer', fontSize:16, color:'var(--muted)'}}>✕</span>
               : <IC.Filter/>}
@@ -225,7 +225,7 @@ function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, aler
           {showResults && (
             <div style={{
               position:'absolute', left:0, right:0, zIndex:500,
-              background:'var(--surface2)', border:'1.5px solid var(--green)',
+              background:'var(--surface2)', border:'1.5px solid var(--primary)',
               borderTop:'1px solid var(--border)', borderRadius:'0 0 14px 14px',
               overflow:'hidden', boxShadow:'0 8px 24px rgba(0,0,0,.4)',
             }}>
@@ -270,7 +270,7 @@ function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, aler
               borderRadius:14, padding:'12px 8px', textAlign:'center',
             }}>
               <div style={{fontSize:18, marginBottom:4}}>{s.icon}</div>
-              <div style={{fontFamily:"'Space Mono',monospace", fontSize:16, fontWeight:700, color:s.col, lineHeight:1}}>{s.val}</div>
+              <div style={{fontFamily:"'Syne',monospace", fontSize:16, fontWeight:700, color:s.col, lineHeight:1}}>{s.val}</div>
               <div style={{fontSize:9, color:'var(--muted)', marginTop:3, textTransform:'uppercase', letterSpacing:'.05em'}}>{s.label}</div>
             </div>
           ))}
@@ -330,7 +330,7 @@ function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, aler
                 <div style={{fontSize:10, color:'var(--muted)', marginBottom:5}}>{CAT_LABEL[p.cat]||'Local'} · Bauru</div>
                 <div style={{display:'flex', alignItems:'center', gap:4}}>
                   <Stars score={p._score}/>
-                  <span style={{fontFamily:"'Space Mono',monospace", fontSize:10, color:'var(--green)', fontWeight:700}}>
+                  <span style={{fontFamily:"'Syne',monospace", fontSize:10, color:'var(--primary)', fontWeight:700}}>
                     {Math.min(5,Math.max(1,p._score)).toFixed(1)}
                   </span>
                 </div>
@@ -359,7 +359,7 @@ function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, aler
                 <div style={{fontSize:11, color:'var(--muted)', marginTop:2}}>{CAT_LABEL[p.cat]||'Local'} · Bauru, SP</div>
                 <div style={{display:'flex', alignItems:'center', gap:6, marginTop:4}}>
                   <Stars score={calcScore(p.id,events,usersMap)}/>
-                  <span style={{fontSize:10, color:'var(--green)', fontWeight:700}}>
+                  <span style={{fontSize:10, color:'var(--primary)', fontWeight:700}}>
                     {Math.min(5,Math.max(1,calcScore(p.id,events,usersMap))).toFixed(1)}
                   </span>
                   <span style={{fontSize:10, color:'var(--muted)'}}>
@@ -428,10 +428,10 @@ function ActivitiesTab({events, usersMap, allPlaces, onPlace, user, saved, follo
           {TABS.map(t=>(
             <button key={t} onClick={()=>setTab(t)} style={{
               padding:'7px 13px', borderRadius:100,
-              background:tab===t?'rgba(34,197,94,.13)':'var(--surface2)',
-              border:`1px solid ${tab===t?'var(--green)':'var(--border)'}`,
-              color:tab===t?'var(--green)':'var(--muted)',
-              fontFamily:"'Inter',sans-serif", fontWeight:600, fontSize:11, cursor:'pointer',
+              background:tab===t?'var(--primary-dim)':'var(--surface2)',
+              border:`1px solid ${tab===t?'var(--primary)':'var(--border)'}`,
+              color:tab===t?'var(--primary)':'var(--muted)',
+              fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:600, fontSize:11, cursor:'pointer',
               textTransform:'capitalize',
             }}>{t}</button>
           ))}
@@ -636,7 +636,7 @@ function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUp
           <div style={{position:'relative'}}>
             <div style={{
               width:76, height:76, borderRadius:'50%', flexShrink:0,
-              background:'var(--surface3)', border:'3px solid var(--green)',
+              background:'var(--surface3)', border:'3px solid var(--primary)',
               overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center', fontSize:32,
             }}>
               {user.photo?<img src={user.photo} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>:'👤'}
@@ -644,7 +644,7 @@ function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUp
             <button onClick={()=>{setEditing(true);setEditName(user?.name||'')}} style={{
               position:'absolute', bottom:-2, right:-2,
               width:24, height:24, borderRadius:'50%',
-              background:'var(--green)', border:'2px solid var(--bg)',
+              background:'linear-gradient(135deg,var(--primary),var(--accent))', border:'2px solid var(--bg)',
               display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer',
             }}>
               <svg viewBox="0 0 24 24" fill="none" stroke="#052e16" strokeWidth="2.5" width="11" height="11">
@@ -664,7 +664,7 @@ function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUp
             )}
             <div style={{
               display:'inline-flex', alignItems:'center', gap:5,
-              background:'rgba(34,197,94,.1)', border:'1px solid rgba(34,197,94,.25)',
+              background:'var(--primary-dim)', border:'1px solid rgba(255,92,53,.25)',
               borderRadius:100, padding:'3px 10px',
               fontSize:11, color:'var(--green)', fontWeight:700,
             }}>🏆 Explorador Urbano</div>
@@ -682,7 +682,7 @@ function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUp
               background:'var(--surface2)', border:'1px solid var(--border)',
               borderRadius:14, padding:'14px 8px', textAlign:'center',
             }}>
-              <div style={{fontFamily:"'Space Mono',monospace", fontSize:22, fontWeight:700, marginBottom:3}}>{s.val}</div>
+              <div style={{fontFamily:"'Syne',monospace", fontSize:22, fontWeight:700, marginBottom:3}}>{s.val}</div>
               <div style={{fontSize:11, color:'var(--muted)'}}>{s.label}</div>
             </div>
           ))}
@@ -692,13 +692,13 @@ function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUp
       <div style={{padding:'16px 16px 0'}}>
         {/* Pontuação */}
         <div style={{
-          background:'rgba(34,197,94,.07)', border:'1px solid rgba(34,197,94,.2)',
+          background:'var(--primary-dim)', border:'1px solid rgba(255,92,53,.2)',
           borderRadius:16, padding:16, marginBottom:20,
           display:'flex', alignItems:'center', justifyContent:'space-between',
         }}>
           <div>
             <div style={{fontSize:10, textTransform:'uppercase', letterSpacing:'.12em', color:'var(--muted)', marginBottom:4}}>⚡ PONTUAÇÃO TOTAL</div>
-            <div style={{fontFamily:"'Space Mono',monospace", fontSize:32, fontWeight:700, color:'var(--green)'}}>
+            <div style={{fontFamily:"'Syne',monospace", fontSize:32, fontWeight:700, color:'var(--green)'}}>
               {user.score??0} <span style={{fontSize:14, color:'var(--muted)'}}>pts</span>
             </div>
           </div>
@@ -711,10 +711,10 @@ function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUp
             <button key={t.id} onClick={()=>setProfileTab(t.id)} style={{
               flex:1, padding:'10px 0',
               background:'none', border:'none',
-              borderBottom:`2px solid ${profileTab===t.id?'var(--green)':'transparent'}`,
-              color:profileTab===t.id?'var(--green)':'var(--muted)',
+              borderBottom:`2px solid ${profileTab===t.id?'var(--primary)':'transparent'}`,
+              color:profileTab===t.id?'var(--primary)':'var(--muted)',
               fontSize:12, fontWeight:profileTab===t.id?700:500,
-              cursor:'pointer', fontFamily:"'Inter',sans-serif",
+              cursor:'pointer', fontFamily:"'Plus Jakarta Sans',sans-serif",
             }}>{t.label}</button>
           ))}
         </div>
@@ -799,7 +799,7 @@ function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUp
                     </div>
                   </div>
                   <div style={{
-                    background:'rgba(34,197,94,.1)', border:'1px solid rgba(34,197,94,.25)',
+                    background:'var(--primary-dim)', border:'1px solid rgba(255,92,53,.25)',
                     borderRadius:100, padding:'4px 10px', fontSize:10, color:'var(--green)', fontWeight:600,
                   }}>Seguindo</div>
                 </div>
@@ -810,7 +810,7 @@ function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUp
         <button onClick={onLogout} style={{
           width:'100%', padding:14, borderRadius:14, marginTop:16,
           background:'rgba(239,68,68,.07)', border:'1px solid rgba(239,68,68,.25)',
-          color:'var(--red)', fontFamily:"'Inter',sans-serif",
+          color:'var(--red)', fontFamily:"'Plus Jakarta Sans',sans-serif",
           fontWeight:700, fontSize:14, cursor:'pointer',
         }}>Sair da conta</button>
         <div style={{height:16}}/>
@@ -864,7 +864,7 @@ function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUp
               <label style={{cursor:'pointer', position:'relative'}}>
                 <div style={{
                   width:80, height:80, borderRadius:'50%',
-                  background:'var(--surface3)', border:'3px solid var(--green)',
+                  background:'var(--surface3)', border:'3px solid var(--primary)',
                   overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center', fontSize:32,
                 }}>
                   {editPhotoPreview
@@ -876,7 +876,7 @@ function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUp
                 <div style={{
                   position:'absolute', bottom:0, right:0,
                   width:26, height:26, borderRadius:'50%',
-                  background:'var(--green)', border:'2px solid var(--bg)',
+                  background:'linear-gradient(135deg,var(--primary),var(--accent))', border:'2px solid var(--bg)',
                   display:'flex', alignItems:'center', justifyContent:'center',
                 }}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="#052e16" strokeWidth="2.5" width="12" height="12">
@@ -898,10 +898,10 @@ function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUp
                 style={{
                   width:'100%', background:'var(--surface2)', border:'1.5px solid var(--border)',
                   borderRadius:12, padding:'12px 14px', color:'var(--text)',
-                  fontFamily:"'Inter',sans-serif", fontSize:15, outline:'none',
+                  fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:15, outline:'none',
                   boxSizing:'border-box',
                 }}
-                onFocus={e=>e.target.style.borderColor='var(--green)'}
+                onFocus={e=>e.target.style.borderColor='var(--primary)'}
                 onBlur={e=>e.target.style.borderColor='var(--border)'}
               />
             </div>
@@ -910,12 +910,12 @@ function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUp
               <button onClick={()=>{setEditing(false);setEditPhotoPreview(null)}} style={{
                 flex:1, padding:14, borderRadius:12,
                 background:'var(--surface2)', border:'1px solid var(--border)',
-                color:'var(--muted)', fontFamily:"'Inter',sans-serif", fontWeight:600, fontSize:14, cursor:'pointer',
+                color:'var(--muted)', fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:600, fontSize:14, cursor:'pointer',
               }}>Cancelar</button>
               <button onClick={handleSaveProfile} disabled={saving||!editName.trim()} style={{
                 flex:2, padding:14, borderRadius:12,
-                background:'var(--green)', border:'none',
-                color:'#052e16', fontFamily:"'Inter',sans-serif", fontWeight:800, fontSize:14, cursor:'pointer',
+                background:'linear-gradient(135deg,var(--primary),var(--accent))', border:'none',
+                color:'#052e16', fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:800, fontSize:14, cursor:'pointer',
                 opacity:saving||!editName.trim()?0.6:1,
               }}>{saving?'Salvando...':'Salvar'}</button>
             </div>
@@ -931,7 +931,7 @@ function SectionHeader({title, action}) {
   return (
     <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12}}>
       <div style={{fontSize:15, fontWeight:800}}>{title}</div>
-      {action&&<button style={{background:'none', border:'none', color:'var(--green)', fontSize:12, fontWeight:600, cursor:'pointer'}}>{action}</button>}
+      {action&&<button style={{background:'none', border:'none', color:'var(--primary)', fontSize:12, fontWeight:700, cursor:'pointer'}}>{action}</button>}
     </div>
   )
 }
@@ -958,9 +958,9 @@ function BottomNav({active, onChange, onAdd, notifCount, chatCount}) {
         if (!tab.Icon) return (
           <button key="fab" onClick={onAdd} style={{
             width:52, height:52, borderRadius:'50%',
-            background:'var(--green)', border:'none', cursor:'pointer',
+            background:'linear-gradient(135deg,var(--primary),var(--accent))', border:'none', cursor:'pointer',
             display:'flex', alignItems:'center', justifyContent:'center',
-            boxShadow:'0 4px 20px rgba(34,197,94,.45)',
+            boxShadow:'0 4px 24px var(--primary-glow)',
             marginTop:-20, flexShrink:0, color:'#052e16',
             transition:'transform .15s, box-shadow .15s',
           }}
@@ -976,8 +976,8 @@ function BottomNav({active, onChange, onAdd, notifCount, chatCount}) {
             display:'flex', flexDirection:'column', alignItems:'center', gap:3,
             padding:'5px 14px', cursor:'pointer',
             border:'none', background:'none',
-            color:isActive?'var(--green)':'var(--muted)',
-            fontFamily:"'Inter',sans-serif", fontWeight:600, fontSize:10,
+            color:isActive?'var(--primary)':'var(--muted)',
+            fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:600, fontSize:10,
             transition:'color .2s', position:'relative',
           }}>
             <tab.Icon/>
@@ -1099,7 +1099,7 @@ function SettingsPanel({open, user, onClose, onLogout, onUpdateProfile}) {
                 background:tab===t.id?'rgba(34,197,94,.15)':'var(--surface2)',
                 border:`1px solid ${tab===t.id?'var(--green)':'var(--border)'}`,
                 color:tab===t.id?'var(--green)':'var(--muted)',
-                fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:10,
+                fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:700, fontSize:10,
                 transition:'all .15s',
               }}>{t.label}</button>
             ))}
@@ -1115,10 +1115,10 @@ function SettingsPanel({open, user, onClose, onLogout, onUpdateProfile}) {
                 style={{
                   width:'100%', background:'var(--surface2)', border:'1.5px solid var(--border)',
                   borderRadius:12, padding:'12px 14px', color:'var(--text)',
-                  fontFamily:"'Inter',sans-serif", fontSize:14, outline:'none',
+                  fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:14, outline:'none',
                   boxSizing:'border-box', marginBottom:14, transition:'border-color .2s',
                 }}
-                onFocus={e=>e.target.style.borderColor='var(--green)'}
+                onFocus={e=>e.target.style.borderColor='var(--primary)'}
                 onBlur={e=>e.target.style.borderColor='var(--border)'}/>
 
               {/* Bio */}
@@ -1129,11 +1129,11 @@ function SettingsPanel({open, user, onClose, onLogout, onUpdateProfile}) {
                 style={{
                   width:'100%', background:'var(--surface2)', border:'1.5px solid var(--border)',
                   borderRadius:12, padding:'12px 14px', color:'var(--text)',
-                  fontFamily:"'Inter',sans-serif", fontSize:14, outline:'none',
+                  fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:14, outline:'none',
                   resize:'none', lineHeight:1.6, boxSizing:'border-box', marginBottom:4,
                   transition:'border-color .2s',
                 }}
-                onFocus={e=>e.target.style.borderColor='var(--green)'}
+                onFocus={e=>e.target.style.borderColor='var(--primary)'}
                 onBlur={e=>e.target.style.borderColor='var(--border)'}/>
               <div style={{fontSize:10,color:'var(--dim)',textAlign:'right',marginBottom:14}}>{editBio.length}/160</div>
 
@@ -1143,7 +1143,7 @@ function SettingsPanel({open, user, onClose, onLogout, onUpdateProfile}) {
                 style={{
                   width:'100%', background:'var(--surface3)', border:'1px solid var(--border)',
                   borderRadius:12, padding:'12px 14px', color:'var(--dim)',
-                  fontFamily:"'Inter',sans-serif", fontSize:14, outline:'none',
+                  fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:14, outline:'none',
                   boxSizing:'border-box', marginBottom:4, cursor:'not-allowed',
                 }}/>
               <div style={{fontSize:10,color:'var(--dim)',marginBottom:16}}>Email não pode ser alterado</div>
@@ -1152,7 +1152,7 @@ function SettingsPanel({open, user, onClose, onLogout, onUpdateProfile}) {
                 width:'100%', padding:14, borderRadius:12, border:'none',
                 background:saved2?'rgba(34,197,94,.2)':'var(--green)',
                 color:saved2?'var(--green)':'#052e16',
-                fontFamily:"'Inter',sans-serif", fontWeight:800, fontSize:14,
+                fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:800, fontSize:14,
                 cursor:editName.trim()?'pointer':'not-allowed',
                 marginBottom:16, transition:'all .2s',
               }}>{saved2?'✅ Salvo!':saving?'Salvando...':'Salvar alterações'}</button>
@@ -1161,7 +1161,7 @@ function SettingsPanel({open, user, onClose, onLogout, onUpdateProfile}) {
               <button onClick={onLogout} style={{
                 width:'100%', padding:14, borderRadius:12,
                 background:'rgba(239,68,68,.07)', border:'1px solid rgba(239,68,68,.25)',
-                color:'var(--red)', fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer',
+                color:'var(--red)', fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:700, fontSize:14, cursor:'pointer',
               }}>Sair da conta</button>
             </div>
           )}
@@ -1289,7 +1289,7 @@ function CitySelector({open, currentCity, onSelect, onClose}) {
           </div>
           <div style={{display:'flex',alignItems:'center',gap:10,background:'var(--surface2)',border:'1px solid var(--border)',borderRadius:12,padding:'10px 14px',marginBottom:16}}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16" style={{color:'var(--muted)',flexShrink:0}}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar cidade..." style={{flex:1,background:'none',border:'none',color:'var(--text)',fontFamily:"'Inter',sans-serif",fontSize:14,outline:'none'}}/>
+            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar cidade..." style={{flex:1,background:'none',border:'none',color:'var(--text)',fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:14,outline:'none'}}/>
           </div>
           <div style={{fontSize:11,color:'var(--muted)',marginBottom:12,fontWeight:600}}>CIDADES DISPONÍVEIS</div>
           {filtered.map(c=>(
@@ -1354,7 +1354,7 @@ export default function App() {
   const [saved,       setSaved]       = useState({})
   const [following,   setFollowing]   = useState({})
 
-  const isAdmin = ADMIN_UIDS.includes(user?.uid)
+  const isAdmin = user?.isAdmin === true
 
   const {confirmStillHappening, markResolved} = useTrafficConfirm({
     userPos, events, places:allPlaces, user, onConfirmPrompt:setTrafficPrompt,
@@ -1508,7 +1508,7 @@ export default function App() {
   if (loading) return (
     <div style={{position:'fixed',inset:0,background:'var(--bg)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:20}}>
       <UrbynLogo size={36}/>
-      <div style={{width:12,height:12,borderRadius:'50%',background:'var(--green)',boxShadow:'0 0 20px var(--green)',animation:'pulse 1.4s ease infinite'}}/>
+      <div style={{width:12,height:12,borderRadius:'50%',background:'linear-gradient(135deg,var(--primary),var(--accent))',boxShadow:'0 0 20px var(--green)',animation:'pulse 1.4s ease infinite'}}/>
       <style>{`@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.4);opacity:.6}}`}</style>
     </div>
   )
@@ -1548,9 +1548,9 @@ export default function App() {
               <div style={{display:'flex', gap:8, alignItems:'center'}}>
                 {onlineCount>1&&(
                   <span style={{
-                    background:'rgba(34,197,94,.1)', border:'1px solid rgba(34,197,94,.25)',
+                    background:'var(--primary-dim)', border:'1px solid rgba(255,92,53,.25)',
                     borderRadius:100, padding:'4px 10px', fontSize:10, color:'var(--green)',
-                    fontFamily:"'Space Mono',monospace",
+                    fontFamily:"'Syne',monospace",
                   }}>● {onlineCount} online</span>
                 )}
                 {isAdmin&&(
@@ -1567,7 +1567,7 @@ export default function App() {
                   </button>
                 )}
                 <div style={{
-                  fontFamily:"'Space Mono',monospace",
+                  fontFamily:"'Syne',monospace",
                   background:'rgba(34,197,94,.08)', border:'1px solid rgba(34,197,94,.2)',
                   borderRadius:100, padding:'5px 12px', fontSize:11, color:'var(--green)',
                 }}>⚡ {user.score??0} pts</div>
@@ -1592,7 +1592,7 @@ export default function App() {
               <IC.SearchSm/>
               <input placeholder="Buscar lugares, comidas..."
                 style={{background:'none', border:'none', outline:'none', color:'var(--text)',
-                  fontFamily:"'Inter',sans-serif", fontSize:13, flex:1}}/>
+                  fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:13, flex:1}}/>
               <IC.Filter/>
             </div>
 
@@ -1627,7 +1627,7 @@ export default function App() {
             <button onClick={handleCancelAdd} style={{
               background:'rgba(0,0,0,.15)', border:'none', borderRadius:8,
               padding:'6px 12px', color:'#052e16', cursor:'pointer',
-              fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:12,
+              fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:700, fontSize:12,
             }}>Cancelar</button>
           </div>
         )}
@@ -1646,10 +1646,10 @@ export default function App() {
               background:hotCount>0?'rgba(239,68,68,.1)':'var(--surface)',
               border:`1px solid ${hotCount>0?'rgba(239,68,68,.45)':'var(--border)'}`,
               borderRadius:14, padding:'10px 14px', cursor:'pointer',
-              fontFamily:"'Inter',sans-serif",
+              fontFamily:"'Plus Jakarta Sans',sans-serif",
             }}>
               <div style={{fontSize:10, textTransform:'uppercase', letterSpacing:'.1em', color:hotCount>0?'var(--red)':'var(--muted)', marginBottom:4}}>🔴 Agora</div>
-              <div style={{fontFamily:"'Space Mono',monospace", fontSize:20, fontWeight:700, color:hotCount>0?'var(--red)':'var(--text)'}}>{hotCount}</div>
+              <div style={{fontFamily:"'Syne',monospace", fontSize:20, fontWeight:700, color:hotCount>0?'var(--red)':'var(--text)'}}>{hotCount}</div>
               <div style={{fontSize:10, color:'var(--muted)', marginTop:2}}>hotspots</div>
             </button>
             {[
@@ -1663,7 +1663,7 @@ export default function App() {
                 borderRadius:14, padding:'10px 14px',
               }}>
                 <div style={{fontSize:10, textTransform:'uppercase', letterSpacing:'.1em', color:'var(--muted)', marginBottom:4}}>{s.label}</div>
-                <div style={{fontFamily:"'Space Mono',monospace", fontSize:20, fontWeight:700, color:s.col}}>{s.val}</div>
+                <div style={{fontFamily:"'Syne',monospace", fontSize:20, fontWeight:700, color:s.col}}>{s.val}</div>
                 <div style={{fontSize:10, color:'var(--muted)', marginTop:2}}>{s.sub}</div>
               </div>
             ))}
@@ -1685,8 +1685,8 @@ export default function App() {
               <div style={{fontSize:11, color:'var(--muted)'}}>Avisos quando um local esquentar</div>
             </div>
             <button onClick={()=>{requestPermission();setNotifBanner(false)}} style={{
-              background:'var(--green)', border:'none', borderRadius:8, padding:'6px 12px',
-              fontFamily:"'Inter',sans-serif", fontWeight:700, fontSize:11, color:'#052e16', cursor:'pointer',
+              background:'linear-gradient(135deg,var(--primary),var(--accent))', border:'none', borderRadius:8, padding:'6px 12px',
+              fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:700, fontSize:11, color:'#052e16', cursor:'pointer',
             }}>Ativar</button>
             <button onClick={()=>setNotifBanner(false)} style={{background:'none', border:'none', color:'var(--muted)', cursor:'pointer', fontSize:16}}>✕</button>
           </div>
@@ -1748,7 +1748,7 @@ export default function App() {
         }}>
           <div style={{background:'rgba(17,30,22,.97)', border:'1px solid var(--border)', borderRadius:20, padding:'20px 36px'}}>
             <div style={{fontSize:32}}>⚡</div>
-            <div style={{fontFamily:"'Space Mono',monospace", fontSize:32, fontWeight:700, color:'var(--green)'}}>+{pointsAlert}</div>
+            <div style={{fontFamily:"'Syne',monospace", fontSize:32, fontWeight:700, color:'var(--green)'}}>+{pointsAlert}</div>
             <div style={{fontSize:11, color:'var(--muted)', marginTop:2}}>pontos</div>
           </div>
         </div>

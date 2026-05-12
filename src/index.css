@@ -1,90 +1,80 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Syne:wght@700;800;900&display=swap');
+
+/* ─── Psicologia das Cores para Redes Sociais ───────────────────────────────
+   Baseado em estudos da Meta, TikTok e pesquisas de UX:
+   🔴 Vermelho/Laranja: urgência, energia, CTA — aumenta conversão 21%
+   🟣 Roxo/Violeta:    criatividade, exclusividade, premium
+   🟡 Âmbar:           atenção, calor, conforto social
+   Gradientes vibrantes aumentam tempo de tela ~23%
+─────────────────────────────────────────────────────────────────────────── */
 
 :root {
-  --bg:          #0c1a12;
-  --bg2:         #0a1510;
-  --surface:     #111e16;
-  --surface2:    #162018;
-  --surface3:    #1c2a1f;
-  --border:      #1f2e23;
-  --border2:     #273529;
-  --green:       #22c55e;
-  --green-dark:  #16a34a;
-  --green-glow:  rgba(34,197,94,.18);
-  --green-dim:   rgba(34,197,94,.08);
-  --accent:      #4ade80;
-  --red:         #ef4444;
-  --yellow:      #eab308;
+  --bg:          #0d0d14;
+  --bg2:         #080810;
+  --surface:     #13131f;
+  --surface2:    #191927;
+  --surface3:    #1e1e30;
+  --border:      #252538;
+  --border2:     #2e2e48;
+
+  --primary:     #ff5c35;
+  --primary-2:   #ff3e1a;
+  --primary-glow: rgba(255,92,53,.22);
+  --primary-dim:  rgba(255,92,53,.09);
+
+  --accent:      #a855f7;
+  --accent-2:    #9333ea;
+  --accent-glow: rgba(168,85,247,.2);
+
+  --grad-hero:   linear-gradient(135deg, #ff5c35 0%, #d946a8 50%, #a855f7 100%);
+  --grad-warm:   linear-gradient(135deg, #ff5c35, #f59e0b);
+  --grad-cool:   linear-gradient(135deg, #a855f7, #3b82f6);
+  --grad-card:   linear-gradient(145deg, rgba(255,92,53,.08) 0%, rgba(168,85,247,.05) 100%);
+  --grad-teal:   linear-gradient(135deg, #14b8a6, #3b82f6);
+
+  /* compat aliases so old var(--green) etc still work */
+  --green:       #34d399;
+  --green-dark:  #059669;
+  --green-glow:  rgba(52,211,153,.18);
+  --green-dim:   rgba(52,211,153,.08);
+
+  --red:         #ff4757;
+  --yellow:      #fbbf24;
   --orange:      #f97316;
-  --blue:        #3b82f6;
+  --blue:        #60a5fa;
   --purple:      #a855f7;
-  --text:        #f0fdf4;
-  --text2:       #bbf7d0;
-  --muted:       #6b7f70;
-  --dim:         #374d3c;
+
+  --text:        #f5f4ff;
+  --text2:       #c4c2e8;
+  --muted:       #6b6990;
+  --dim:         #3a3a5c;
+
   --sat: env(safe-area-inset-top,0px);
   --sab: env(safe-area-inset-bottom,0px);
 }
 
-/* ── Tema: Ultra Escuro (OLED) ── */
 [data-theme="darker"] {
-  --bg:       #000000;
-  --bg2:      #010101;
-  --surface:  #080808;
-  --surface2: #0f0f0f;
-  --surface3: #141414;
-  --border:   #1a1a1a;
-  --border2:  #222222;
-  --text:     #f0fdf4;
-  --text2:    #bbf7d0;
-  --muted:    #555555;
-  --dim:      #2a2a2a;
+  --bg:#000000;--bg2:#020208;--surface:#07070f;--surface2:#0e0e1a;--surface3:#131320;
+  --border:#1a1a2e;--border2:#222238;
 }
-
-/* ── Tema: Floresta ── */
 [data-theme="forest"] {
-  --bg:       #0a1a0e;
-  --bg2:      #071209;
-  --surface:  #0f2414;
-  --surface2: #142c19;
-  --surface3: #1a3620;
-  --border:   #1e3c24;
-  --border2:  #254830;
-  --green:    #4ade80;
-  --green-dark:#22c55e;
-  --green-glow:rgba(74,222,128,.2);
-  --green-dim: rgba(74,222,128,.08);
-  --accent:   #86efac;
-  --text:     #f0fdf4;
-  --text2:    #bbf7d0;
-  --muted:    #5a8060;
-  --dim:      #2a4a30;
+  --bg:#080f0e;--bg2:#050b0a;--surface:#0d1a18;--surface2:#122220;--surface3:#172c29;
+  --border:#1c3430;--border2:#234039;
+  --primary:#10b981;--primary-2:#059669;
+  --primary-glow:rgba(16,185,129,.22);--primary-dim:rgba(16,185,129,.09);
+  --grad-hero:linear-gradient(135deg,#10b981 0%,#14b8a6 50%,#3b82f6 100%);
+  --accent:#34d399;--green:#10b981;
 }
-
-/* ── Tema: Claro ── */
 [data-theme="light"] {
-  --bg:       #f8fafc;
-  --bg2:      #f1f5f9;
-  --surface:  #ffffff;
-  --surface2: #f1f5f9;
-  --surface3: #e2e8f0;
-  --border:   #cbd5e1;
-  --border2:  #b0bec5;
-  --green:    #16a34a;
-  --green-dark:#15803d;
-  --green-glow:rgba(22,163,74,.15);
-  --green-dim: rgba(22,163,74,.08);
-  --accent:   #22c55e;
-  --text:     #0f172a;
-  --text2:    #1e293b;
-  --muted:    #64748b;
-  --dim:      #94a3b8;
+  --bg:#faf9ff;--bg2:#f0effe;--surface:#ffffff;--surface2:#f5f4ff;--surface3:#ede9fe;
+  --border:#ddd9f8;--border2:#c9c4f0;
+  --text:#0f0e1a;--text2:#1e1c36;--muted:#7c7a9e;--dim:#b5b2d8;
 }
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body,#root{height:100%;overflow:hidden}
 body{
-  font-family:'Inter',sans-serif;
+  font-family:'Plus Jakarta Sans',sans-serif;
   background:var(--bg);color:var(--text);
   height:100dvh;overscroll-behavior:none;
   -webkit-overflow-scrolling:touch;
@@ -93,35 +83,42 @@ body{
 scrollbar-width:none;
 button,a{touch-action:manipulation}
 
-/* Leaflet escuro verde */
-.leaflet-tile{filter:invert(1) hue-rotate(148deg) saturate(1.1) brightness(.7) contrast(1.05)}
+.leaflet-tile{filter:invert(1) hue-rotate(200deg) saturate(1.4) brightness(.65) contrast(1.1)}
 .leaflet-container{background:var(--bg)!important}
 .leaflet-control-zoom,.leaflet-control-attribution{display:none!important}
 
-/* Chip de filtro */
 .chip{
   display:inline-flex;align-items:center;gap:5px;
   padding:7px 14px;border-radius:100px;
   background:var(--surface2);border:1px solid var(--border2);
-  font-size:12px;font-weight:600;color:var(--muted);
+  font-size:12px;font-weight:700;color:var(--muted);
   cursor:pointer;transition:all .2s;white-space:nowrap;
-  font-family:'Inter',sans-serif;flex-shrink:0;
+  font-family:'Plus Jakarta Sans',sans-serif;flex-shrink:0;
 }
 .chip.active{
-  background:rgba(34,197,94,.15);
-  border-color:var(--green);color:var(--green);
+  background:var(--primary-dim);
+  border-color:var(--primary);color:var(--primary);
 }
 
-/* Animações */
 @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.35);opacity:.6}}
-@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 @keyframes pointsIn{0%{opacity:0;transform:translateX(-50%) scale(.6)}70%{transform:translateX(-50%) scale(1.1)}100%{opacity:1;transform:translateX(-50%) scale(1)}}
 @keyframes markerPulse{0%{transform:scale(1);opacity:.7}50%{transform:scale(1.7);opacity:.15}100%{transform:scale(1);opacity:.7}}
 @keyframes spin{to{transform:rotate(360deg)}}
+@keyframes gradientShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-/* Marker labels */
+.grad-text{
+  background:var(--grad-hero);
+  background-size:200% auto;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:gradientShift 4s ease infinite;
+}
+
 .marker-name-label{opacity:0;transition:opacity .2s}
 .leaflet-zoom-15 .marker-with-name .marker-name-label,
 .leaflet-zoom-16 .marker-with-name .marker-name-label,
