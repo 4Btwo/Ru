@@ -43,25 +43,25 @@ const IC = {
   Settings: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
 }
 
-/* ── Logo Urbyn ──────────────────────────────────────────────────────────────── */
+/* ── Logo Urbyn 3.0 ──────────────────────────────────────────────────────────── */
 function UrbynLogo({ size=28 }) {
   return (
-    <div style={{display:'flex', alignItems:'center', gap:7}}>
+    <div style={{display:'flex', alignItems:'center', gap:8}}>
       <div style={{
         width:size, height:size, borderRadius:size*.28,
-        background:'linear-gradient(135deg,#ff5c35,#d946a8,#a855f7)',
+        background:'linear-gradient(135deg,#4f8eff,#7c5cfc,#b44cf0)',
         display:'flex', alignItems:'center', justifyContent:'center',
-        boxShadow:'0 4px 14px rgba(34,197,94,.4)', flexShrink:0,
+        boxShadow:'0 0 20px rgba(79,142,255,0.45)', flexShrink:0,
       }}>
-        <svg width={size*.55} height={size*.55} viewBox="0 0 24 24" fill="none">
-          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="white" opacity=".92"/>
+        <svg width={size*.58} height={size*.58} viewBox="0 0 24 24" fill="none">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="white" opacity=".95"/>
           <circle cx="12" cy="9" r="2.5" fill="white"/>
         </svg>
       </div>
       <span style={{
-        fontSize:size*.85, fontWeight:900, color:'var(--text)',
-        fontFamily:"'Plus Jakarta Sans',sans-serif", letterSpacing:'-.03em', lineHeight:1,
-      }}>Urbyn</span>
+        fontSize:size*.92, fontWeight:900, color:'var(--text)',
+        fontFamily:"'Outfit',sans-serif", letterSpacing:'-.04em', lineHeight:1,
+      }}>urbyn</span>
     </div>
   )
 }
@@ -119,115 +119,107 @@ function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, aler
 
   const showResults = searchFocus && searchQuery.trim().length >= 2
 
+  const greeting = (() => {
+    const h = new Date().getHours()
+    if (h >= 5  && h < 12) return { text: 'Bom dia', sub: 'Veja o que está rolando agora ☀️' }
+    if (h >= 12 && h < 18) return { text: 'Boa tarde', sub: 'A cidade está ativa 🌤️' }
+    if (h >= 18 && h < 23) return { text: 'Boa noite', sub: 'Hora de explorar a cidade 🌙' }
+    return { text: 'Madrugada', sub: 'Ainda tem coisa rolando por aí 🔥' }
+  })()
+
   return (
     <div style={{
-      position:'absolute', inset:0, overflowY:'auto',
-      paddingBottom:'calc(72px + env(safe-area-inset-bottom,0px))',
+      position:'absolute', inset:0, overflowY:'auto', scrollbarWidth:'none',
+      paddingBottom:'calc(100px + env(safe-area-inset-bottom,0px))',
+      background:'var(--bg)',
     }}>
-      {/* ── Header ── */}
+
+      {/* ── Sticky header ── */}
       <div style={{
         position:'sticky', top:0, zIndex:100,
-        background:'var(--bg)',
-        padding:'calc(14px + var(--sat)) 16px 12px',
-        borderBottom:'1px solid var(--border)',
+        background:'rgba(8,8,16,0.92)',
+        backdropFilter:'blur(24px)', WebkitBackdropFilter:'blur(24px)',
+        borderBottom:'1px solid rgba(255,255,255,0.06)',
+        padding:'calc(12px + var(--sat)) 16px 12px',
       }}>
-        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14}}>
+        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
           <div style={{display:'flex', alignItems:'center', gap:10}}>
             <UrbynLogo size={28}/>
-            <div style={{
+            <button onClick={onCityClick} style={{
               display:'flex', alignItems:'center', gap:4,
-              background:'var(--surface2)', border:'1px solid var(--border)',
-              borderRadius:100, padding:'5px 10px',
-              fontSize:11, color:'var(--muted)', cursor:'pointer',
-            }} onClick={onCityClick}>
-              <IC.MapPin/> <span style={{fontWeight:600}}>Bauru, SP</span>
+              background:'rgba(255,255,255,0.05)',
+              border:'1px solid rgba(255,255,255,0.08)',
+              borderRadius:999, padding:'5px 10px',
+              fontSize:11, color:'var(--muted)', cursor:'pointer', fontFamily:"'DM Sans',sans-serif",
+            }}>
+              <IC.MapPin/>
+              <span style={{fontWeight:600}}>Bauru, SP</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="10" height="10"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
+            </button>
           </div>
+
           <div style={{display:'flex', gap:8, alignItems:'center'}}>
-            {isAdmin&&(
-              <button onClick={()=>setAdminOpen(true)} style={{
-                position:'relative', background:pendingCount>0?'rgba(234,179,8,.1)':'var(--surface2)',
-                border:`1px solid ${pendingCount>0?'rgba(234,179,8,.4)':'var(--border)'}`,
-                borderRadius:10, padding:'7px 10px', cursor:'pointer',
+            {isAdmin && (
+              <button onClick={()=>setAdminOpen(true)} className="btn-icon" style={{
+                position:'relative',
+                background:pendingCount>0?'rgba(255,211,42,0.1)':'',
+                borderColor:pendingCount>0?'rgba(255,211,42,0.3)':'',
                 color:pendingCount>0?'var(--yellow)':'var(--muted)',
-                fontSize:14,
+                fontSize:15,
               }}>
                 🛡️
-                {pendingCount>0&&<span style={{position:'absolute', top:-4, right:-4, background:'var(--red)', color:'#fff', fontSize:9, fontWeight:800, borderRadius:'50%', width:15, height:15, display:'flex', alignItems:'center', justifyContent:'center'}}>{pendingCount}</span>}
+                {pendingCount>0 && <span className="badge">{pendingCount}</span>}
               </button>
             )}
-            {/* Chat privado */}
-            <button onClick={onChat} style={{
-              width:36, height:36, borderRadius:'50%',
-              background:'var(--surface2)', border:'1px solid var(--border)',
-              display:'flex', alignItems:'center', justifyContent:'center',
-              cursor:'pointer', color:'var(--muted)', position:'relative',
-            }}>
+            <button onClick={onChat} className="btn-icon" style={{position:'relative'}}>
               <IC.Chat/>
-              {chatUnread>0&&<span style={{position:'absolute', top:-3, right:-3, background:'linear-gradient(135deg,var(--primary),var(--accent))', color:'#052e16', fontSize:9, fontWeight:800, borderRadius:'50%', width:16, height:16, display:'flex', alignItems:'center', justifyContent:'center', border:'2px solid var(--bg)'}}>{chatUnread>9?'9+':chatUnread}</span>}
+              {chatUnread>0 && <span className="badge badge-brand">{chatUnread>9?'9+':chatUnread}</span>}
             </button>
-            {/* Notificações */}
-            <button onClick={onBell} style={{
-              width:36, height:36, borderRadius:'50%',
-              background:'var(--surface2)', border:'1px solid var(--border)',
-              display:'flex', alignItems:'center', justifyContent:'center',
-              cursor:'pointer', color:'var(--muted)', position:'relative',
-            }}>
+            <button onClick={onBell} className="btn-icon" style={{position:'relative'}}>
               <IC.Bell/>
-              {notifCount>0&&<span style={{position:'absolute', top:-3, right:-3, background:'var(--red)', color:'#fff', fontSize:9, fontWeight:800, borderRadius:'50%', width:16, height:16, display:'flex', alignItems:'center', justifyContent:'center', border:'2px solid var(--bg)'}}>{notifCount>9?'9+':notifCount}</span>}
+              {notifCount>0 && <span className="badge">{notifCount>9?'9+':notifCount}</span>}
             </button>
-            <div style={{
-              width:36, height:36, borderRadius:'50%',
-              background:'var(--surface2)', border:'2px solid rgba(255,92,53,.4)',
-              overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center',
-              fontSize:16, cursor:'pointer',
-            }} onClick={()=>{}}>
-              {user.photo?<img src={user.photo} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>:'👤'}
+            <div className="avatar avatar-ring" style={{width:36, height:36, cursor:'pointer'}}>
+              {user.photo ? <img src={user.photo} alt=""/> : '👤'}
             </div>
           </div>
-        </div>
-        {/* Greeting */}
-        <div style={{fontSize:20, fontWeight:800}}>
-          {(()=>{
-            const h = new Date().getHours()
-            if (h >= 5  && h < 12) return `Bom dia, urbano ☀️`
-            if (h >= 12 && h < 18) return `Boa tarde, urbano 🌤️`
-            if (h >= 18 && h < 23) return `Boa noite, urbano 🌙`
-            return `Madrugada agitada, urbano 🔥`
-          })()}
         </div>
       </div>
 
-      <div style={{padding:'16px 16px 0'}}>
+      <div style={{padding:'20px 16px 0'}}>
 
-        {/* Search */}
-        <div style={{position:'relative', marginBottom:20}}>
+        {/* ── Greeting ── */}
+        <div style={{marginBottom:20}}>
           <div style={{
-            display:'flex', alignItems:'center', gap:10,
-            background:'var(--surface2)', border:`1.5px solid ${searchFocus?'var(--primary)':'var(--border)'}`,
-            borderRadius: showResults ? '14px 14px 0 0' : 14,
-            padding:'12px 14px', transition:'border-color .2s',
+            fontFamily:"'Outfit',sans-serif", fontSize:26, fontWeight:800,
+            letterSpacing:'-.03em', lineHeight:1.1, marginBottom:5,
+          }}>{greeting.text}, <span className="grad-text">urbano.</span></div>
+          <div style={{fontSize:13, color:'var(--muted)', fontWeight:500}}>{greeting.sub}</div>
+        </div>
+
+        {/* ── Search ── */}
+        <div style={{position:'relative', marginBottom:20}}>
+          <div className="search-bar" style={{
+            borderRadius: showResults ? '16px 16px 0 0' : 999,
           }}>
-            <IC.SearchSm/>
+            <IC.SearchSm style={{color:'var(--muted)', flexShrink:0}}/>
             <input
               value={searchQuery}
               onChange={e=>setSearchQuery(e.target.value)}
               onFocus={()=>setSearchFocus(true)}
               onBlur={()=>setTimeout(()=>setSearchFocus(false),150)}
-              placeholder="Buscar lugares, comidas, experiências..."
-              style={{background:'none', border:'none', outline:'none', color:'var(--text)',
-                fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:14, flex:1}}/>
+              placeholder="Explorar lugares, experiências..."/>
             {searchQuery
-              ? <span onClick={()=>setSearchQuery('')} style={{cursor:'pointer', fontSize:16, color:'var(--muted)'}}>✕</span>
-              : <IC.Filter/>}
+              ? <button onClick={()=>setSearchQuery('')} style={{background:'none', border:'none', color:'var(--muted)', cursor:'pointer', fontSize:16, padding:'0 2px'}}>✕</button>
+              : <IC.Filter style={{color:'var(--muted)', flexShrink:0}}/>}
           </div>
           {showResults && (
             <div style={{
               position:'absolute', left:0, right:0, zIndex:500,
-              background:'var(--surface2)', border:'1.5px solid var(--primary)',
-              borderTop:'1px solid var(--border)', borderRadius:'0 0 14px 14px',
-              overflow:'hidden', boxShadow:'0 8px 24px rgba(0,0,0,.4)',
+              background:'rgba(8,8,20,0.96)', backdropFilter:'blur(24px)', WebkitBackdropFilter:'blur(24px)',
+              border:'1px solid rgba(79,142,255,0.3)', borderTop:'none',
+              borderRadius:'0 0 16px 16px', overflow:'hidden',
+              boxShadow:'0 12px 32px rgba(0,0,0,0.6)',
             }}>
               {searchResults.length===0 ? (
                 <div style={{padding:'16px', textAlign:'center', color:'var(--muted)', fontSize:13}}>
@@ -236,11 +228,19 @@ function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, aler
               ) : searchResults.map(p=>(
                 <div key={p.id}
                   onMouseDown={()=>{onPlace(p); setSearchQuery(''); setSearchFocus(false)}}
-                  style={{display:'flex', alignItems:'center', gap:12, padding:'12px 14px', borderBottom:'1px solid var(--border)', cursor:'pointer'}}
-                  onMouseEnter={e=>e.currentTarget.style.background='var(--surface3)'}
+                  style={{
+                    display:'flex', alignItems:'center', gap:12, padding:'12px 14px',
+                    borderBottom:'1px solid rgba(255,255,255,0.05)', cursor:'pointer',
+                    transition:'background .15s',
+                  }}
+                  onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.04)'}
                   onMouseLeave={e=>e.currentTarget.style.background='transparent'}
                 >
-                  <div style={{width:36, height:36, borderRadius:10, flexShrink:0, background:'var(--surface3)', border:'1px solid var(--border)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18}}>
+                  <div style={{
+                    width:38, height:38, borderRadius:12, flexShrink:0,
+                    background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.08)',
+                    display:'flex', alignItems:'center', justifyContent:'center', fontSize:18,
+                  }}>
                     {p.iconEmoji||CAT_EMOJI2[p.cat]||'📍'}
                   </div>
                   <div style={{flex:1, minWidth:0}}>
@@ -254,83 +254,108 @@ function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, aler
           )}
         </div>
 
-        {/* Stats strip */}
-        <div style={{
-          display:'grid', gridTemplateColumns:'repeat(4,1fr)',
-          gap:8, marginBottom:24,
-        }}>
+        {/* ── Live stats strip ── */}
+        <div className="scroll-row" style={{marginBottom:24}}>
           {[
-            {icon:'🔥', val:hotCount,    label:'Hotspots', col:'var(--red)'},
-            {icon:'📡', val:totalActive, label:'Reportes',  col:'var(--text)'},
-            {icon:'🚦', val:alertCount,  label:'Alertas',   col:'var(--yellow)'},
-            {icon:'👥', val:onlineCount, label:'Online',    col:'var(--blue)'},
+            {icon:'🔥', val:hotCount,    label:'Hotspots', col:'var(--hot)',    glow:'rgba(255,71,87,0.25)'},
+            {icon:'📡', val:totalActive, label:'Reportes',  col:'var(--text)',  glow:'rgba(255,255,255,0.05)'},
+            {icon:'🚦', val:alertCount,  label:'Alertas',   col:'var(--yellow)',glow:'rgba(255,211,42,0.2)'},
+            {icon:'👥', val:onlineCount, label:'Online',    col:'var(--cyber)', glow:'rgba(0,245,160,0.2)'},
           ].map((s,i)=>(
-            <div key={i} style={{
-              background:'var(--surface2)', border:'1px solid var(--border)',
-              borderRadius:14, padding:'12px 8px', textAlign:'center',
+            <div key={i} className="stat-card" style={{
+              boxShadow:s.val>0?`0 0 20px ${s.glow}`:'none',
+              borderColor:s.val>0?`${s.glow}`.replace('0.2','0.3').replace('0.25','0.35'):'rgba(255,255,255,0.07)',
             }}>
-              <div style={{fontSize:18, marginBottom:4}}>{s.icon}</div>
-              <div style={{fontFamily:"'Syne',monospace", fontSize:16, fontWeight:700, color:s.col, lineHeight:1}}>{s.val}</div>
-              <div style={{fontSize:9, color:'var(--muted)', marginTop:3, textTransform:'uppercase', letterSpacing:'.05em'}}>{s.label}</div>
+              <div style={{fontSize:16, marginBottom:5}}>{s.icon}</div>
+              <div className="stat-value" style={{color:s.col}}>{s.val}</div>
+              <div className="stat-label" style={{marginTop:4, marginBottom:0}}>{s.label}</div>
             </div>
           ))}
         </div>
 
-        {/* Categorias */}
-        <SectionHeader title="Categorias" action="Ver todas"/>
-        <div style={{display:'flex', gap:10, marginBottom:24, overflowX:'auto', scrollbarWidth:'none', paddingBottom:2}}>
+        {/* ── Categorias ── */}
+        <SectionHeader title="Categorias" action="Ver mapa"/>
+        <div className="scroll-row" style={{marginBottom:24}}>
           {[
-            {emoji:'☕', label:'Cafeterias',    filter:'estabelecimento', col:'#f97316'},
-            {emoji:'🍽️', label:'Restaurantes',  filter:'noturno',         col:'var(--purple)'},
-            {emoji:'🍺', label:'Bares',          filter:'bar',             col:'var(--yellow)'},
-            {emoji:'🎭', label:'Arte & Cultura', filter:'show',            col:'var(--blue)'},
-            {emoji:'🌿', label:'Parques',         filter:'parque',          col:'var(--green)'},
+            {emoji:'☕', label:'Cafés',         filter:'estabelecimento'},
+            {emoji:'🍽️', label:'Restaurantes',  filter:'noturno'},
+            {emoji:'🍺', label:'Bares',          filter:'bar'},
+            {emoji:'🎭', label:'Arte',           filter:'show'},
+            {emoji:'🌿', label:'Parques',         filter:'parque'},
+            {emoji:'🚦', label:'Trânsito',       filter:'transito'},
           ].map((c,i)=>(
-            <div key={i} onClick={()=>onCategorySelect(c.filter)} style={{
+            <button key={i} onClick={()=>onCategorySelect(c.filter)} style={{
               flexShrink:0, textAlign:'center', cursor:'pointer',
-              background:'var(--surface2)', border:'1px solid var(--border)',
-              borderRadius:16, padding:'16px 12px', minWidth:74,
-              transition:'border-color .2s, transform .15s',
+              background:'rgba(255,255,255,0.04)',
+              border:'1px solid rgba(255,255,255,0.07)',
+              borderRadius:18, padding:'14px 12px', minWidth:70,
+              transition:'border-color .2s, background .2s, transform .15s',
+              fontFamily:"'DM Sans',sans-serif",
             }}
-              onMouseDown={e=>e.currentTarget.style.transform='scale(.94)'}
+              onMouseDown={e=>e.currentTarget.style.transform='scale(.93)'}
               onMouseUp={e=>e.currentTarget.style.transform='scale(1)'}
-              onTouchStart={e=>e.currentTarget.style.transform='scale(.94)'}
+              onTouchStart={e=>e.currentTarget.style.transform='scale(.93)'}
               onTouchEnd={e=>e.currentTarget.style.transform='scale(1)'}
+              onMouseEnter={e=>{ e.currentTarget.style.background='rgba(79,142,255,0.08)'; e.currentTarget.style.borderColor='rgba(79,142,255,0.3)'; }}
+              onMouseLeave={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.07)'; }}
             >
-              <div style={{fontSize:26, marginBottom:7}}>{c.emoji}</div>
-              <div style={{fontSize:10, color:'var(--muted)', fontWeight:600}}>{c.label}</div>
-            </div>
+              <div style={{fontSize:24, marginBottom:6}}>{c.emoji}</div>
+              <div style={{fontSize:10, color:'var(--muted)', fontWeight:600, letterSpacing:'.01em'}}>{c.label}</div>
+            </button>
           ))}
         </div>
 
-        {/* Em alta */}
-        <SectionHeader title="🔥 Em alta perto de você"/>
-        <div style={{display:'flex', gap:12, marginBottom:24, overflowX:'auto', scrollbarWidth:'none', paddingBottom:4}}>
+        {/* ── Em alta ── */}
+        <SectionHeader title="Em alta agora" action="Ver todos"/>
+        <div className="scroll-row" style={{marginBottom:28, paddingBottom:4}}>
           {trending.map(p=>(
             <div key={p.id} onClick={()=>onPlace(p)} style={{
-              flexShrink:0, width:165,
-              background:'var(--surface2)', border:'1px solid var(--border)',
-              borderRadius:16, overflow:'hidden', cursor:'pointer',
-              transition:'border-color .2s',
-            }}>
+              flexShrink:0, width:158,
+              background:'rgba(255,255,255,0.04)',
+              border:'1px solid rgba(255,255,255,0.07)',
+              borderRadius:20, overflow:'hidden', cursor:'pointer',
+              transition:'border-color .2s, transform .2s',
+            }}
+              onMouseDown={e=>e.currentTarget.style.transform='scale(.97)'}
+              onMouseUp={e=>e.currentTarget.style.transform='scale(1)'}
+              onTouchStart={e=>e.currentTarget.style.transform='scale(.97)'}
+              onTouchEnd={e=>e.currentTarget.style.transform='scale(1)'}
+            >
               <div style={{
-                height:96, background:`linear-gradient(135deg, var(--surface3), var(--bg2))`,
-                display:'flex', alignItems:'center', justifyContent:'center', fontSize:36,
-                position:'relative',
+                height:88, background:`linear-gradient(135deg, rgba(79,142,255,0.12), rgba(124,92,252,0.12))`,
+                display:'flex', alignItems:'center', justifyContent:'center', fontSize:34,
+                position:'relative', borderBottom:'1px solid rgba(255,255,255,0.06)',
               }}>
                 {CAT_EMOJI[p.cat]||'📍'}
-                {p._score>6&&<div style={{
-                  position:'absolute', top:6, right:6,
-                  background:'var(--red)', borderRadius:20,
-                  padding:'2px 7px', fontSize:9, fontWeight:800, color:'#fff',
-                }}>🔥 HOT</div>}
+                {p._score>6 && (
+                  <div style={{
+                    position:'absolute', top:7, right:7,
+                    background:'rgba(255,71,87,0.9)', borderRadius:20,
+                    padding:'2px 8px', fontSize:9, fontWeight:800, color:'#fff',
+                    backdropFilter:'blur(8px)',
+                  }}>🔥 HOT</div>
+                )}
               </div>
-              <div style={{padding:'10px 11px'}}>
-                <div style={{fontSize:12, fontWeight:700, marginBottom:3, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{p.name}</div>
-                <div style={{fontSize:10, color:'var(--muted)', marginBottom:5}}>{CAT_LABEL[p.cat]||'Local'} · Bauru</div>
+              <div style={{padding:'10px 12px'}}>
+                <div style={{
+                  fontFamily:"'Outfit',sans-serif",
+                  fontSize:12, fontWeight:700, marginBottom:3,
+                  overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap',
+                }}>{p.name}</div>
+                <div style={{fontSize:10, color:'var(--muted)', marginBottom:6}}>{CAT_LABEL[p.cat]||'Local'}</div>
                 <div style={{display:'flex', alignItems:'center', gap:4}}>
-                  <Stars score={p._score}/>
-                  <span style={{fontFamily:"'Syne',monospace", fontSize:10, color:'var(--primary)', fontWeight:700}}>
+                  <div style={{
+                    height:3, flex:1, background:'rgba(255,255,255,0.08)',
+                    borderRadius:999, overflow:'hidden',
+                  }}>
+                    <div style={{
+                      height:'100%', borderRadius:999,
+                      background:'linear-gradient(90deg,#4f8eff,#7c5cfc)',
+                      width:`${Math.min(100, p._score * 20)}%`,
+                      transition:'width .3s',
+                    }}/>
+                  </div>
+                  <span style={{fontFamily:"'Space Mono',monospace", fontSize:10, color:'var(--electric)', fontWeight:700}}>
                     {Math.min(5,Math.max(1,p._score)).toFixed(1)}
                   </span>
                 </div>
@@ -339,40 +364,40 @@ function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, aler
           ))}
         </div>
 
-        {/* Recomendados */}
-        <SectionHeader title="Recomendados para você" action="Ver todos"/>
+        {/* ── Recentes ── */}
+        <SectionHeader title="Adicionados recentemente"/>
         <div style={{display:'flex', flexDirection:'column', gap:10}}>
           {recent.map(p=>(
             <div key={p.id} onClick={()=>onPlace(p)} style={{
-              display:'flex', alignItems:'center', gap:12,
-              background:'var(--surface2)', border:'1px solid var(--border)',
-              borderRadius:16, padding:'12px 14px', cursor:'pointer',
-              transition:'border-color .15s',
-            }}>
+              display:'flex', alignItems:'center', gap:13,
+              background:'rgba(255,255,255,0.03)',
+              border:'1px solid rgba(255,255,255,0.07)',
+              borderRadius:18, padding:'12px 14px', cursor:'pointer',
+              transition:'border-color .15s, background .15s',
+            }}
+              onMouseEnter={e=>{ e.currentTarget.style.background='rgba(79,142,255,0.05)'; e.currentTarget.style.borderColor='rgba(79,142,255,0.2)'; }}
+              onMouseLeave={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.03)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.07)'; }}
+            >
               <div style={{
-                width:50, height:50, borderRadius:12, flexShrink:0,
-                background:'var(--surface3)',
+                width:48, height:48, borderRadius:14, flexShrink:0,
+                background:'rgba(79,142,255,0.1)',
+                border:'1px solid rgba(79,142,255,0.2)',
                 display:'flex', alignItems:'center', justifyContent:'center', fontSize:22,
               }}>{CAT_EMOJI[p.cat]||'📍'}</div>
               <div style={{flex:1, minWidth:0}}>
-                <div style={{fontSize:14, fontWeight:700, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{p.name}</div>
+                <div style={{
+                  fontFamily:"'Outfit',sans-serif",
+                  fontSize:14, fontWeight:700,
+                  overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap',
+                }}>{p.name}</div>
                 <div style={{fontSize:11, color:'var(--muted)', marginTop:2}}>{CAT_LABEL[p.cat]||'Local'} · Bauru, SP</div>
-                <div style={{display:'flex', alignItems:'center', gap:6, marginTop:4}}>
-                  <Stars score={calcScore(p.id,events,usersMap)}/>
-                  <span style={{fontSize:10, color:'var(--primary)', fontWeight:700}}>
-                    {Math.min(5,Math.max(1,calcScore(p.id,events,usersMap))).toFixed(1)}
-                  </span>
-                  <span style={{fontSize:10, color:'var(--muted)'}}>
-                    · {(Math.random()*2+0.1).toFixed(1)} km
-                  </span>
-                </div>
               </div>
-              <IC.ChevronRight/>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" width="14" height="14" style={{color:'var(--dim)', flexShrink:0}}><polyline points="9 18 15 12 9 6"/></svg>
             </div>
           ))}
         </div>
 
-        <div style={{height:16}}/>
+        <div style={{height:8}}/>
       </div>
     </div>
   )
@@ -927,59 +952,51 @@ function ProfileTab({user, onLogout, onlineCount, events, saved, following, onUp
 }
 
 /* ── Section header helper ───────────────────────────────────────────────────── */
-function SectionHeader({title, action}) {
+function SectionHeader({title, action, onAction}) {
   return (
-    <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12}}>
-      <div style={{fontSize:15, fontWeight:800}}>{title}</div>
-      {action&&<button style={{background:'none', border:'none', color:'var(--primary)', fontSize:12, fontWeight:700, cursor:'pointer'}}>{action}</button>}
+    <div className="section-header">
+      <div className="section-title">{title}</div>
+      {action && (
+        <button className="section-action" onClick={onAction}>{action}</button>
+      )}
     </div>
   )
 }
 
-/* ── Bottom Nav ──────────────────────────────────────────────────────────────── */
-function BottomNav({active, onChange, onAdd, notifCount, chatCount}) {
+/* ── Floating Dock 3.0 (replaces BottomNav) ─────────────────────────────────── */
+function BottomNav({active, onChange, onAdd}) {
   const tabs = [
     {id:'home',       label:'Início',     Icon:IC.Home},
     {id:'map',        label:'Explorar',   Icon:IC.Search},
-    {id:'__fab__',    label:'',           Icon:null},
-    {id:'activities', label:'Atividades', Icon:IC.Activity},
+    {id:'activities', label:'Feed',       Icon:IC.Activity},
     {id:'profile',    label:'Perfil',     Icon:IC.User},
   ]
   return (
-    <div style={{
-      position:'fixed', bottom:0, left:0, right:0, zIndex:900,
-      background:'var(--surface)',
-      borderTop:'1px solid var(--border)',
-      display:'flex', alignItems:'center', justifyContent:'space-around',
-      paddingTop:8,
-      paddingBottom:'calc(8px + var(--sab))',
-    }}>
-      {tabs.map(tab=>{
-        if (!tab.Icon) return (
-          <button key="fab" onClick={onAdd} style={{
-            width:52, height:52, borderRadius:'50%',
-            background:'linear-gradient(135deg,var(--primary),var(--accent))', border:'none', cursor:'pointer',
-            display:'flex', alignItems:'center', justifyContent:'center',
-            boxShadow:'0 4px 24px var(--primary-glow)',
-            marginTop:-20, flexShrink:0, color:'#052e16',
-            transition:'transform .15s, box-shadow .15s',
-          }}
-            onMouseDown={e=>e.currentTarget.style.transform='scale(.93)'}
-            onMouseUp={e=>e.currentTarget.style.transform='scale(1)'}
-            onTouchStart={e=>e.currentTarget.style.transform='scale(.93)'}
-            onTouchEnd={e=>e.currentTarget.style.transform='scale(1)'}
-          ><IC.Plus/></button>
-        )
-        const isActive = active===tab.id
+    <div className="floating-dock">
+      {tabs.slice(0,2).map(tab => {
+        const isActive = active === tab.id
         return (
-          <button key={tab.id} onClick={()=>onChange(tab.id)} style={{
-            display:'flex', flexDirection:'column', alignItems:'center', gap:3,
-            padding:'5px 14px', cursor:'pointer',
-            border:'none', background:'none',
-            color:isActive?'var(--primary)':'var(--muted)',
-            fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:600, fontSize:10,
-            transition:'color .2s', position:'relative',
-          }}>
+          <button key={tab.id} className={`dock-btn${isActive?' active':''}`}
+            onClick={() => onChange(tab.id)}>
+            <tab.Icon/>
+            {tab.label}
+          </button>
+        )
+      })}
+
+      {/* Central FAB */}
+      <button className="dock-fab" onClick={onAdd}
+        onMouseDown={e=>e.currentTarget.style.transform='scale(.9)'}
+        onMouseUp={e=>e.currentTarget.style.transform='scale(1)'}
+        onTouchStart={e=>e.currentTarget.style.transform='scale(.9)'}
+        onTouchEnd={e=>e.currentTarget.style.transform='scale(1)'}
+      ><IC.Plus/></button>
+
+      {tabs.slice(2).map(tab => {
+        const isActive = active === tab.id
+        return (
+          <button key={tab.id} className={`dock-btn${isActive?' active':''}`}
+            onClick={() => onChange(tab.id)}>
             <tab.Icon/>
             {tab.label}
           </button>
@@ -1506,10 +1523,26 @@ export default function App() {
 
   /* ── Loading ── */
   if (loading) return (
-    <div style={{position:'fixed',inset:0,background:'var(--bg)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:20}}>
-      <UrbynLogo size={36}/>
-      <div style={{width:12,height:12,borderRadius:'50%',background:'linear-gradient(135deg,var(--primary),var(--accent))',boxShadow:'0 0 20px var(--green)',animation:'pulse 1.4s ease infinite'}}/>
-      <style>{`@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.4);opacity:.6}}`}</style>
+    <div style={{
+      position:'fixed', inset:0, background:'var(--bg)',
+      display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+      gap:24, fontFamily:"'DM Sans',sans-serif",
+    }}>
+      <UrbynLogo size={40}/>
+      <div style={{display:'flex', gap:6, alignItems:'center'}}>
+        {[0,1,2].map(i=>(
+          <div key={i} style={{
+            width:6, height:6, borderRadius:'50%',
+            background:'linear-gradient(135deg,var(--electric),var(--neon))',
+            animation:`pulse 1.2s ease infinite`,
+            animationDelay:`${i*0.2}s`,
+          }}/>
+        ))}
+      </div>
+      <div style={{fontSize:12, color:'var(--muted)', letterSpacing:'.08em', textTransform:'uppercase'}}>
+        carregando a cidade...
+      </div>
+      <style>{`@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.6);opacity:0.4}}`}</style>
     </div>
   )
 
@@ -1539,41 +1572,40 @@ export default function App() {
         {!pickMode&&(
           <div style={{
             position:'absolute', top:0, left:0, right:0, zIndex:500,
-            padding:'calc(12px + var(--sat)) 16px 0',
-            background:'linear-gradient(to bottom,rgba(12,26,18,.97) 60%,transparent)',
+            padding:'calc(14px + var(--sat)) 16px 0',
+            background:'linear-gradient(to bottom,rgba(8,8,16,0.97) 0%,rgba(8,8,16,0.6) 65%,transparent 100%)',
           }}>
             {/* Logo row */}
             <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10}}>
               <UrbynLogo size={26}/>
-              <div style={{display:'flex', gap:8, alignItems:'center'}}>
+              <div style={{display:'flex', gap:7, alignItems:'center'}}>
                 {onlineCount>1&&(
-                  <span style={{
-                    background:'var(--primary-dim)', border:'1px solid rgba(255,92,53,.25)',
-                    borderRadius:100, padding:'4px 10px', fontSize:10, color:'var(--green)',
-                    fontFamily:"'Syne',monospace",
-                  }}>● {onlineCount} online</span>
+                  <div className="online-pill">
+                    <div style={{width:6,height:6,borderRadius:'50%',background:'var(--cyber)',animation:'blink 1s ease infinite'}}/>
+                    {onlineCount} online
+                  </div>
                 )}
                 {isAdmin&&(
-                  <button onClick={()=>setAdminOpen(true)} style={{
-                    position:'relative',
-                    background:pendingCount>0?'rgba(234,179,8,.1)':'var(--surface2)',
-                    border:`1px solid ${pendingCount>0?'rgba(234,179,8,.4)':'var(--border)'}`,
-                    borderRadius:10, padding:'6px 10px', cursor:'pointer',
+                  <button onClick={()=>setAdminOpen(true)} className="btn-icon" style={{
+                    width:34,height:34,
+                    background:pendingCount>0?'rgba(255,211,42,0.1)':'',
+                    borderColor:pendingCount>0?'rgba(255,211,42,0.3)':'',
                     color:pendingCount>0?'var(--yellow)':'var(--muted)',
-                    fontSize:14,
+                    fontSize:13, position:'relative',
                   }}>
                     🛡️
-                    {pendingCount>0&&<span style={{position:'absolute', top:-4, right:-4, background:'var(--red)', color:'#fff', fontSize:9, fontWeight:800, borderRadius:'50%', width:15, height:15, display:'flex', alignItems:'center', justifyContent:'center'}}>{pendingCount}</span>}
+                    {pendingCount>0&&<span className="badge">{pendingCount}</span>}
                   </button>
                 )}
                 <div style={{
-                  fontFamily:"'Syne',monospace",
-                  background:'rgba(34,197,94,.08)', border:'1px solid rgba(34,197,94,.2)',
-                  borderRadius:100, padding:'5px 12px', fontSize:11, color:'var(--green)',
-                }}>⚡ {user.score??0} pts</div>
+                  fontFamily:"'Space Mono',monospace",
+                  background:'rgba(0,245,160,0.08)', border:'1px solid rgba(0,245,160,0.2)',
+                  borderRadius:999, padding:'5px 11px', fontSize:11, color:'var(--cyber)',
+                }}>⚡ {user.score??0}</div>
                 <div onClick={logout} style={{
                   width:34, height:34, borderRadius:'50%',
-                  background:'var(--surface2)', border:'2px solid rgba(34,197,94,.3)',
+                  background:'rgba(255,255,255,0.06)',
+                  border:'2px solid rgba(79,142,255,0.35)',
                   cursor:'pointer', overflow:'hidden',
                   display:'flex', alignItems:'center', justifyContent:'center',
                 }}>
@@ -1583,21 +1615,14 @@ export default function App() {
             </div>
 
             {/* Search on map */}
-            <div style={{
-              display:'flex', alignItems:'center', gap:10,
-              background:'rgba(17,30,22,.94)', border:'1px solid var(--border)',
-              borderRadius:14, padding:'10px 14px', marginBottom:10,
-              backdropFilter:'blur(12px)',
-            }}>
-              <IC.SearchSm/>
-              <input placeholder="Buscar lugares, comidas..."
-                style={{background:'none', border:'none', outline:'none', color:'var(--text)',
-                  fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:13, flex:1}}/>
-              <IC.Filter/>
+            <div className="search-bar" style={{marginBottom:10}}>
+              <IC.SearchSm style={{color:'var(--muted)',flexShrink:0}}/>
+              <input placeholder="Buscar lugares, experiências..." style={{fontFamily:"'DM Sans',sans-serif"}}/>
+              <IC.Filter style={{color:'var(--muted)',flexShrink:0}}/>
             </div>
 
             {/* Category chips */}
-            <div style={{display:'flex', gap:8, overflowX:'auto', scrollbarWidth:'none', paddingBottom:10}}>
+            <div style={{display:'flex', gap:7, overflowX:'auto', scrollbarWidth:'none', paddingBottom:12}}>
               {FILTERS.map(f=>(
                 <button key={f.id} onClick={()=>setActiveFilter(f.id)}
                   className={`chip${activeFilter===f.id?' active':''}`}>
@@ -1612,22 +1637,23 @@ export default function App() {
         {pickMode&&(
           <div style={{
             position:'absolute', top:0, left:0, right:0, zIndex:600,
-            background:'rgba(34,197,94,.95)',
-            padding:'calc(16px + var(--sat)) 16px 14px',
+            background:'rgba(79,142,255,0.95)',
+            backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)',
+            padding:'calc(18px + var(--sat)) 16px 16px',
             display:'flex', alignItems:'center', justifyContent:'space-between',
             animation:'slideDown .25s ease',
           }}>
             <div style={{display:'flex', alignItems:'center', gap:10}}>
               <span style={{fontSize:20}}>📍</span>
               <div>
-                <div style={{fontWeight:800, fontSize:14, color:'#052e16'}}>Toque no mapa para marcar</div>
-                <div style={{fontSize:11, opacity:.8, color:'#052e16'}}>Escolha o ponto exato</div>
+                <div style={{fontWeight:800, fontSize:14, color:'#fff', fontFamily:"'Outfit',sans-serif"}}>Toque no mapa para marcar</div>
+                <div style={{fontSize:11, opacity:.75, color:'rgba(255,255,255,0.85)'}}>Escolha o ponto exato do local</div>
               </div>
             </div>
             <button onClick={handleCancelAdd} style={{
-              background:'rgba(0,0,0,.15)', border:'none', borderRadius:8,
-              padding:'6px 12px', color:'#052e16', cursor:'pointer',
-              fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:700, fontSize:12,
+              background:'rgba(255,255,255,0.18)', border:'1px solid rgba(255,255,255,0.3)',
+              borderRadius:999, padding:'7px 14px', color:'#fff', cursor:'pointer',
+              fontFamily:"'DM Sans',sans-serif", fontWeight:700, fontSize:12,
             }}>Cancelar</button>
           </div>
         )}
@@ -1636,35 +1662,32 @@ export default function App() {
         {!pickMode&&(
           <div style={{
             position:'absolute', bottom:0, left:0, right:0, zIndex:500,
-            paddingTop:14, paddingLeft:16, paddingRight:16,
-            paddingBottom:'calc(72px + env(safe-area-inset-bottom,0px))',
-            background:'linear-gradient(to top,rgba(12,26,18,.97) 55%,transparent)',
+            paddingTop:20, paddingLeft:16, paddingRight:16,
+            paddingBottom:'calc(94px + env(safe-area-inset-bottom,0px))',
+            background:'linear-gradient(to top,rgba(8,8,16,0.98) 0%,rgba(8,8,16,0.65) 55%,transparent 100%)',
             display:'flex', gap:10, overflowX:'auto', scrollbarWidth:'none',
           }}>
-            <button onClick={()=>setNowOpen(true)} style={{
-              flexShrink:0, minWidth:110,
-              background:hotCount>0?'rgba(239,68,68,.1)':'var(--surface)',
-              border:`1px solid ${hotCount>0?'rgba(239,68,68,.45)':'var(--border)'}`,
-              borderRadius:14, padding:'10px 14px', cursor:'pointer',
-              fontFamily:"'Plus Jakarta Sans',sans-serif",
+            {/* LIVE hotspots — clickable */}
+            <button onClick={()=>setNowOpen(true)} className="stat-card" style={{
+              boxShadow:hotCount>0?'0 0 24px rgba(255,71,87,0.3)':'none',
+              borderColor:hotCount>0?'rgba(255,71,87,0.35)':'rgba(255,255,255,0.07)',
             }}>
-              <div style={{fontSize:10, textTransform:'uppercase', letterSpacing:'.1em', color:hotCount>0?'var(--red)':'var(--muted)', marginBottom:4}}>🔴 Agora</div>
-              <div style={{fontFamily:"'Syne',monospace", fontSize:20, fontWeight:700, color:hotCount>0?'var(--red)':'var(--text)'}}>{hotCount}</div>
-              <div style={{fontSize:10, color:'var(--muted)', marginTop:2}}>hotspots</div>
+              {hotCount>0 && <div className="live-badge" style={{marginBottom:7}}>
+                <div className="live-dot"/>LIVE
+              </div>}
+              {!hotCount && <div className="stat-label" style={{marginBottom:6}}>🔴 Agora</div>}
+              <div className="stat-value" style={{color:hotCount>0?'var(--hot)':'var(--text)'}}>{hotCount}</div>
+              <div className="stat-sub">hotspots</div>
             </button>
             {[
               {label:'📡 Reportes', val:totalActive, sub:'última hora', col:'var(--text)'},
               {label:'🚦 Alertas',  val:alertCount,  sub:'trânsito',   col:'var(--yellow)'},
-              {label:'👥 Online',   val:onlineCount,  sub:'agora',      col:'var(--text)'},
+              {label:'👥 Online',   val:onlineCount,  sub:'agora',      col:'var(--cyber)'},
             ].map((s,i)=>(
-              <div key={i} style={{
-                flexShrink:0, minWidth:110,
-                background:'var(--surface)', border:'1px solid var(--border)',
-                borderRadius:14, padding:'10px 14px',
-              }}>
-                <div style={{fontSize:10, textTransform:'uppercase', letterSpacing:'.1em', color:'var(--muted)', marginBottom:4}}>{s.label}</div>
-                <div style={{fontFamily:"'Syne',monospace", fontSize:20, fontWeight:700, color:s.col}}>{s.val}</div>
-                <div style={{fontSize:10, color:'var(--muted)', marginTop:2}}>{s.sub}</div>
+              <div key={i} className="stat-card">
+                <div className="stat-label" style={{marginBottom:6}}>{s.label}</div>
+                <div className="stat-value" style={{color:s.col}}>{s.val}</div>
+                <div className="stat-sub">{s.sub}</div>
               </div>
             ))}
           </div>
@@ -1673,22 +1696,27 @@ export default function App() {
         {/* Notif banner */}
         {notifBanner&&permission==='default'&&!pickMode&&(
           <div style={{
-            position:'absolute', top:130, left:16, right:16, zIndex:550,
-            background:'var(--surface)', border:'1px solid rgba(234,179,8,.3)',
-            borderRadius:14, padding:'12px 14px',
+            position:'absolute', top:136, left:16, right:16, zIndex:550,
+            background:'rgba(8,8,20,0.94)',
+            backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)',
+            border:'1px solid rgba(255,211,42,0.25)',
+            borderRadius:18, padding:'14px 16px',
             display:'flex', alignItems:'center', gap:10,
-            animation:'slideDown .3s ease',
+            animation:'slideDown .3s cubic-bezier(.34,1.56,.64,1)',
+            boxShadow:'0 8px 32px rgba(0,0,0,0.5)',
           }}>
             <span style={{fontSize:20}}>🔔</span>
             <div style={{flex:1}}>
-              <div style={{fontWeight:700, fontSize:13, marginBottom:1}}>Ativar alertas?</div>
+              <div style={{fontWeight:700, fontSize:13, marginBottom:2, fontFamily:"'Outfit',sans-serif"}}>Ativar alertas?</div>
               <div style={{fontSize:11, color:'var(--muted)'}}>Avisos quando um local esquentar</div>
             </div>
             <button onClick={()=>{requestPermission();setNotifBanner(false)}} style={{
-              background:'linear-gradient(135deg,var(--primary),var(--accent))', border:'none', borderRadius:8, padding:'6px 12px',
-              fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:700, fontSize:11, color:'#052e16', cursor:'pointer',
+              background:'linear-gradient(135deg,var(--electric),var(--neon))',
+              border:'none', borderRadius:999, padding:'7px 14px',
+              fontFamily:"'DM Sans',sans-serif", fontWeight:700, fontSize:11,
+              color:'#fff', cursor:'pointer',
             }}>Ativar</button>
-            <button onClick={()=>setNotifBanner(false)} style={{background:'none', border:'none', color:'var(--muted)', cursor:'pointer', fontSize:16}}>✕</button>
+            <button onClick={()=>setNotifBanner(false)} style={{background:'none',border:'none',color:'var(--muted)',cursor:'pointer',fontSize:18,padding:'0 2px'}}>✕</button>
           </div>
         )}
       </div>
@@ -1732,11 +1760,16 @@ export default function App() {
       {/* Toast */}
       {toast&&(
         <div style={{
-          position:'fixed', bottom:88, left:'50%', transform:'translateX(-50%)',
-          zIndex:3000, background:toast.bg, color:toast.color,
-          padding:'10px 22px', borderRadius:22, fontWeight:700, fontSize:13,
-          boxShadow:'0 4px 24px rgba(0,0,0,.5)', animation:'toastIn .3s ease',
+          position:'fixed', bottom:'calc(106px + var(--sab))', left:'50%',
+          transform:'translateX(-50%)',
+          zIndex:3000, background:toast.bg||'rgba(10,10,24,0.96)', color:toast.color||'var(--text)',
+          padding:'11px 24px', borderRadius:999, fontWeight:700, fontSize:13,
+          fontFamily:"'DM Sans',sans-serif",
+          boxShadow:'0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08) inset',
+          backdropFilter:'blur(16px)', WebkitBackdropFilter:'blur(16px)',
+          animation:'toastIn .35s cubic-bezier(.34,1.56,.64,1)',
           whiteSpace:'nowrap', pointerEvents:'none',
+          border:'1px solid rgba(255,255,255,0.1)',
         }}>{toast.msg}</div>
       )}
 
@@ -1744,12 +1777,21 @@ export default function App() {
       {pointsAlert&&(
         <div style={{
           position:'fixed', top:'42%', left:'50%', transform:'translateX(-50%)',
-          zIndex:3000, textAlign:'center', animation:'pointsIn .35s ease', pointerEvents:'none',
+          zIndex:3000, textAlign:'center', animation:'pointsIn .4s cubic-bezier(.34,1.56,.64,1)',
+          pointerEvents:'none',
         }}>
-          <div style={{background:'rgba(17,30,22,.97)', border:'1px solid var(--border)', borderRadius:20, padding:'20px 36px'}}>
-            <div style={{fontSize:32}}>⚡</div>
-            <div style={{fontFamily:"'Syne',monospace", fontSize:32, fontWeight:700, color:'var(--green)'}}>+{pointsAlert}</div>
-            <div style={{fontSize:11, color:'var(--muted)', marginTop:2}}>pontos</div>
+          <div style={{
+            background:'rgba(8,8,20,0.96)', backdropFilter:'blur(24px)', WebkitBackdropFilter:'blur(24px)',
+            border:'1px solid rgba(0,245,160,0.3)',
+            borderRadius:24, padding:'22px 40px',
+            boxShadow:'0 0 40px rgba(0,245,160,0.2)',
+          }}>
+            <div style={{fontSize:36, marginBottom:6}}>⚡</div>
+            <div style={{
+              fontFamily:"'Space Mono',monospace", fontSize:36, fontWeight:700,
+              color:'var(--cyber)', letterSpacing:'-.02em',
+            }}>+{pointsAlert}</div>
+            <div style={{fontSize:11, color:'var(--muted)', marginTop:4, textTransform:'uppercase', letterSpacing:'.1em'}}>pontos</div>
           </div>
         </div>
       )}
@@ -1795,12 +1837,15 @@ export default function App() {
       />
 
       <style>{`
-        @keyframes pulse     {0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.7}}
-        @keyframes toastIn   {from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-        @keyframes slideDown {from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes fadeUp    {from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes pointsIn  {0%{opacity:0;transform:translateX(-50%) scale(.6)}70%{transform:translateX(-50%) scale(1.1)}100%{opacity:1;transform:translateX(-50%) scale(1)}}
-        @keyframes markerPulse {0%{transform:scale(1);opacity:.7}50%{transform:scale(1.5);opacity:.15}100%{transform:scale(1);opacity:.7}}
+        @keyframes pulse       {0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.6}}
+        @keyframes blink       {0%,100%{opacity:1}50%{opacity:.3}}
+        @keyframes toastIn     {from{opacity:0;transform:translateX(-50%) translateY(10px) scale(.95)}to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
+        @keyframes slideDown   {from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes fadeUp      {from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes pointsIn    {0%{opacity:0;transform:translateX(-50%) scale(.5)}70%{transform:translateX(-50%) scale(1.08)}100%{opacity:1;transform:translateX(-50%) scale(1)}}
+        @keyframes markerPulse {0%{transform:scale(1);opacity:.8}50%{transform:scale(1.7);opacity:.1}100%{transform:scale(1);opacity:.8}}
+        @keyframes rippleCyber {0%{box-shadow:0 0 0 0 rgba(0,245,160,.55)}70%{box-shadow:0 0 0 14px rgba(0,245,160,0)}100%{box-shadow:0 0 0 0 rgba(0,245,160,0)}}
+        @keyframes gradientShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
       `}</style>
     </div>
   )

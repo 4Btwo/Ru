@@ -1,4 +1,4 @@
-// ── MAPA COM MODO DE SELEÇÃO DE PONTO ────────────────────────────────────────
+// ── MAPVIEW 3.0 — URBYN NEON MAP ─────────────────────────────────────────────
 import React, { useEffect, useRef, useState, useImperativeHandle, forwardRef } from 'react'
 import L from 'leaflet'
 import { DEFAULT_LAT, DEFAULT_LNG } from '../lib/constants'
@@ -13,42 +13,70 @@ const MapView = forwardRef(function MapView(
   const mapInst    = useRef(null)
   const markersRef = useRef({})
   const pickMarker = useRef(null)
+  const userMarker = useRef(null)
   const [zoom, setZoom] = useState(14)
 
-  // Expõe flyTo para o App
   useImperativeHandle(ref, () => ({
-    flyTo: (lat, lng, z = 15) => mapInst.current?.flyTo([lat, lng], z, { animate:true, duration:.8 }),
+    flyTo: (lat, lng, z = 15) =>
+      mapInst.current?.flyTo([lat, lng], z, { animate: true, duration: 0.9 }),
   }))
 
-  // Init mapa
+  // ── Init map ──────────────────────────────────────────────────────────────
   useEffect(() => {
     if (mapInst.current) return
-    mapInst.current = L.map(mapRef.current, {
-      center: [DEFAULT_LAT, DEFAULT_LNG], zoom:14, zoomControl:false,
-    })
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19 })
-      .addTo(mapInst.current)
 
-    // Marcador do usuário
-    const uIcon = L.divIcon({
-      html:`<div style="width:14px;height:14px;background:#1db954;border-radius:50%;border:3px solid #fff;box-shadow:0 0 14px #1db954"></div>`,
-      className:'', iconSize:[14,14], iconAnchor:[7,7],
+    mapInst.current = L.map(mapRef.current, {
+      center: [DEFAULT_LAT, DEFAULT_LNG],
+      zoom: 14,
+      zoomControl: false,
+      attributionControl: false,
     })
-    L.marker([DEFAULT_LAT, DEFAULT_LNG], { icon: uIcon })
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      keepBuffer: 4,
+    }).addTo(mapInst.current)
+
+    // User location marker — glowing cyan dot
+    const uIcon = L.divIcon({
+      html: `
+        <div style="position:relative;width:20px;height:20px;">
+          <div style="
+            position:absolute;inset:-10px;border-radius:50%;
+            border:1.5px solid rgba(0,245,160,0.35);
+            animation:markerPulse 2.2s ease-in-out infinite;
+          "></div>
+          <div style="
+            position:absolute;inset:-5px;border-radius:50%;
+            border:1.5px solid rgba(0,245,160,0.2);
+            animation:markerPulse 2.2s ease-in-out infinite 0.4s;
+          "></div>
+          <div style="
+            width:20px;height:20px;border-radius:50%;
+            background:radial-gradient(circle at 35% 35%,#00f5a0,#00c87a);
+            border:3px solid rgba(255,255,255,0.9);
+            box-shadow:0 0 0 0 rgba(0,245,160,0.6);
+            animation:rippleCyber 2s ease-out infinite;
+          "></div>
+        </div>`,
+      className: '',
+      iconSize: [20, 20],
+      iconAnchor: [10, 10],
+    })
+
+    userMarker.current = L.marker([DEFAULT_LAT, DEFAULT_LNG], { icon: uIcon, zIndexOffset: 1000 })
       .addTo(mapInst.current)
-      .bindTooltip('Você', { permanent:false, direction:'top' })
 
     mapInst.current.on('zoomend', () => {
       const z = mapInst.current.getZoom()
       setZoom(z)
-      // Atualiza classe de zoom no container para CSS de nome do marcador
       const el = mapInst.current.getContainer()
       el.className = el.className.replace(/\bleaflet-zoom-\d+\b/g, '')
       el.classList.add(`leaflet-zoom-${Math.round(z)}`)
     })
   }, [])
 
-  // Modo seleção de ponto — cursor muda + clique coloca marcador temporário
+  // ── Pick mode ─────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!mapInst.current) return
     const map = mapInst.current
@@ -56,23 +84,32 @@ const MapView = forwardRef(function MapView(
 
     if (pickMode) {
       container.style.cursor = 'crosshair'
+
       const handler = (e) => {
         const { lat, lng } = e.latlng
-
-        // Remove marcador anterior
         if (pickMarker.current) pickMarker.current.remove()
 
-        // Marcador temporário pulsante
         const icon = L.divIcon({
-          html:`<div style="position:relative;width:24px;height:24px;">
-            <div style="position:absolute;inset:-6px;border-radius:50%;border:2px solid #ff2d55;opacity:.5;animation:markerPulse 1.2s ease infinite;"></div>
-            <div style="width:24px;height:24px;border-radius:50%;background:#ff2d55;border:3px solid #fff;box-shadow:0 0 16px rgba(255,45,85,.7);display:flex;align-items:center;justify-content:center;font-size:12px;">📍</div>
-          </div>`,
-          className:'', iconSize:[24,24], iconAnchor:[12,12],
+          html: `
+            <div style="position:relative;width:28px;height:28px;">
+              <div style="position:absolute;inset:-8px;border-radius:50%;
+                border:2px solid rgba(79,142,255,0.5);
+                animation:markerPulse 1.2s ease infinite;"></div>
+              <div style="width:28px;height:28px;border-radius:50%;
+                background:radial-gradient(circle at 35% 35%,#6aabff,#4f8eff);
+                border:3px solid #fff;
+                box-shadow:0 0 20px rgba(79,142,255,0.8);
+                display:flex;align-items:center;justify-content:center;
+                font-size:13px;">📍</div>
+            </div>`,
+          className: '',
+          iconSize: [28, 28],
+          iconAnchor: [14, 14],
         })
         pickMarker.current = L.marker([lat, lng], { icon }).addTo(map)
         onPick({ lat, lng })
       }
+
       map.on('click', handler)
       return () => {
         map.off('click', handler)
@@ -85,10 +122,13 @@ const MapView = forwardRef(function MapView(
     }
   }, [pickMode, onPick])
 
-  // Atualiza markers quando eventos ou lugares mudam
+  // ── Render markers ────────────────────────────────────────────────────────
   useEffect(() => {
     if (!mapInst.current) return
-    const filtered = (allPlaces || []).filter(l => !filteredIds || filteredIds.includes(l.id))
+
+    const filtered = (allPlaces || []).filter(
+      l => !filteredIds || filteredIds.includes(l.id)
+    )
     const clusters = clusterLocations(filtered, events, usersMap, zoom)
 
     Object.values(markersRef.current).forEach(m => m.remove())
@@ -96,6 +136,7 @@ const MapView = forwardRef(function MapView(
 
     clusters.forEach(cluster => {
       if (!cluster.locations?.length) return
+
       const icon = cluster.isCluster
         ? buildClusterIcon(cluster)
         : buildMarkerIcon(cluster.locations[0], events, usersMap)
@@ -103,51 +144,89 @@ const MapView = forwardRef(function MapView(
       const m = L.marker([cluster.lat, cluster.lng], { icon })
         .addTo(mapInst.current)
         .on('click', () => {
-          if (pickMode) return  // em modo pick, não abre detail
+          if (pickMode) return
           if (cluster.isCluster && cluster.locations.length > 1) {
             mapInst.current.flyTo([cluster.lat, cluster.lng],
-              Math.min(zoom + 2, 16), { animate:true, duration:.8 })
+              Math.min(zoom + 2, 16), { animate: true, duration: 0.8 })
           } else {
             onLocationClick(cluster.locations[0])
           }
         })
+
       markersRef.current[cluster.id] = m
     })
   }, [allPlaces, events, usersMap, filteredIds, zoom, pickMode])
 
-  // Centraliza no usuário
+  // ── Center on user ────────────────────────────────────────────────────────
   useEffect(() => {
-    if (userPos && mapInst.current)
-      mapInst.current.setView([userPos.lat, userPos.lng], 14, { animate:true })
+    if (userPos && mapInst.current) {
+      mapInst.current.setView([userPos.lat, userPos.lng], 14, { animate: true })
+      if (userMarker.current) {
+        userMarker.current.setLatLng([userPos.lat, userPos.lng])
+      }
+    }
   }, [userPos])
 
-  return <div ref={mapRef} style={{ position:'absolute', inset:0, zIndex:1 }} />
+  return (
+    <div ref={mapRef} style={{ position: 'absolute', inset: 0, zIndex: 1 }} />
+  )
 })
 
 export default MapView
 
+// ── Cluster icon — neon glow sphere ──────────────────────────────────────────
 function buildClusterIcon(cluster) {
-  const colors = { hot:'#ff2d55', mid:'#ffcc00', low:'#6666aa', inactive:'#3a3a5a' }
-  const color  = colors[cluster.heat] || '#6666aa'
-  const size   = Math.min(56, 32 + cluster.totalScore * 2)
+  const heatColors = {
+    hot:      { main: '#ff4757', glow: 'rgba(255,71,87,0.6)',      ring: 'rgba(255,71,87,0.3)' },
+    mid:      { main: '#4f8eff', glow: 'rgba(79,142,255,0.55)',    ring: 'rgba(79,142,255,0.25)' },
+    low:      { main: '#7c5cfc', glow: 'rgba(124,92,252,0.45)',    ring: 'rgba(124,92,252,0.2)' },
+    inactive: { main: '#2a2a42', glow: 'rgba(42,42,66,0.3)',       ring: 'rgba(255,255,255,0.06)' },
+  }
+
+  const c = heatColors[cluster.heat] || heatColors.low
+  const size = Math.min(60, 30 + cluster.totalScore * 2.2)
+  const isHot = cluster.heat === 'hot'
 
   return L.divIcon({
-    html:`
+    html: `
       <div style="position:relative;width:${size}px;height:${size}px;">
-        <div style="position:absolute;inset:-6px;border-radius:50%;border:2px solid ${color};opacity:.4;animation:markerPulse 1.8s ease infinite;"></div>
-        <div style="width:${size}px;height:${size}px;border-radius:50%;
-          background:radial-gradient(circle,${color}cc,${color}66);
-          box-shadow:0 0 18px ${color}88;border:2px solid rgba(255,255,255,.2);
-          display:flex;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;">
-          <div style="font-size:11px;font-weight:800;color:#fff;font-family:'Syne',monospace;">${cluster.locations.length}</div>
-          <div style="font-size:8px;color:rgba(255,255,255,.7);">locais</div>
+        ${isHot ? `
+          <div style="position:absolute;inset:-10px;border-radius:50%;
+            border:1.5px solid ${c.ring};
+            animation:markerPulse 1.8s ease-in-out infinite 0.2s;"></div>
+          <div style="position:absolute;inset:-5px;border-radius:50%;
+            border:1px solid ${c.ring};
+            animation:markerPulse 1.8s ease-in-out infinite 0.6s;"></div>
+        ` : `
+          <div style="position:absolute;inset:-6px;border-radius:50%;
+            border:1px solid ${c.ring};
+            animation:markerPulse 2.5s ease-in-out infinite;"></div>
+        `}
+        <div style="
+          width:${size}px;height:${size}px;border-radius:50%;
+          background:radial-gradient(circle at 35% 30%, ${c.main}ee, ${c.main}88);
+          box-shadow:0 0 ${isHot ? 24 : 16}px ${c.glow}, 0 0 ${isHot ? 40 : 24}px ${c.glow}40;
+          border:1.5px solid rgba(255,255,255,0.18);
+          display:flex;align-items:center;justify-content:center;
+          flex-direction:column;cursor:pointer;
+          backdrop-filter:blur(4px);
+        ">
+          <div style="font-size:12px;font-weight:800;color:#fff;
+            font-family:'Space Mono',monospace;line-height:1;">${cluster.locations.length}</div>
+          <div style="font-size:8px;color:rgba(255,255,255,0.65);line-height:1;margin-top:1px;">locais</div>
         </div>
-        <div style="position:absolute;top:-7px;right:-7px;background:#f0f0ff;color:#0a0a0f;
-          font-size:9px;font-weight:800;font-family:'Syne',monospace;
-          border-radius:20px;padding:1px 6px;min-width:17px;text-align:center;">
-          ${cluster.count}
-        </div>
+        <div style="
+          position:absolute;top:-7px;right:-7px;
+          background:#f0f0ff;color:#08080e;
+          font-size:9px;font-weight:800;
+          font-family:'Space Mono',monospace;
+          border-radius:20px;padding:2px 6px;
+          min-width:18px;text-align:center;
+          box-shadow:0 2px 8px rgba(0,0,0,0.4);
+        ">${cluster.count}</div>
       </div>`,
-    className:'', iconSize:[size,size], iconAnchor:[size/2,size/2],
+    className: '',
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
   })
 }
