@@ -167,8 +167,13 @@ export function buildMarkerIcon(loc, events, usersMap = {}) {
   const svgIcon = buildActiveSvg(domType, color, size)
   const isTriangle = domType === 'acidente'
 
+  // Se o local tem emoji personalizado, mostrar como badge no canto superior esquerdo
+  const emojiBadge = loc.iconEmoji
+    ? `<div style="position:absolute;top:-8px;left:-8px;width:22px;height:22px;border-radius:50%;background:rgba(8,8,20,0.9);border:1.5px solid rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;font-size:11px;z-index:2;">${loc.iconEmoji}</div>`
+    : ''
+
   return L.divIcon({
-    html: `<div style="position:relative;width:${size}px;height:${size}px;">${ring}${fomoLabel}<div style="width:${size}px;height:${size}px;filter:drop-shadow(0 0 ${heat === 'hot' ? 10 : 5}px ${color}99);cursor:pointer;">${svgIcon || `<svg width="${size}" height="${size}" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="18" fill="${color}dd"/></svg>`}</div>${badge}</div>`,
+    html: `<div style="position:relative;width:${size}px;height:${size}px;">${ring}${fomoLabel}<div style="width:${size}px;height:${size}px;filter:drop-shadow(0 0 ${heat === 'hot' ? 10 : 5}px ${color}99);cursor:pointer;">${svgIcon || `<svg width="${size}" height="${size}" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="18" fill="${color}dd"/></svg>`}</div>${badge}${emojiBadge}</div>`,
     className: '',
     iconSize: [size, size],
     iconAnchor: [size / 2, isTriangle ? size : size / 2],

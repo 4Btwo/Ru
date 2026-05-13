@@ -25,6 +25,7 @@ import { useNetworkStatus }  from './hooks/useNetworkStatus'
 import NetworkBanner         from './components/NetworkBanner'
 import NotificationsPanel, { useUserNotifications } from './components/NotificationsPanel'
 import PrivateChatPanel,   { usePrivateChats }       from './components/PrivateChatPanel'
+import RewardsPanel                                   from './components/RewardsPanel'
 
 /* ── Icons ──────────────────────────────────────────────────────────────────── */
 const IC = {
@@ -93,7 +94,7 @@ function Stars({score}) {
 }
 
 /* ── Home Tab ─────────────────────────────────────────────────────────────────── */
-function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, alertCount, onlineCount, onPlace, onStartAdd, isAdmin, setAdminOpen, pendingCount, logout, onCategorySelect, onCityClick, onBell, notifCount, onChat, chatUnread}) {
+function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, alertCount, onlineCount, onPlace, onStartAdd, isAdmin, setAdminOpen, pendingCount, logout, onCategorySelect, onCityClick, onBell, notifCount, onChat, chatUnread, onRewards}) {
   const now = Date.now()
   const trending = [...allPlaces]
     .map(p=>({...p, _score:calcScore(p.id, events, usersMap)}))
@@ -271,6 +272,16 @@ function HomeTab({user, allPlaces, events, usersMap, hotCount, totalActive, aler
               <div className="stat-label" style={{marginTop:4, marginBottom:0}}>{s.label}</div>
             </div>
           ))}
+          <button onClick={onRewards} className="stat-card" style={{
+            background:'linear-gradient(135deg,rgba(0,245,160,0.08),rgba(0,200,122,0.04))',
+            borderColor:'rgba(0,245,160,0.25)',
+            boxShadow:'0 0 20px rgba(0,245,160,0.1)',
+            cursor:'pointer',
+          }}>
+            <div style={{fontSize:16, marginBottom:5}}>⚡</div>
+            <div className="stat-value" style={{color:'var(--cyber)',fontSize:16}}>{user.score??0}</div>
+            <div className="stat-label" style={{marginTop:4, marginBottom:0, color:'var(--cyber)'}}>Pontos</div>
+          </button>
         </div>
 
         {/* ── Categorias ── */}
@@ -417,9 +428,12 @@ function ActivitiesTab({events, usersMap, allPlaces, onPlace, user, saved, follo
 
   const feedTodos = [...events].sort((a,b)=>b.ts-a.ts).slice(0,40)
 
-  // "salvos" — lugares salvos pelo usuário
+  // "salvos" — reportes dos lugares salvos pelo usuário
   const savedPlaceIds = Object.keys(saved||{})
-  const feedSalvos = savedPlaceIds.map(id=>allPlaces.find(p=>p.id===id)).filter(Boolean)
+  const feedSalvos = [...events]
+    .filter(e => savedPlaceIds.includes(e.locationId))
+    .sort((a,b) => b.ts - a.ts)
+    .slice(0, 40)
 
   const followingIds = Object.keys(following||{})
   const feedSeguindo = [...events]
@@ -507,26 +521,42 @@ function ActivitiesTab({events, usersMap, allPlaces, onPlace, user, saved, follo
 
         {/* ── SALVOS ── */}
         {tab==='salvos' && (
-          feedSalvos.length===0
-            ? <EmptyState msg="Nenhum lugar salvo" sub="Salve lugares para vê-los aqui!"/>
-            : feedSalvos.map(p=>(
-                <div key={p.id} onClick={()=>onPlace(p)} style={{
-                  display:'flex', alignItems:'center', gap:12,
-                  padding:'12px 0', borderBottom:'1px solid var(--border)',
-                  cursor:'pointer',
-                }}>
-                  <div style={{
-                    width:44, height:44, borderRadius:12, flexShrink:0,
-                    background:'var(--surface2)',
-                    display:'flex', alignItems:'center', justifyContent:'center', fontSize:22,
-                  }}>{CAT_EMOJI[p.cat]||'📍'}</div>
-                  <div style={{flex:1, minWidth:0}}>
-                    <div style={{fontSize:14, fontWeight:700, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{p.name}</div>
-                    <div style={{fontSize:11, color:'var(--muted)', marginTop:2}}>{CAT_LABEL[p.cat]||'Local'} · Bauru</div>
-                  </div>
-                  <span style={{fontSize:16}}>🔖</span>
-                </div>
-              ))
+          savedPlaceIds.length===0
+            ? <EmptyState msg="Nenhum lugar salvo" sub="Salve lugares para ver o que está rolando!"/>
+            : feedSalvos.length===0
+              ? <EmptyState msg="Nada rolando nos seus salvos" sub="Os locais salvos estão tranquilos agora!"/>
+              : feedSalvos.map(ev=>{
+                  const meta  = EVENT_META[ev.type]
+                  const place = allPlaces.find(p=>p.id===ev.locationId)
+                  const uInfo = usersMap[ev.userId]
+                  return (
+                    <div key={ev.id} onClick={()=>place&&onPlace(place)} style={{
+                      display:'flex', alignItems:'center', gap:12,
+                      padding:'14px 0', borderBottom:'1px solid var(--border)',
+                      cursor:place?'pointer':'default',
+                    }}>
+                      <div style={{
+                        width:42, height:42, borderRadius:'50%', flexShrink:0,
+                        background:`${meta?.color||'var(--green)'}18`,
+                        border:`1px solid ${meta?.color||'var(--green)'}33`,
+                        display:'flex', alignItems:'center', justifyContent:'center', fontSize:20,
+                      }}>{meta?.emoji||'📍'}</div>
+                      <div style={{flex:1, minWidth:0}}>
+                        <div style={{fontSize:13, fontWeight:700, marginBottom:3}}>
+                          <span style={{color:meta?.color||'var(--green)'}}>{meta?.label||ev.type}</span>
+                          {place && <span style={{color:'var(--muted)', fontWeight:500}}> em {place.name}</span>}
+                        </div>
+                        <div style={{fontSize:12, color:'var(--muted)'}}>
+                          {ev.userName?.split(' ')[0]||'Alguém'} reportou · {place?`${place.iconEmoji||CAT_EMOJI[place.cat]||'📍'} salvo`:''}
+                        </div>
+                      </div>
+                      <div style={{display:'flex', flexDirection:'column', alignItems:'flex-end', gap:4}}>
+                        <div style={{fontSize:11, color:'var(--dim)'}}>{timeAgo(ev.ts)}</div>
+                        <div style={{fontSize:16}}>🔖</div>
+                      </div>
+                    </div>
+                  )
+                })
         )}
 
         {/* ── SEGUINDO ── */}
@@ -1359,6 +1389,12 @@ export default function App() {
   const [notifOpen,   setNotifOpen]   = useState(false)
   const [chatOpen,    setChatOpen]    = useState(false)
   const [chatTarget,  setChatTarget]  = useState(null) // {uid, name, photo}
+  const [mapSearch,   setMapSearch]   = useState('')
+  const [mapSearchFocus, setMapSearchFocus] = useState(false)
+  const [reportesOpen,setReportesOpen]= useState(false)
+  const [alertasOpen, setAlertasOpen] = useState(false)
+  const [onlineOpen,  setOnlineOpen]  = useState(false)
+  const [rewardsOpen, setRewardsOpen] = useState(false)
 
   const flyToPlace = useCallback((place) => {
     setDetailLoc(place)
@@ -1597,11 +1633,15 @@ export default function App() {
                     {pendingCount>0&&<span className="badge">{pendingCount}</span>}
                   </button>
                 )}
-                <div style={{
+                <div onClick={()=>setRewardsOpen(true)} style={{
                   fontFamily:"'Space Mono',monospace",
                   background:'rgba(0,245,160,0.08)', border:'1px solid rgba(0,245,160,0.2)',
                   borderRadius:999, padding:'5px 11px', fontSize:11, color:'var(--cyber)',
-                }}>⚡ {user.score??0}</div>
+                  cursor:'pointer', transition:'background .2s',
+                }}
+                  onMouseEnter={e=>e.currentTarget.style.background='rgba(0,245,160,0.15)'}
+                  onMouseLeave={e=>e.currentTarget.style.background='rgba(0,245,160,0.08)'}
+                >⚡ {user.score??0}</div>
                 <div onClick={logout} style={{
                   width:34, height:34, borderRadius:'50%',
                   background:'rgba(255,255,255,0.06)',
@@ -1615,10 +1655,64 @@ export default function App() {
             </div>
 
             {/* Search on map */}
-            <div className="search-bar" style={{marginBottom:10}}>
-              <IC.SearchSm style={{color:'var(--muted)',flexShrink:0}}/>
-              <input placeholder="Buscar lugares, experiências..." style={{fontFamily:"'DM Sans',sans-serif"}}/>
-              <IC.Filter style={{color:'var(--muted)',flexShrink:0}}/>
+            <div style={{position:'relative', marginBottom:10}}>
+              <div className="search-bar" style={{borderRadius: mapSearchFocus && mapSearch.trim().length>=2 ? '14px 14px 0 0' : 999}}>
+                <IC.SearchSm style={{color:'var(--muted)',flexShrink:0}}/>
+                <input
+                  value={mapSearch}
+                  onChange={e=>setMapSearch(e.target.value)}
+                  onFocus={()=>setMapSearchFocus(true)}
+                  onBlur={()=>setTimeout(()=>setMapSearchFocus(false),150)}
+                  placeholder="Buscar lugares, experiências..."
+                  style={{fontFamily:"'DM Sans',sans-serif"}}/>
+                {mapSearch
+                  ? <button onClick={()=>setMapSearch('')} style={{background:'none',border:'none',color:'var(--muted)',cursor:'pointer',fontSize:16,padding:'0 2px'}}>✕</button>
+                  : <IC.Filter style={{color:'var(--muted)',flexShrink:0}}/>}
+              </div>
+              {mapSearchFocus && mapSearch.trim().length>=2 && (() => {
+                const CAT_LABEL2 = { noturno:'Bar/Balada', transito:'Trânsito', estabelecimento:'Estabelecimento', parque:'Parque', comercio:'Comércio', show:'Show', bar:'Bar', evento:'Evento', cafe:'Café' }
+                const CAT_EMOJI2 = { noturno:'🌙', transito:'🚦', estabelecimento:'🏪', parque:'🌿', comercio:'🏬', show:'🎭', bar:'🍺', evento:'🎉', cafe:'☕' }
+                const results = visiblePlaces.filter(p=>
+                  p.name?.toLowerCase().includes(mapSearch.toLowerCase()) ||
+                  p.address?.toLowerCase().includes(mapSearch.toLowerCase()) ||
+                  (CAT_LABEL2[p.cat]||'').toLowerCase().includes(mapSearch.toLowerCase())
+                ).slice(0,6)
+                return (
+                  <div style={{
+                    position:'absolute', left:0, right:0, zIndex:600,
+                    background:'rgba(8,8,20,0.97)', backdropFilter:'blur(24px)', WebkitBackdropFilter:'blur(24px)',
+                    border:'1px solid rgba(79,142,255,0.3)', borderTop:'none',
+                    borderRadius:'0 0 16px 16px', overflow:'hidden',
+                    boxShadow:'0 12px 32px rgba(0,0,0,0.7)',
+                  }}>
+                    {results.length===0 ? (
+                      <div style={{padding:'14px',textAlign:'center',color:'var(--muted)',fontSize:12}}>
+                        Nenhum resultado para "{mapSearch}"
+                      </div>
+                    ) : results.map(p=>(
+                      <div key={p.id}
+                        onMouseDown={()=>{flyToPlace(p);setMapSearch('');setMapSearchFocus(false)}}
+                        style={{
+                          display:'flex', alignItems:'center', gap:12, padding:'11px 14px',
+                          borderBottom:'1px solid rgba(255,255,255,0.05)', cursor:'pointer',
+                        }}
+                        onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.04)'}
+                        onMouseLeave={e=>e.currentTarget.style.background='transparent'}
+                      >
+                        <div style={{
+                          width:36,height:36,borderRadius:10,flexShrink:0,
+                          background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.08)',
+                          display:'flex',alignItems:'center',justifyContent:'center',fontSize:16,
+                        }}>{p.iconEmoji||CAT_EMOJI2[p.cat]||'📍'}</div>
+                        <div style={{flex:1,minWidth:0}}>
+                          <div style={{fontWeight:700,fontSize:13,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{p.name}</div>
+                          <div style={{fontSize:11,color:'var(--muted)',marginTop:1}}>{CAT_LABEL2[p.cat]||'Local'}{p.address?` · ${p.address}`:''}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              })()}
             </div>
 
             {/* Category chips */}
@@ -1680,15 +1774,15 @@ export default function App() {
               <div className="stat-sub">hotspots</div>
             </button>
             {[
-              {label:'📡 Reportes', val:totalActive, sub:'última hora', col:'var(--text)'},
-              {label:'🚦 Alertas',  val:alertCount,  sub:'trânsito',   col:'var(--yellow)'},
-              {label:'👥 Online',   val:onlineCount,  sub:'agora',      col:'var(--cyber)'},
+              {label:'📡 Reportes', val:totalActive, sub:'última hora', col:'var(--text)',   onClick:()=>setReportesOpen(true)},
+              {label:'🚦 Alertas',  val:alertCount,  sub:'trânsito',   col:'var(--yellow)', onClick:()=>setAlertasOpen(true)},
+              {label:'👥 Online',   val:onlineCount,  sub:'agora',      col:'var(--cyber)',  onClick:()=>setOnlineOpen(true)},
             ].map((s,i)=>(
-              <div key={i} className="stat-card">
+              <button key={i} className="stat-card" onClick={s.onClick} style={{cursor:'pointer'}}>
                 <div className="stat-label" style={{marginBottom:6}}>{s.label}</div>
                 <div className="stat-value" style={{color:s.col}}>{s.val}</div>
                 <div className="stat-sub">{s.sub}</div>
-              </div>
+              </button>
             ))}
           </div>
         )}
@@ -1732,6 +1826,7 @@ export default function App() {
           onCityClick={()=>setCityModal(true)}
           onBell={()=>setNotifOpen(true)} notifCount={notifCount}
           onChat={()=>{setChatTarget(null);setChatOpen(true)}} chatUnread={chatUnread}
+          onRewards={()=>setRewardsOpen(true)}
         />
       )}
 
@@ -1803,7 +1898,143 @@ export default function App() {
       <ReportPanel open={!!reportLoc} location={reportLoc}
         onClose={()=>setReportLoc(null)} onConfirm={handleReport}/>
       <NowPanel open={nowOpen} onClose={()=>setNowOpen(false)}
-        events={events} usersMap={usersMap} onLocationClick={loc=>{setNowOpen(false);setDetailLoc(loc)}}/>
+        events={events} usersMap={usersMap} allPlaces={visiblePlaces}
+        onLocationClick={loc=>{setNowOpen(false);setDetailLoc(loc)}}/>
+
+      {/* ── REPORTES PANEL ── */}
+      {reportesOpen && (
+        <>
+          <div onClick={()=>setReportesOpen(false)} style={{position:'fixed',inset:0,zIndex:1500,background:'rgba(0,0,0,0.72)',backdropFilter:'blur(8px)',WebkitBackdropFilter:'blur(8px)'}}/>
+          <div style={{position:'fixed',bottom:0,left:0,right:0,zIndex:2000,background:'rgba(8,8,20,0.97)',backdropFilter:'blur(40px)',WebkitBackdropFilter:'blur(40px)',border:'1px solid rgba(255,255,255,0.07)',borderBottom:'none',borderRadius:'28px 28px 0 0',maxHeight:'80vh',overflowY:'auto'}}>
+            <div style={{width:36,height:4,background:'rgba(255,255,255,0.16)',borderRadius:2,margin:'14px auto 0'}}/>
+            <div style={{position:'sticky',top:0,background:'rgba(8,8,20,0.97)',padding:'16px 20px 14px',borderBottom:'1px solid rgba(255,255,255,0.06)',zIndex:1,backdropFilter:'blur(24px)'}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                <div>
+                  <div style={{fontSize:18,fontWeight:800,fontFamily:"'Outfit',sans-serif",marginBottom:3}}>📡 Reportes</div>
+                  <div style={{fontSize:12,color:'rgba(240,240,255,0.4)'}}>Última hora · {totalActive} ocorrência{totalActive!==1?'s':''}</div>
+                </div>
+                <button onClick={()=>setReportesOpen(false)} style={{width:36,height:36,borderRadius:'50%',background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.08)',cursor:'pointer',color:'rgba(240,240,255,0.5)',fontSize:16,display:'flex',alignItems:'center',justifyContent:'center'}}>✕</button>
+              </div>
+            </div>
+            <div style={{padding:'14px 16px 48px'}}>
+              {events.length===0 ? (
+                <div style={{textAlign:'center',padding:'48px 0',color:'rgba(240,240,255,0.35)'}}>
+                  <div style={{fontSize:40,marginBottom:12}}>📭</div>
+                  <div style={{fontSize:14,fontWeight:600}}>Nenhum reporte recente</div>
+                </div>
+              ) : [...events].sort((a,b)=>b.ts-a.ts).slice(0,30).map(ev=>{
+                  const meta  = EVENT_META[ev.type]
+                  const place = visiblePlaces.find(p=>p.id===ev.locationId)
+                  const ago   = (()=>{const d=Math.floor((Date.now()-ev.ts)/1000);if(d<60)return`${d}s`;if(d<3600)return`${Math.floor(d/60)}min`;return`${Math.floor(d/3600)}h`})()
+                  return (
+                    <div key={ev.id} onClick={()=>{if(place){setReportesOpen(false);flyToPlace(place)}}} style={{display:'flex',alignItems:'center',gap:12,padding:'12px 0',borderBottom:'1px solid rgba(255,255,255,0.05)',cursor:place?'pointer':'default'}}>
+                      <div style={{width:40,height:40,borderRadius:'50%',flexShrink:0,background:`${meta?.color||'#4f8eff'}18`,border:`1px solid ${meta?.color||'#4f8eff'}33`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18}}>{meta?.emoji||'📍'}</div>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{fontSize:13,fontWeight:700,color:meta?.color||'var(--text)'}}>{meta?.label||ev.type}</div>
+                        <div style={{fontSize:12,color:'rgba(240,240,255,0.4)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{place?`📍 ${place.name}`:'Local desconhecido'}</div>
+                      </div>
+                      <div style={{fontSize:11,color:'rgba(240,240,255,0.35)',flexShrink:0}}>{ago}</div>
+                    </div>
+                  )
+                })
+              }
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ── ALERTAS PANEL ── */}
+      {alertasOpen && (
+        <>
+          <div onClick={()=>setAlertasOpen(false)} style={{position:'fixed',inset:0,zIndex:1500,background:'rgba(0,0,0,0.72)',backdropFilter:'blur(8px)',WebkitBackdropFilter:'blur(8px)'}}/>
+          <div style={{position:'fixed',bottom:0,left:0,right:0,zIndex:2000,background:'rgba(8,8,20,0.97)',backdropFilter:'blur(40px)',WebkitBackdropFilter:'blur(40px)',border:'1px solid rgba(255,255,255,0.07)',borderBottom:'none',borderRadius:'28px 28px 0 0',maxHeight:'80vh',overflowY:'auto'}}>
+            <div style={{width:36,height:4,background:'rgba(255,255,255,0.16)',borderRadius:2,margin:'14px auto 0'}}/>
+            <div style={{position:'sticky',top:0,background:'rgba(8,8,20,0.97)',padding:'16px 20px 14px',borderBottom:'1px solid rgba(255,255,255,0.06)',zIndex:1,backdropFilter:'blur(24px)'}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                <div>
+                  <div style={{fontSize:18,fontWeight:800,fontFamily:"'Outfit',sans-serif",marginBottom:3}}>🚦 Alertas de Trânsito</div>
+                  <div style={{fontSize:12,color:'rgba(240,240,255,0.4)'}}>Ocorrências ativas na cidade</div>
+                </div>
+                <button onClick={()=>setAlertasOpen(false)} style={{width:36,height:36,borderRadius:'50%',background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.08)',cursor:'pointer',color:'rgba(240,240,255,0.5)',fontSize:16,display:'flex',alignItems:'center',justifyContent:'center'}}>✕</button>
+              </div>
+            </div>
+            <div style={{padding:'14px 16px 48px'}}>
+              {(() => {
+                const trafficTypes = ['pesado','bloqueio','acidente','blitz','obra','alagado','perigo','transito']
+                const trafficEvs   = events.filter(e=>trafficTypes.includes(e.type)||EVENT_META[e.type]?.cat==='transito').sort((a,b)=>b.ts-a.ts)
+                if (trafficEvs.length===0) return (
+                  <div style={{textAlign:'center',padding:'48px 0',color:'rgba(240,240,255,0.35)'}}>
+                    <div style={{fontSize:40,marginBottom:12}}>✅</div>
+                    <div style={{fontSize:14,fontWeight:600,color:'rgba(240,240,255,0.5)'}}>Trânsito tranquilo</div>
+                    <div style={{fontSize:12,marginTop:4}}>Nenhum alerta ativo no momento</div>
+                  </div>
+                )
+                return trafficEvs.map(ev=>{
+                  const meta  = EVENT_META[ev.type]
+                  const place = visiblePlaces.find(p=>p.id===ev.locationId)
+                  const ago   = (()=>{const d=Math.floor((Date.now()-ev.ts)/1000);if(d<60)return`${d}s`;if(d<3600)return`${Math.floor(d/60)}min`;return`${Math.floor(d/3600)}h`})()
+                  return (
+                    <div key={ev.id} onClick={()=>{if(place){setAlertasOpen(false);flyToPlace(place)}}} style={{display:'flex',alignItems:'center',gap:12,padding:'13px',marginBottom:8,borderRadius:16,background:'rgba(255,211,42,0.05)',border:'1px solid rgba(255,211,42,0.15)',cursor:place?'pointer':'default',transition:'background .2s'}}
+                      onMouseEnter={e=>e.currentTarget.style.background='rgba(255,211,42,0.1)'}
+                      onMouseLeave={e=>e.currentTarget.style.background='rgba(255,211,42,0.05)'}
+                    >
+                      <div style={{width:44,height:44,borderRadius:14,flexShrink:0,background:`${meta?.color||'#eab308'}18`,border:`1px solid ${meta?.color||'#eab308'}33`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:20}}>{meta?.emoji||'🚦'}</div>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{fontSize:14,fontWeight:700,color:meta?.color||'#eab308'}}>{meta?.label||ev.type}</div>
+                        <div style={{fontSize:12,color:'rgba(240,240,255,0.5)',marginTop:2}}>📍 {place?place.name:'Localização desconhecida'}</div>
+                      </div>
+                      <div style={{textAlign:'right',flexShrink:0}}>
+                        <div style={{fontSize:11,color:'rgba(240,240,255,0.35)'}}>{ago}</div>
+                        {place&&<div style={{fontSize:11,color:'rgba(79,142,255,0.7)',marginTop:3}}>Ver no mapa →</div>}
+                      </div>
+                    </div>
+                  )
+                })
+              })()}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ── ONLINE PANEL ── */}
+      {onlineOpen && (
+        <>
+          <div onClick={()=>setOnlineOpen(false)} style={{position:'fixed',inset:0,zIndex:1500,background:'rgba(0,0,0,0.72)',backdropFilter:'blur(8px)',WebkitBackdropFilter:'blur(8px)'}}/>
+          <div style={{position:'fixed',bottom:0,left:0,right:0,zIndex:2000,background:'rgba(8,8,20,0.97)',backdropFilter:'blur(40px)',WebkitBackdropFilter:'blur(40px)',border:'1px solid rgba(255,255,255,0.07)',borderBottom:'none',borderRadius:'28px 28px 0 0',maxHeight:'70vh',overflowY:'auto'}}>
+            <div style={{width:36,height:4,background:'rgba(255,255,255,0.16)',borderRadius:2,margin:'14px auto 0'}}/>
+            <div style={{padding:'18px 20px 32px'}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
+                <div>
+                  <div style={{fontSize:18,fontWeight:800,fontFamily:"'Outfit',sans-serif",marginBottom:3}}>👥 Usuários Online</div>
+                  <div style={{fontSize:12,color:'rgba(240,240,255,0.4)'}}>Explorando Bauru agora</div>
+                </div>
+                <button onClick={()=>setOnlineOpen(false)} style={{width:36,height:36,borderRadius:'50%',background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.08)',cursor:'pointer',color:'rgba(240,240,255,0.5)',fontSize:16,display:'flex',alignItems:'center',justifyContent:'center'}}>✕</button>
+              </div>
+              <div style={{background:'rgba(0,245,160,0.06)',border:'1px solid rgba(0,245,160,0.2)',borderRadius:20,padding:'24px',textAlign:'center',marginBottom:20}}>
+                <div style={{fontFamily:"'Space Mono',monospace",fontSize:48,fontWeight:700,color:'var(--cyber)',lineHeight:1}}>{onlineCount}</div>
+                <div style={{fontSize:14,color:'rgba(240,240,255,0.5)',marginTop:8}}>urbanos ativos agora</div>
+                <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:6,marginTop:10}}>
+                  <div style={{width:8,height:8,borderRadius:'50%',background:'var(--cyber)',animation:'blink 1s ease infinite'}}/>
+                  <span style={{fontSize:12,color:'var(--cyber)',fontWeight:700}}>AO VIVO</span>
+                </div>
+              </div>
+              <div style={{background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:16,padding:'16px'}}>
+                <div style={{fontSize:12,color:'rgba(240,240,255,0.4)',lineHeight:1.6}}>
+                  Por privacidade, as posições exatas dos usuários não são exibidas. O contador mostra quantas pessoas estão com o app aberto e conectado agora.
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ── REWARDS PANEL ── */}
+      <RewardsPanel
+        open={rewardsOpen}
+        onClose={()=>setRewardsOpen(false)}
+        user={user}
+        allPlaces={visiblePlaces}
+      />
       <AddLocationPanel open={addLocOpen} coords={pickedCoords}
         onClose={handleCancelAdd} onSave={handleSavePlace}/>
       <AdminPanel open={adminOpen} onClose={()=>setAdminOpen(false)} adminUid={user?.uid}/>

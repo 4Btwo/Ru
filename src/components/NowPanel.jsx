@@ -1,11 +1,11 @@
 // ── NOWPANEL 3.0 — URBYN LIVE FEED ───────────────────────────────────────────
 import React from 'react'
-import { LOCATIONS, EVENT_META } from '../lib/constants'
+import { EVENT_META } from '../lib/constants'
 import { getLocationStatus, getActiveEvents, timeAgo } from '../lib/hotspot'
 import { shareLocation } from '../lib/share'
 
-export default function NowPanel({ open, onClose, events, usersMap, onLocationClick }) {
-  const ranked = LOCATIONS
+export default function NowPanel({ open, onClose, events, usersMap, onLocationClick, allPlaces = [] }) {
+  const ranked = allPlaces
     .map(loc => ({
       loc,
       status:  getLocationStatus(loc.id, events, usersMap),

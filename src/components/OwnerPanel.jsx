@@ -1,9 +1,156 @@
 // ── PAINEL DO DONO ────────────────────────────────────────────────────────────
 import React, { useState, useEffect } from 'react'
-import { ref, update } from 'firebase/database'
+import { ref, update, onValue, push, set, serverTimestamp } from 'firebase/database'
 import { db } from '../lib/firebase'
 import { useOwner } from '../hooks/useOwner'
 import { uploadToCloudinary } from '../lib/cloudinary'
+
+/* ── Componente inline de Recompensas para o dono ─────────────────────────── */
+function OwnerRewardsTabInline({ placeId }) {
+  const [rewards,  setRewards]  = useState([])
+  const [pending,  setPending]  = useState([])
+  const [creating, setCreating] = useState(false)
+  const [saving,   setSaving]   = useState(false)
+  const [form, setForm] = useState({ title:'', description:'', pointsCost:10000, emoji:'🎁' })
+
+  useEffect(() => {
+    if (!placeId) return
+    const unsubR = onValue(ref(db, `rewards/${placeId}`), snap => {
+      const data = snap.val() || {}
+      setRewards(Object.entries(data).map(([id,v]) => ({id,...v})))
+    })
+    const unsubP = onValue(ref(db, `places/${placeId}/pendingRedemptions`), snap => {
+      const data = snap.val() || {}
+      setPending(Object.entries(data).map(([id,v]) => ({id,...v})).filter(r => r.status==='pending'))
+    })
+    return () => { unsubR(); unsubP() }
+  }, [placeId])
+
+  const handleCreate = async () => {
+    if (!form.title.trim() || form.pointsCost < 100) return
+    setSaving(true)
+    try {
+      await push(ref(db, `rewards/${placeId}`), {
+        ...form, pointsCost: Number(form.pointsCost),
+        active: true, createdAt: serverTimestamp(),
+      })
+      setCreating(false)
+      setForm({ title:'', description:'', pointsCost:10000, emoji:'🎁' })
+    } catch(e) { console.error(e) }
+    setSaving(false)
+  }
+
+  const toggleActive = async (id, cur) =>
+    update(ref(db, `rewards/${placeId}/${id}`), { active: !cur })
+
+  const validate = async (r) => {
+    await update(ref(db, `places/${placeId}/pendingRedemptions/${r.id}`), { status:'used' })
+  }
+
+  const EMOJIS = ['🎁','🍺','☕','🍕','🍔','🎉','💸','🎫','🥤','🍷','🎭','🏆','💅','🎸','🌟']
+
+  return (
+    <div style={{padding:'0 0 32px'}}>
+      {/* Pending */}
+      {pending.length > 0 && (
+        <div style={{marginBottom:20}}>
+          <div style={{fontSize:11,fontWeight:700,color:'#ff4757',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:10,display:'flex',alignItems:'center',gap:6}}>
+            <div style={{width:6,height:6,borderRadius:'50%',background:'#ff4757',animation:'blink 1s ease infinite'}}/>
+            {pending.length} resgate{pending.length!==1?'s':''} para validar
+          </div>
+          {pending.map(r => (
+            <div key={r.id} style={{background:'rgba(255,71,87,0.07)',border:'1px solid rgba(255,71,87,0.25)',borderRadius:14,padding:'13px',marginBottom:8}}>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
+                <div>
+                  <div style={{fontSize:13,fontWeight:700,color:'#f0f0ff'}}>{r.rewardTitle}</div>
+                  <div style={{fontSize:12,color:'#6666aa'}}>👤 {r.userName} · ⚡ {Number(r.pointsCost||0).toLocaleString('pt-BR')} pts</div>
+                </div>
+                <div style={{fontFamily:"'Space Mono',monospace",fontSize:20,fontWeight:700,color:'#00f5a0',letterSpacing:'.1em'}}>{r.code}</div>
+              </div>
+              <button onClick={() => validate(r)} style={{
+                width:'100%',padding:'9px',borderRadius:10,border:'none',
+                background:'rgba(0,245,160,0.15)',color:'#00f5a0',
+                fontFamily:"'Plus Jakarta Sans',sans-serif",fontWeight:700,fontSize:12,cursor:'pointer',
+              }}>✓ Validar resgate</button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Existing rewards */}
+      <div style={{marginBottom:12}}>
+        {rewards.map(r => (
+          <div key={r.id} style={{background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:14,padding:'13px',marginBottom:8,display:'flex',alignItems:'center',gap:10}}>
+            <div style={{fontSize:22,flexShrink:0}}>{r.emoji||'🎁'}</div>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontSize:13,fontWeight:700,color:'#f0f0ff',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{r.title}</div>
+              <div style={{fontSize:12,color:'#6666aa'}}>⚡ {Number(r.pointsCost||0).toLocaleString('pt-BR')} pts · {r.active?'Ativo':'Inativo'}</div>
+            </div>
+            <button onClick={() => toggleActive(r.id, r.active)} style={{
+              padding:'5px 10px',borderRadius:8,
+              background: r.active ? 'rgba(0,245,160,0.12)' : 'rgba(255,255,255,0.06)',
+              border: `1px solid ${r.active ? 'rgba(0,245,160,0.3)' : 'rgba(255,255,255,0.1)'}`,
+              color: r.active ? '#00f5a0' : '#6666aa',
+              fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',sans-serif",
+            }}>{r.active ? '● On' : '○ Off'}</button>
+          </div>
+        ))}
+      </div>
+
+      {!creating ? (
+        <button onClick={() => setCreating(true)} style={{
+          width:'100%',padding:13,borderRadius:14,
+          background:'rgba(0,245,160,0.06)',border:'1px dashed rgba(0,245,160,0.3)',
+          color:'#00f5a0',fontFamily:"'Plus Jakarta Sans',sans-serif",fontWeight:700,fontSize:13,cursor:'pointer',
+        }}>+ Criar nova recompensa</button>
+      ) : (
+        <div style={{background:'rgba(0,245,160,0.04)',border:'1px solid rgba(0,245,160,0.2)',borderRadius:18,padding:'18px'}}>
+          <div style={{fontSize:13,fontWeight:700,color:'#f0f0ff',marginBottom:14}}>✨ Nova recompensa</div>
+          <div style={{marginBottom:12}}>
+            <div style={{fontSize:11,color:'#6666aa',marginBottom:7}}>Ícone</div>
+            <div style={{display:'flex',gap:7,flexWrap:'wrap'}}>
+              {EMOJIS.map(e => (
+                <button key={e} onClick={() => setForm(f=>({...f,emoji:e}))} style={{
+                  width:34,height:34,borderRadius:9,border:`2px solid ${form.emoji===e?'#00f5a0':'rgba(255,255,255,0.1)'}`,
+                  background:form.emoji===e?'rgba(0,245,160,0.15)':'rgba(255,255,255,0.04)',
+                  fontSize:17,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',
+                }}>{e}</button>
+              ))}
+            </div>
+          </div>
+          {[
+            {key:'title', label:'Nome', placeholder:'Ex: Uma cerveja grátis'},
+            {key:'description', label:'Descrição', placeholder:'Ex: Válido p/ qualquer chope de seg a qui'},
+          ].map(f => (
+            <div key={f.key} style={{marginBottom:12}}>
+              <div style={{fontSize:11,color:'#6666aa',marginBottom:6}}>{f.label}</div>
+              <input value={form[f.key]} onChange={e=>setForm(p=>({...p,[f.key]:e.target.value}))}
+                placeholder={f.placeholder}
+                style={{width:'100%',background:'#1a1a26',border:'1px solid #2a2a3d',borderRadius:12,padding:'10px 13px',color:'#f0f0ff',fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:13,outline:'none',boxSizing:'border-box'}}
+              />
+            </div>
+          ))}
+          <div style={{marginBottom:16}}>
+            <div style={{fontSize:11,color:'#6666aa',marginBottom:6}}>Custo em pontos</div>
+            <input type="number" min="100" step="1000" value={form.pointsCost}
+              onChange={e=>setForm(p=>({...p,pointsCost:parseInt(e.target.value)||0}))}
+              style={{width:'100%',background:'#1a1a26',border:'1px solid rgba(0,245,160,0.3)',borderRadius:12,padding:'10px 13px',color:'#00f5a0',fontFamily:"'Space Mono',monospace",fontSize:16,fontWeight:700,outline:'none',boxSizing:'border-box'}}
+            />
+            <div style={{fontSize:11,color:'rgba(255,255,255,0.25)',marginTop:5}}>
+              Sugestão: 5.000–50.000 pts conforme valor do benefício
+            </div>
+          </div>
+          <div style={{display:'flex',gap:8}}>
+            <button onClick={() => setCreating(false)} style={{flex:1,padding:'11px',borderRadius:12,cursor:'pointer',background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.1)',color:'#6666aa',fontFamily:"'Plus Jakarta Sans',sans-serif",fontWeight:700,fontSize:13}}>Cancelar</button>
+            <button onClick={handleCreate} disabled={saving} style={{flex:2,padding:'11px',borderRadius:12,border:'none',cursor:'pointer',background:saving?'rgba(0,245,160,0.5)':'linear-gradient(135deg,#00f5a0,#00c87a)',color:'#0a0f1e',fontFamily:"'Plus Jakarta Sans',sans-serif",fontWeight:800,fontSize:13}}>
+              {saving ? 'Salvando...' : '✓ Criar recompensa'}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 const OCCUPANCY_STEPS = [0, 25, 50, 75, 90, 100]
 
@@ -84,9 +231,10 @@ export default function OwnerPanel({ open, place, uid, onClose }) {
   const oColor = OccupancyColor(occupancy)
 
   const TABS = [
-    { id:'lotacao', label:'📊 Lotação' },
-    { id:'capa',    label:'🖼️ Capa'   },
-    { id:'info',    label:'📝 Info'   },
+    { id:'lotacao',     label:'📊 Lotação'    },
+    { id:'capa',        label:'🖼️ Capa'       },
+    { id:'info',        label:'📝 Info'       },
+    { id:'recompensas', label:'⚡ Recompensas' },
   ]
 
   return (
@@ -285,6 +433,11 @@ export default function OwnerPanel({ open, place, uid, onClose }) {
               fontFamily:"'Plus Jakarta Sans',sans-serif", fontWeight:800, fontSize:15, cursor:'pointer', transition:'all .2s',
             }}>{saved?'✅ Salvo!':saving?'⏳ Salvando...':'💾 Salvar informações'}</button>
           </div>
+        )}
+
+        {/* ── RECOMPENSAS ── */}
+        {tab==='recompensas' && (
+          <OwnerRewardsTabInline placeId={place?.id}/>
         )}
       </div>
     </>
