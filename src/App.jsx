@@ -826,14 +826,6 @@ const AVAILABLE_CITIES = [
   {id:'saopaulo', name:'São Paulo',state:'SP', lat:-23.5505, lng:-46.6333},
 ]
 
-const AVAILABLE_CITIES = [
-  {id:'bauru',    name:'Bauru',    state:'SP', lat:-22.3147, lng:-49.0611},
-  {id:'marilia',  name:'Marília',  state:'SP', lat:-22.2144, lng:-49.9456},
-  {id:'botucatu', name:'Botucatu', state:'SP', lat:-22.8851, lng:-48.4454},
-  {id:'campinas', name:'Campinas', state:'SP', lat:-22.9068, lng:-47.0626},
-  {id:'saopaulo', name:'São Paulo',state:'SP', lat:-23.5505, lng:-46.6333},
-]
-
 function CitySelector({open, currentCity, onSelect, onClose}) {
   const [search, setSearch] = useState('')
   const filtered = AVAILABLE_CITIES.filter(c=>c.name.toLowerCase().includes(search.toLowerCase()))
